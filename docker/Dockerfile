@@ -12,7 +12,10 @@ RUN apt-get update && apt-get install -y \
   unzip \
   curl \
   git \
-  && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd
+  && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd opcache
+
+# Copy file opcache.ini
+COPY ./docker/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 
 # Cài Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer

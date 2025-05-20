@@ -59,7 +59,7 @@ class UserController extends Controller
 
             return response()->json($engagementStats);
         } catch (\Exception $e) {
-            return response()->json($e, 500);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 

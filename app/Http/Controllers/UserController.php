@@ -53,10 +53,10 @@ class UserController extends Controller
                 DB::raw('COUNT(DISTINCT engaged_users.id) as engaged_users'),
                 DB::raw('ROUND((COUNT(DISTINCT engaged_users.id) / COUNT(DISTINCT users.id)) * 100, 2) as engagement_rate')
             ])
-            ->orderBy('day')
+            ->orderBy('days')
             ->get();
 
-        return response()->json($engagementStats);
+        return response()->json($engagementStats, 500);
     }
 
     /**

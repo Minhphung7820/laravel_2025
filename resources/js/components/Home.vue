@@ -7,7 +7,19 @@
 
 <script>
 export default {
-  name: 'Home',
+  created(){
+     this.getApi();
+  },
+  methods: {
+    async getApi() {
+      try {
+        const list = await window.axios.get('/api/test-500');
+        console.log(list.data);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }
 }
 </script>
 

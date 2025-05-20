@@ -12,7 +12,7 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
             $subQuery = DB::table('users')
@@ -60,6 +60,48 @@ class UserController extends Controller
             return response()->json($engagementStats);
         } catch (\Exception $e) {
             return response()->json($e, 500);
+        }
+    }
+
+    public function advancedEngagement(Request $request)
+    {
+        try {
+            $subQuery = DB::table('users')
+                ->leftJoin('events as e', 'e.user_id', '=', 'users.id')
+                ->whereBetween('users.created_at', [now()->subDays(30), now()])
+                ->select(
+                    'users.id',
+                    DB::raw('DATE(users.created_at) as register_day'),
+                    DB::raw("
+                    SUM(
+                        CASE
+                            WHEN e.event_type = 'view_video' AND e.created_at <= users.created_at + INTERVAL 1 DAY THEN 1
+                            WHEN e.event_type = 'comment' AND e.created_at <= users.created_at + INTERVAL 2 DAY THEN 5
+                            WHEN e.event_type IN ('like', 'share') THEN 2
+                            WHEN e.event_type = 'login' AND e.created_at BETWEEN users.created_at + INTERVAL 2 DAY AND users.created_at + INTERVAL 7 DAY THEN 3
+                            ELSE 0
+                        END
+                    ) as total_score
+                ")
+                )
+                ->groupBy('users.id', 'register_day');
+
+            $engagementStats = DB::table(DB::raw("({$subQuery->toSql()}) as scored_users"))
+                ->mergeBindings($subQuery)
+                ->select(
+                    'register_day',
+                    DB::raw('COUNT(*) as total_users'),
+                    DB::raw("SUM(CASE WHEN total_score >= 10 THEN 1 ELSE 0 END) as highly_engaged"),
+                    DB::raw("SUM(CASE WHEN total_score BETWEEN 5 AND 9 THEN 1 ELSE 0 END) as moderately_engaged"),
+                    DB::raw("SUM(CASE WHEN total_score < 5 THEN 1 ELSE 0 END) as low_engaged")
+                )
+                ->groupBy('register_day')
+                ->orderBy('register_day')
+                ->get();
+
+            return response()->json($engagementStats);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 

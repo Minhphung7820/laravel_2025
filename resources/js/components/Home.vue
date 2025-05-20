@@ -13,10 +13,10 @@ export default {
   methods: {
     async getApi() {
       try {
-        const list = await window.axios.get('/api/test-500');
+        const list = await window.axios.get('/api/user/list');
         console.log(list.data);
       } catch (error) {
-        console.log(error);
+        console.log(error?.response?.data?.message);
       }
     }
   }

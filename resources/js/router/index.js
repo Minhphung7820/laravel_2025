@@ -32,7 +32,7 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  if (store.getters['auth/currentUser'] === null) {
+  if (to.path !== '/login' && store.getters['auth/currentUser'] === null) {
     await store.dispatch('auth/fetchUser')
   }
 

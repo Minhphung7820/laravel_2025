@@ -1,22 +1,28 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import store from '../store'
 
+import MainLayout from '../layouts/MainLayout.vue'
+import AuthLayout from '../layouts/AuthLayout.vue'
+
+import Home from '../components/Home.vue'
+import About from '../components/About.vue'
+import Login from '../components/Login.vue'
+
 const routes = [{
   path: '/',
-  component: () =>
-    import('../components/Home.vue'),
-  meta: { requiresAuth: true }
-},
-{
-  path: '/about',
-  component: () =>
-    import('../components/About.vue'),
-  meta: { requiresAuth: true }
+  component: MainLayout,
+  meta: { requiresAuth: true },
+  children: [
+    { path: '', component: Home },
+    { path: 'about', component: About }
+  ]
 },
 {
   path: '/login',
-  component: () =>
-    import('../components/Login.vue')
+  component: AuthLayout,
+  children: [
+    { path: '', component: Login }
+  ]
 }
 ]
 

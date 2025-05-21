@@ -22,11 +22,11 @@ class ProductController extends Controller
     public function recommend(Request $request)
     {
         try {
-            $userId = $request->input('user_id');
+            $customerId = $request->input('customer_id');
 
             $sub = DB::table('order_items')
                 ->join('orders', 'orders.id', '=', 'order_items.order_id')
-                ->where('orders.user_id', $userId)
+                ->where('orders.customer_id', $customerId)
                 ->where('orders.status', 'completed')
                 ->select(
                     'order_items.id as item_id',

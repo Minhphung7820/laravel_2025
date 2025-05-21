@@ -14,15 +14,15 @@ class ReportController extends Controller
         try {
             $topCustomers = DB::table('orders')
                 ->join('order_items', 'orders.id', '=', 'order_items.order_id')
-                ->join('users', 'orders.user_id', '=', 'users.id')
+                ->join('customers', 'orders.customer_id', '=', 'customers.id')
                 ->where('orders.status', 'completed')
                 ->where('orders.transaction_date', '>=', now()->subDays(30))
-                ->groupBy('orders.user_id', 'users.name')
+                ->groupBy('orders.customer_id', 'customers.name')
                 ->havingRaw('COUNT(DISTINCT orders.id) >= 2')
                 ->havingRaw('SUM(order_items.sell_price * order_items.quantity) > 10000000')
                 ->select(
-                    'orders.user_id',
-                    'users.name',
+                    'orders.customer_id',
+                    'customers.name',
                     DB::raw('COUNT(DISTINCT orders.id) as total_orders'),
                     DB::raw('SUM(order_items.sell_price * order_items.quantity) as total_spent')
                 )

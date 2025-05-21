@@ -21,7 +21,7 @@ export default {
     async login() {
       try {
         await window.axios.get('/sanctum/csrf-cookie')
-        await window.axios.post('/api/login', {
+        const response = await window.axios.post('/api/auth/login', {
           email: this.email,
           password: this.password
         })

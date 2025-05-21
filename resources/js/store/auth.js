@@ -17,15 +17,13 @@ export default {
     async fetchUser({ commit }) {
       try {
         const res = await axios.get('/api/user')
-        console.log(res);
-
         commit('setUser', res.data)
       } catch {
         commit('clearUser')
       }
     },
     async logout({ commit }) {
-      await axios.post('/api/logout')
+      await axios.post('/api/auth/logout')
       commit('clearUser')
     }
   },

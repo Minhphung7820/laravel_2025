@@ -1,9 +1,4 @@
 <template>
-  <div class="home">
-    <h1>Chào mừng đến với trang chủ</h1>
-    <p>Đây là trang Home, nơi bắt đầu của SPA Vue trong Laravel.</p>
-  </div>
-
 <ul>
   <li v-for="(item, index) in engagements" :key="index">
      <p>Ngày : {{ item.day }}</p>

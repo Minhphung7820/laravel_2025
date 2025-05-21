@@ -2,6 +2,7 @@
   <div>
     <nav class="nav">
       <router-link to="/" class="nav-link">Trang chủ</router-link>
+      <router-link to="/customer" class="nav-link">Khách hàng</router-link>
       <router-link to="/about" class="nav-link">Về chúng tôi</router-link>
       <button v-if="isLoggedIn" @click="handleLogout" class="nav-link logout-btn">Đăng xuất</button>
     </nav>

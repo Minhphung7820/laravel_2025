@@ -7,6 +7,7 @@ import AuthLayout from '../layouts/AuthLayout.vue'
 import Home from '../components/Home.vue'
 import About from '../components/About.vue'
 import Login from '../components/Login.vue'
+import ListCustomer from '../components/customer/List.vue'
 
 const routes = [{
   path: '/',
@@ -14,7 +15,8 @@ const routes = [{
   meta: { requiresAuth: true },
   children: [
     { path: '', component: Home },
-    { path: 'about', component: About }
+    { path: 'about', component: About },
+    { path: 'customer', component: ListCustomer }
   ]
 },
 {

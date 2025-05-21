@@ -34,6 +34,8 @@ class Customer extends Model
         'debt_amount',
         'credit_limit',
         'note',
+        'is_customer',
+        'avatar'
     ];
 
     protected $casts = [

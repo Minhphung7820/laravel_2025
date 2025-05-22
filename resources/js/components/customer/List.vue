@@ -9,6 +9,14 @@
       @search="onSearch"
       @page-change="onPageChange"
     >
+      <template #buttons>
+        <button
+          class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 shadow font-semibold cursor-pointer"
+          @click="$router.push('/customer/create')"
+        >
+          + Thêm khách hàng
+        </button>
+      </template>
       <template #actions="{ item }">
         <div v-if="item && item.id" class="relative" @click.stop>
           <button

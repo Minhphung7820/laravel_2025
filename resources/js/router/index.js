@@ -8,6 +8,7 @@ import Home from '../components/Home.vue'
 import About from '../components/About.vue'
 import Login from '../components/Login.vue'
 import ListCustomer from '../components/customer/List.vue'
+import CreateCustomer from '../components/customer/Create.vue'
 
 const routes = [{
   path: '/',
@@ -16,7 +17,8 @@ const routes = [{
   children: [
     { path: '', component: Home },
     { path: 'about', component: About },
-    { path: 'customer', component: ListCustomer }
+    { path: 'customer', component: ListCustomer },
+    { path: 'customer/create', component: CreateCustomer }
   ]
 },
 {

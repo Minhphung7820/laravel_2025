@@ -8,7 +8,7 @@
         placeholder="🔍 Tìm kiếm khách hàng..."
         class="w-full md:w-[400px] px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
       />
-      <slot name="actions"></slot>
+      <slot name="buttons"></slot>
     </div>
 
     <div class="rounded-lg border border-gray-200 overflow-visible">

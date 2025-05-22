@@ -6,18 +6,36 @@
       <!-- Thông tin cơ bản -->
       <div>
         <label class="block mb-1 text-sm text-gray-700 font-semibold">Tên khách hàng <span class="text-red-500">*</span></label>
-        <input v-model="form.name" type="text" required
-          class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        <input
+          v-model="form.name"
+          type="text"
+          @input="clearError('name')"
+          :class="[
+            'w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400',
+            errors.name ? 'border-red-500' : 'border-gray-300'
+          ]"
+        />
+        <p v-if="errors.name" class="text-sm text-red-600 mt-1">{{ errors.name[0] }}</p>
       </div>
 
       <div>
-        <label class="block mb-1 text-sm text-gray-700 font-semibold">SĐT <span class="text-red-500">*</span></label>
-        <input v-model="form.phone" type="text" required
-          class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        <label class="block mb-1 text-sm text-gray-700 font-semibold">
+          SĐT <span class="text-red-500">*</span>
+        </label>
+        <input
+          v-model="form.phone"
+          @input="clearError('phone')"
+          type="text"
+          :class="[
+            'w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400',
+            errors.phone ? 'border-red-500' : 'border-gray-300'
+          ]"
+        />
+        <p v-if="errors.phone" class="text-sm text-red-600 mt-1">{{ errors.phone[0] }}</p>
       </div>
 
       <div>
-        <label class="block mb-1 text-sm text-gray-700 font-semibold">Email <span class="text-red-500">*</span></label>
+        <label class="block mb-1 text-sm text-gray-700 font-semibold">Email</label>
         <input v-model="form.email" type="email"
           class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
       </div>
@@ -167,7 +185,8 @@ export default {
       },
       avatarFile: null,
       avatarPreview: null,
-      originalForm: null
+      originalForm: null,
+      errors: {}
     }
   },
   mounted() {
@@ -178,6 +197,23 @@ export default {
     window.removeEventListener('beforeunload', this.handleBeforeUnload)
   },
   methods: {
+    clearError(field) {
+      if (this.errors[field]) {
+        this.$set(this.errors, field, null)
+      }
+    },
+    validateForm() {
+      if (!this.form.name.trim()) {
+        alert('Tên khách hàng là bắt buộc')
+        return false
+      }
+      if (!this.form.phone.trim()) {
+        alert('Số điện thoại là bắt buộc')
+        return false
+      }
+
+      return true
+    },
     handleAvatarChange(e) {
       const file = e.target.files[0]
       if (!file) return
@@ -200,6 +236,7 @@ export default {
       }
     },
     async submitForm() {
+      // if (!this.validateForm()) return
       try {
         const formData = new FormData()
         for (const key in this.form) {
@@ -210,15 +247,20 @@ export default {
         }
 
         await window.axios.post('/api/customer/create', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+          headers: { 'Content-Type': 'multipart/form-data' }
         })
+
+        this.originalForm = JSON.stringify(this.form)
+        this.avatarFile = null
 
         this.$router.push('/customer')
       } catch (err) {
-        console.error(err)
-        alert('Gửi thất bại!')
+        if (err.response && err.response.status === 422) {
+          this.errors = err.response.data.errors || {}
+        } else {
+          console.error(err)
+          alert('Gửi thất bại!')
+        }
       }
     }
   },

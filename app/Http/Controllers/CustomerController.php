@@ -22,7 +22,7 @@ class CustomerController extends Controller
                         $query->orWhere('email', 'like', '%' . $request['keyword'] . '%');
                     });
                 }
-            )->paginate($request['limit'] ?? 10);
+            )->orderBy('created_at', 'desc')->paginate($request['limit'] ?? 10);
             return response()->json($customers);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -42,7 +42,42 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        if ($request->assigned_user_id === 'null') {
+            $request->merge(['assigned_user_id' => null]);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20|unique:customers,phone',
+            'email' => 'nullable|email|max:255',
+            'birthday' => 'nullable|date',
+            'gender' => 'nullable|in:male,female,other,unknown',
+            'address' => 'nullable|string|max:255',
+            'type' => 'in:individual,company',
+            'status' => 'in:active,inactive,blacklist',
+            'assigned_user_id' => 'nullable|exists:users,id',
+            'facebook_url' => 'nullable|string|max:255',
+            'zalo_phone' => 'nullable|string|max:20',
+            'tax_code' => 'nullable|string|max:100',
+            'debt_amount' => 'nullable|numeric',
+            'credit_limit' => 'nullable|numeric',
+            'note' => 'nullable|string',
+            'avatar' => 'nullable|image|max:2048'
+        ]);
+
+        $validated['total_orders'] = 0;
+        $validated['total_spent'] = 0;
+
+        if ($request->hasFile('avatar')) {
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $validated['avatar'] = '/storage/' . $path;
+        }
+        $customer = Customer::create($validated);
+
+        return response()->json([
+            'message' => 'Tạo khách hàng thành công',
+            'data' => $customer
+        ], 201);
     }
 
     /**

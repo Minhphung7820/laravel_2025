@@ -116,7 +116,22 @@
         <textarea v-model="form.note" rows="3"
           class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
       </div>
+      <div class="md:col-span-2">
+        <label class="block mb-1 text-sm text-gray-700 font-semibold">Ảnh đại diện</label>
 
+        <!-- Preview -->
+        <div v-if="avatarPreview" class="mb-2 relative w-[120px]">
+          <img :src="avatarPreview" class="rounded shadow w-[120px] h-[120px] object-cover border" />
+          <button type="button" @click="removeAvatar"
+            class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-700">
+            ✕
+          </button>
+        </div>
+
+        <!-- Chọn ảnh -->
+        <input type="file" accept="image/*" @change="handleAvatarChange"
+          class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+      </div>
       <!-- Submit -->
       <div class="md:col-span-2 flex justify-end pt-4 border-t mt-6">
         <button type="submit"
@@ -150,6 +165,8 @@ export default {
         credit_limit: 0,
         note: ''
       },
+      avatarFile: null,
+      avatarPreview: null,
       originalForm: null
     }
   },
@@ -161,8 +178,20 @@ export default {
     window.removeEventListener('beforeunload', this.handleBeforeUnload)
   },
   methods: {
+    handleAvatarChange(e) {
+      const file = e.target.files[0]
+      if (!file) return
+
+      this.avatarFile = file
+      this.avatarPreview = URL.createObjectURL(file)
+    },
+    removeAvatar() {
+      this.avatarFile = null
+      this.avatarPreview = null
+    },
     async isFormDirty() {
-      return JSON.stringify(this.form) !== this.originalForm
+      return JSON.stringify(this.form) !== this.originalForm ||
+      this.avatarFile !== null
     },
     handleBeforeUnload(e) {
       if (this.isFormDirty()) {
@@ -172,7 +201,20 @@ export default {
     },
     async submitForm() {
       try {
-        await window.axios.post('/api/customer/create', this.form)
+        const formData = new FormData()
+        for (const key in this.form) {
+          formData.append(key, this.form[key])
+        }
+        if (this.avatarFile) {
+          formData.append('avatar', this.avatarFile)
+        }
+
+        await window.axios.post('/api/customer/create', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+
         this.$router.push('/customer')
       } catch (err) {
         console.error(err)

@@ -48,6 +48,10 @@ export default {
         this.customers = res.data.data
         this.pagination.current_page = res.data.current_page
         this.pagination.last_page = res.data.last_page
+        this.pagination.from = res.data.from
+        this.pagination.to = res.data.to
+        this.pagination.per_page = res.data.per_page
+        this.pagination.total = res.data.total
       })
     },
     onSearch(keyword) {

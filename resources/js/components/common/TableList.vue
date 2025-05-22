@@ -18,6 +18,7 @@
             <th v-for="col in columns" :key="col.key" class="px-4 py-3 text-left font-semibold text-sm text-gray-700 uppercase tracking-wider">
               {{ col.label }}
             </th>
+              <th class="px-4 py-3"></th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 bg-white">
@@ -25,6 +26,9 @@
             <td v-for="col in columns" :key="col.key" class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap">
               {{ item[col.key] }}
             </td>
+          <td class="px-4 py-2 text-center">
+            <slot name="actions" :item="item" />
+          </td>
           </tr>
           <tr v-if="!data.length">
             <td :colspan="columns.length" class="text-center py-6 text-gray-500 italic">Không có dữ liệu</td>
@@ -98,7 +102,7 @@ export default {
       default: () => ({
         current_page: 1,
         last_page: 1,
-        per_page : 15,
+        per_page : 10,
         from: 0,
         to: 0,
         total: 0

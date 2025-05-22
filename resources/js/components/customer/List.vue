@@ -20,7 +20,7 @@
 
           <div
               v-if="dropdownId === item.id"
-              class="absolute right-0 mt-2 bg-white border rounded shadow z-10 whitespace-nowrap px-2 py-1"
+              class="absolute right-0 mt-2 bg-white border rounded shadow z-50 whitespace-nowrap px-2 py-1 min-w-[100px]"
             >
               <ul class="text-sm text-gray-700">
                 <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer" @click="onView(item)">👁 Xem</li>

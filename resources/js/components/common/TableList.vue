@@ -11,7 +11,7 @@
       <slot name="actions"></slot>
     </div>
 
-    <div class="overflow-auto rounded-lg border border-gray-200">
+    <div class="rounded-lg border border-gray-200 overflow-visible">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-100 sticky top-0 z-10">
           <tr>

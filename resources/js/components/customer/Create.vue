@@ -253,7 +253,7 @@ export default {
         this.originalForm = JSON.stringify(this.form)
         this.avatarFile = null
 
-        this.$router.push('/customer')
+        this.$router.push('/sale/customer')
       } catch (err) {
         if (err.response && err.response.status === 422) {
           this.errors = err.response.data.errors || {}

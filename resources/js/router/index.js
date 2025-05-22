@@ -17,8 +17,8 @@ const routes = [{
   children: [
     { path: '', component: Home },
     { path: 'about', component: About },
-    { path: 'customer', component: ListCustomer },
-    { path: 'customer/create', component: CreateCustomer }
+    { path: 'sale/customer', component: ListCustomer },
+    { path: 'sale/customer/create', component: CreateCustomer }
   ]
 },
 {

@@ -133,10 +133,11 @@ export default {
         {
           name: 'Kho',
           epics: [
-            { name: 'Sản phẩm', path: '/sale/customer' },
-            { name: 'Danh mục', path: '/quotes' },
-            { name: 'Nhãn hiệu', path: '/orders' },
-            { name: 'Đơn vị', path: '/returns' }
+            { name: 'Sản phẩm', path: '/warehouse/product' },
+            { name: 'Danh mục', path: '/warehouse/category' },
+            { name: 'Nhãn hiệu', path: '/warehouse/brand' },
+            { name: 'Đơn vị', path: '/warehouse/unit' },
+            { name: 'Kho', path: '/warehouse/stock' }
           ]
         },
         {

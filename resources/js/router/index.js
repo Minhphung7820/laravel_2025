@@ -10,6 +10,13 @@ import Login from '../components/Login.vue'
 import ListCustomer from '../components/customer/List.vue'
 import CreateCustomer from '../components/customer/Create.vue'
 import EditCustomer from '../components/customer/Edit.vue'
+import DetailCustomer from '../components/customer/Detail.vue'
+
+import ListProduct from '../components/warehouse/product/List.vue'
+import ListUnit from '../components/warehouse/unit/List.vue'
+import ListBrand from '../components/warehouse/brand/List.vue'
+import ListCategory from '../components/warehouse/category/List.vue'
+import ListStock from '../components/warehouse/stock/List.vue'
 
 const routes = [{
   path: '/',
@@ -34,6 +41,30 @@ const routes = [{
   {
     path: 'sale/customer/:id/edit',
     component: EditCustomer
+  },
+  {
+    path: 'sale/customer/:id/detail',
+    component: DetailCustomer
+  },
+  {
+    path: 'warehouse/product',
+    component: ListProduct
+  },
+  {
+    path: 'warehouse/unit',
+    component: ListUnit
+  },
+  {
+    path: 'warehouse/brand',
+    component: ListBrand
+  },
+  {
+    path: 'warehouse/category',
+    component: ListCategory
+  },
+  {
+    path: 'warehouse/stock',
+    component: ListStock
   }
   ]
 },

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="text-xl font-bold mb-4">Danh sách khách hàng</h1>
+    <h1 class="text-2xl font-bold mb-4">Danh sách khách hàng</h1>
 
     <CommonTable
       :columns="columns"
@@ -94,7 +94,7 @@ export default {
       this.dropdownId = this.dropdownId === id ? null : id
     },
     onView(item) {
-      console.log('Xem:', item)
+      this.$router.push(`/sale/customer/${item.id}/detail`)
       this.dropdownId = null
     },
     onEdit(item) {

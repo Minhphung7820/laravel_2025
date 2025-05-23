@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReportController;
@@ -22,6 +23,12 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/detail/{id}', [CustomerController::class, 'show']);
     Route::post('/create', [CustomerController::class, 'store']);
     Route::post('/update/{id}', [CustomerController::class, 'update']);
+  });
+
+  Route::group(['prefix' => 'warehouse'], function () {
+    Route::group(['prefix' => 'category'], function () {
+      Route::get('/list', [CategoryController::class, 'index']);
+    });
   });
 
   Route::group(['prefix' => 'product'], function () {

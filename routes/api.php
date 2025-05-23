@@ -19,7 +19,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
   Route::group(['prefix' => 'customer'], function () {
     Route::get('/list', [CustomerController::class, 'index']);
+    Route::get('/detail/{id}', [CustomerController::class, 'show']);
     Route::post('/create', [CustomerController::class, 'store']);
+    Route::post('/update/{id}', [CustomerController::class, 'update']);
   });
 
   Route::group(['prefix' => 'product'], function () {

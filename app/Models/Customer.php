@@ -48,8 +48,15 @@ class Customer extends Model
         'total_spent' => 'decimal:2',
     ];
 
+    protected $appends = ['avatar_url'];
+
     public function assignedUser()
     {
         return $this->belongsTo(User::class, 'assigned_user_id');
+    }
+
+    public function getAvatarUrlAttribute($value)
+    {
+        return $this->avatar ? url($this->avatar) : null;
     }
 }

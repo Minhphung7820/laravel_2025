@@ -9,16 +9,32 @@ import About from '../components/About.vue'
 import Login from '../components/Login.vue'
 import ListCustomer from '../components/customer/List.vue'
 import CreateCustomer from '../components/customer/Create.vue'
+import EditCustomer from '../components/customer/Edit.vue'
 
 const routes = [{
   path: '/',
   component: MainLayout,
   meta: { requiresAuth: true },
-  children: [
-    { path: '', component: Home },
-    { path: 'about', component: About },
-    { path: 'sale/customer', component: ListCustomer },
-    { path: 'sale/customer/create', component: CreateCustomer }
+  children: [{
+    path: '',
+    component: Home
+  },
+  {
+    path: 'about',
+    component: About
+  },
+  {
+    path: 'sale/customer',
+    component: ListCustomer
+  },
+  {
+    path: 'sale/customer/create',
+    component: CreateCustomer
+  },
+  {
+    path: 'sale/customer/:id/edit',
+    component: EditCustomer
+  }
   ]
 },
 {

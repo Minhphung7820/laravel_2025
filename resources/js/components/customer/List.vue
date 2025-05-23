@@ -98,7 +98,7 @@ export default {
       this.dropdownId = null
     },
     onEdit(item) {
-      console.log('Sửa:', item)
+      this.$router.push(`/sale/customer/${item.id}/edit`)
       this.dropdownId = null
     },
     onDelete(item) {

@@ -41,7 +41,7 @@
       Hiển thị {{ pagination.from }}–{{ pagination.to }} / {{ pagination.total }} khách hàng
     </div>
 
-    <div class="flex flex-wrap gap-2 items-center justify-center md:justify-end">
+    <div v-if="pagination.total > pagination.per_page" class="flex flex-wrap gap-2 items-center justify-center md:justify-end">
       <button
         @click="$emit('page-change', 1)"
         :disabled="pagination.current_page === 1"

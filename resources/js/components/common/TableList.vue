@@ -37,8 +37,8 @@
       </table>
     </div>
 
-    <div class="mt-2 text-sm text-gray-500">
-      Hiển thị {{ pagination.from }}–{{ pagination.to }} / {{ pagination.total }} khách hàng
+    <div v-if="pagination.total > pagination.per_page" class="mt-2 text-sm text-gray-500">
+      Hiển thị {{ pagination.from }}–{{ pagination.to }} / {{ pagination.total }} dòng
     </div>
 
     <div v-if="pagination.total > pagination.per_page" class="flex flex-wrap gap-2 items-center justify-center md:justify-end">

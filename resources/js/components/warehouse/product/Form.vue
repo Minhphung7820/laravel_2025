@@ -115,13 +115,42 @@
       </label>
     </div>
 
+    <!-- Chọn thuộc tính và giá trị con -->
+    <div v-if="form.has_variant && variantAttributes.length" class="space-y-4">
+      <h2 class="font-semibold text-blue-600">Chọn thuộc tính biến thể (tối đa 2)</h2>
+      <div v-for="(attr, index) in variantAttributes" :key="attr.id" class="border p-3 rounded shadow-sm">
+        <label>
+          <input
+            type="checkbox"
+            :value="attr"
+            v-model="selectedAttributes"
+            :disabled="!selectedAttributes.includes(attr) && selectedAttributes.length >= 2"
+          />
+          {{ attr.title }}
+        </label>
+        <div v-if="selectedAttributes.includes(attr)" class="ml-4 mt-2">
+          <label v-for="opt in attr.attributes" :key="opt.id" class="inline-flex items-center mr-3">
+            <input type="checkbox" :value="opt" v-model="selectedAttributeValues[attr.id]" />
+            <span class="ml-1">{{ opt.title }}</span>
+          </label>
+        </div>
+      </div>
+
+      <button
+        class="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700"
+        @click="generateVariantGrid"
+        :disabled="selectedAttributes.length === 0"
+      >
+        Xác nhận và tạo lưới biến thể
+      </button>
+    </div>
+
     <!-- Lưới biến thể -->
-    <!-- <VariantGrid
+    <VariantGrid
       v-if="form.has_variant && form.category_id"
-      :category-id="form.category_id"
-      v-model:variants="form.variants"
+     :variants="form.variants"
       :stocks="stocks"
-    /> -->
+    />
     <!-- Submit -->
     <button @click="handleSubmit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded shadow">
       {{ mode === 'update' ? 'Cập nhật' : 'Tạo mới' }}
@@ -176,6 +205,9 @@ export default {
       categories: [],
       suppliers: [],
       stocks: [],
+      variantAttributes: [], // từ API
+      selectedAttributes: [],
+      selectedAttributeValues: {}, // { [attrId]: [giá trị đã chọn] }
     }
   },
   watch: {
@@ -201,17 +233,60 @@ export default {
   methods: {
     async checkAndLoadVariants() {
       if (this.form.has_variant && this.form.category_id) {
-        try {
-          const res = await fetch(`/api/warehouse/category/${this.form.category_id}/attributes`)
-          const attributes = await res.json()
-           console.log(attributes);
+        const res = await fetch(`/api/warehouse/category/${this.form.category_id}/attributes`)
+        this.variantAttributes = await res.json()
 
-        } catch (err) {
-          console.error('❌ Lỗi khi load biến thể:', err)
-        }
+        // Khởi tạo cấu trúc chọn giá trị
+        this.selectedAttributeValues = {}
+        this.variantAttributes.forEach(attr => {
+          this.selectedAttributeValues[attr.id] = []
+        })
       } else {
-        this.form.variants = []
+        this.variantAttributes = []
+        this.selectedAttributes = []
+        this.selectedAttributeValues = {}
       }
+    },
+    generateVariantGrid() {
+      const selected = this.selectedAttributes.map(attr => ({
+        attr,
+        values: this.selectedAttributeValues[attr.id]
+      }))
+
+      // Tối thiểu 1 giá trị mỗi thuộc tính
+      if (selected.some(item => item.values.length === 0)) {
+        alert("Vui lòng chọn ít nhất 1 giá trị mỗi thuộc tính.")
+        return
+      }
+
+      // Sinh tổ hợp các dòng
+      const combinations = this.generateCombinations(selected.map(item => item.values))
+      const stockVariants = []
+
+      combinations.forEach(combo => {
+        this.stocks.forEach(stock => {
+          stockVariants.push({
+            stock_id: stock.id,
+            attributes: combo,
+            price: 0,
+            sku: '',
+            image: null
+          })
+        })
+      })
+
+      this.form.variants = stockVariants
+    },
+    generateCombinations(arrays) {
+      if (arrays.length === 1) return arrays[0].map(i => [i])
+      const result = []
+      const rest = this.generateCombinations(arrays.slice(1))
+      for (const item of arrays[0]) {
+        for (const r of rest) {
+          result.push([item, ...r])
+        }
+      }
+      return result
     },
     async loadInitialData() {
       try {

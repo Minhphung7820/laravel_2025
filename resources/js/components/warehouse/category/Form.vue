@@ -1,9 +1,9 @@
 <template>
   <div>
-    <h2 class="text-xl font-semibold mb-4">📂 Thêm / Sửa Danh Mục</h2>
+    <h2 class="text-2xl font-bold mb-6">{{ mode === 'create' ? 'Thêm' : 'Chỉnh sửa' }} danh Mục</h2>
 
     <div class="mb-4">
-      <label class="block font-medium mb-1">📁 Danh mục</label>
+      <label class="block font-medium mb-1">Danh mục</label>
       <input
         v-model="form.title"
         placeholder="Tên danh mục"

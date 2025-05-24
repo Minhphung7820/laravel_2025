@@ -15,6 +15,10 @@ class StockProduct extends Model
         'sell_price',
         'purchase_price',
         'product_type',
+        'barcode',
+        'sku',
+        'unit_id',
+        'is_sale'
     ];
 
     public function stock()
@@ -35,5 +39,10 @@ class StockProduct extends Model
     public function attributeSecond()
     {
         return $this->belongsTo(Attribute::class, 'attribute_second_id');
+    }
+
+    public function variantImages()
+    {
+        return $this->hasMany(ProductVariantImage::class);
     }
 }

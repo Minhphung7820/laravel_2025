@@ -63,6 +63,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
       Route::get('/detail/{id}', [CategoryController::class, 'show']);
       Route::post('/create', [CategoryController::class, 'store']);
       Route::post('/update/{id}', [CategoryController::class, 'update']);
+      Route::get('/{id}/attributes', [CategoryController::class, 'getAttributes']);
     });
   });
 

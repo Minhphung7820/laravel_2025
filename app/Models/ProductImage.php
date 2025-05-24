@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class ProductImage extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'product_id',
+        'image',
+    ];
+
+    protected $appends = ['image_url'];
+
+    public function getImageUrlAttribute()
+    {
+        return $this->image ? url($this->image) : null;
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
+}

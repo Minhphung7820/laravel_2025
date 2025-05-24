@@ -151,6 +151,17 @@ class CategoryController extends Controller
         }
     }
 
+    public function getAttributes(Request $request, $id)
+    {
+        try {
+            $attributes = Variant::with('attributes')
+                ->where('category_id', $id)
+                ->get();
+            return response()->json($attributes);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
     /**
      * Remove the specified resource from storage.
      */

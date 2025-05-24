@@ -19,6 +19,8 @@ import EditSupplier from '../components/supplier/Edit.vue'
 import DetailSupplier from '../components/supplier/Detail.vue'
 //
 import ListProduct from '../components/warehouse/product/List.vue'
+import CreateProductVariable from '../components/warehouse/product/CreateVariable.vue'
+import CreateProductCombo from '../components/warehouse/product/CreateCombo.vue'
 //
 import ListUnit from '../components/warehouse/unit/List.vue'
 import CreateUnit from '../components/warehouse/unit/Create.vue'
@@ -83,6 +85,10 @@ const routes = [{
   {
     path: 'warehouse/product',
     component: ListProduct
+  },
+  {
+    path: 'warehouse/product/create/variable',
+    component: CreateProductVariable
   },
   {
     path: 'warehouse/unit',

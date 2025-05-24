@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2 class="text-2xl font-bold mb-4">📂 Danh sách danh mục</h2>
+    <h2 class="text-2xl font-bold mb-4">Danh sách danh mục</h2>
 
     <TableList
       :columns="columns"

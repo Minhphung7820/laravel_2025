@@ -13,10 +13,20 @@ import EditCustomer from '../components/customer/Edit.vue'
 import DetailCustomer from '../components/customer/Detail.vue'
 
 import ListProduct from '../components/warehouse/product/List.vue'
+//
 import ListUnit from '../components/warehouse/unit/List.vue'
+import CreateUnit from '../components/warehouse/unit/Create.vue'
+import EditUnit from '../components/warehouse/unit/Edit.vue'
+//
 import ListBrand from '../components/warehouse/brand/List.vue'
-import ListCategory from '../components/warehouse/category/List.vue'
+import CreateBrand from '../components/warehouse/brand/Create.vue'
+import EditBrand from '../components/warehouse/brand/Edit.vue'
+//
 import ListStock from '../components/warehouse/stock/List.vue'
+import CreateStock from '../components/warehouse/stock/Create.vue'
+import EditStock from '../components/warehouse/stock/Edit.vue'
+//
+import ListCategory from '../components/warehouse/category/List.vue'
 import CreateCategory from '../components/warehouse/category/Create.vue'
 import EditCategory from '../components/warehouse/category/Edit.vue'
 
@@ -57,8 +67,24 @@ const routes = [{
     component: ListUnit
   },
   {
+    path: 'warehouse/unit/create',
+    component: CreateUnit
+  },
+  {
+    path: 'warehouse/unit/:id/edit',
+    component: EditUnit
+  },
+  {
     path: 'warehouse/brand',
     component: ListBrand
+  },
+  {
+    path: 'warehouse/brand/create',
+    component: CreateBrand
+  },
+  {
+    path: 'warehouse/brand/:id/edit',
+    component: EditBrand
   },
   {
     path: 'warehouse/category',
@@ -75,7 +101,15 @@ const routes = [{
   {
     path: 'warehouse/stock',
     component: ListStock
-  }
+  },
+  {
+    path: 'warehouse/stock/create',
+    component: CreateStock
+  },
+  {
+    path: 'warehouse/stock/:id/edit',
+    component: EditStock
+  },
   ]
 },
 {

@@ -141,7 +141,7 @@
         <div v-if="avatarPreview" class="mb-2 relative w-[120px]">
           <img :src="avatarPreview" class="rounded shadow w-[120px] h-[120px] object-cover border" />
           <button type="button" @click="removeAvatar"
-            class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-700">
+            class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-700 cursor-pointer">
             ✕
           </button>
         </div>

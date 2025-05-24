@@ -23,9 +23,22 @@
         </thead>
         <tbody class="divide-y divide-gray-100 bg-white">
           <tr v-for="item in data" :key="item.id" class="hover:bg-blue-50 transition-all duration-200">
-            <td v-for="col in columns" :key="col.key" class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap">
+          <td
+            v-for="col in columns"
+            :key="col.key"
+            class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap"
+          >
+            <template v-if="col.type === 'image_file' && item[col.key]">
+              <img
+                :src="`${item[col.key]}`"
+                alt="ảnh"
+                class="w-10 h-10 rounded-full object-cover border"
+              />
+            </template>
+            <template v-else>
               {{ item[col.key] }}
-            </td>
+            </template>
+          </td>
           <td class="px-4 py-2 text-center">
             <slot name="actions" :item="item" />
           </td>

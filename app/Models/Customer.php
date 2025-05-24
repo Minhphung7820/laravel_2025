@@ -55,7 +55,7 @@ class Customer extends Model
         return $this->belongsTo(User::class, 'assigned_user_id');
     }
 
-    public function getAvatarUrlAttribute($value)
+    public function getAvatarUrlAttribute()
     {
         return $this->avatar ? url($this->avatar) : null;
     }

@@ -17,6 +17,8 @@ import ListUnit from '../components/warehouse/unit/List.vue'
 import ListBrand from '../components/warehouse/brand/List.vue'
 import ListCategory from '../components/warehouse/category/List.vue'
 import ListStock from '../components/warehouse/stock/List.vue'
+import CreateCategory from '../components/warehouse/category/Create.vue'
+import EditCategory from '../components/warehouse/category/Edit.vue'
 
 const routes = [{
   path: '/',
@@ -61,6 +63,14 @@ const routes = [{
   {
     path: 'warehouse/category',
     component: ListCategory
+  },
+  {
+    path: 'warehouse/category/create',
+    component: CreateCategory
+  },
+  {
+    path: 'warehouse/category/:id/edit',
+    component: EditCategory
   },
   {
     path: 'warehouse/stock',

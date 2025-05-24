@@ -105,11 +105,11 @@ export default {
       this.fetchCategories(1)
     },
     onView(item) {
-      this.$router.push(`/category/${item.id}/detail`)
+      this.$router.push(`/warehouse/category/${item.id}/detail`)
       this.dropdownId = null
     },
     onEdit(item) {
-      this.$router.push(`/category/${item.id}/edit`)
+      this.$router.push(`/warehouse/category/${item.id}/edit`)
       this.dropdownId = null
     },
     onDelete(item) {
@@ -119,7 +119,7 @@ export default {
       this.dropdownId = null
     },
     createCategory() {
-      this.$router.push(`/category/create`)
+      this.$router.push(`/warehouse/category/create`)
     }
   }
 }

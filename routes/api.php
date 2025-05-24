@@ -28,6 +28,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
   Route::group(['prefix' => 'warehouse'], function () {
     Route::group(['prefix' => 'category'], function () {
       Route::get('/list', [CategoryController::class, 'index']);
+      Route::get('/detail/{id}', [CategoryController::class, 'show']);
+      Route::post('/create', [CategoryController::class, 'store']);
+      Route::post('/update/{id}', [CategoryController::class, 'update']);
     });
   });
 

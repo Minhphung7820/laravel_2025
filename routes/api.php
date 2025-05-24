@@ -6,6 +6,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -26,6 +27,13 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/detail/{id}', [CustomerController::class, 'show']);
     Route::post('/create', [CustomerController::class, 'store']);
     Route::post('/update/{id}', [CustomerController::class, 'update']);
+  });
+
+  Route::group(['prefix' => 'supplier'], function () {
+    Route::get('/list', [SupplierController::class, 'index']);
+    Route::get('/detail/{id}', [SupplierController::class, 'show']);
+    Route::post('/create', [SupplierController::class, 'store']);
+    Route::post('/update/{id}', [SupplierController::class, 'update']);
   });
 
   Route::group(['prefix' => 'warehouse'], function () {

@@ -5,7 +5,7 @@
         v-model="search"
         @input="$emit('search', search)"
         type="text"
-        placeholder="🔍 Tìm kiếm khách hàng..."
+        :placeholder="placeholder"
         class="w-full md:w-[400px] px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
       />
       <slot name="buttons"></slot>
@@ -120,6 +120,10 @@ export default {
         to: 0,
         total: 0
       })
+    },
+    placeholder: {
+      type: String,
+      default: 'Nhập nội dung...'
     }
   },
   data() {

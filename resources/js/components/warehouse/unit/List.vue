@@ -8,6 +8,7 @@
       :pagination="pagination"
       @search="onSearch"
       @page-change="fetchUnits"
+      :placeholder="'🔍 Tìm kiếm đơn vị...'"
     >
       <template #buttons>
         <button

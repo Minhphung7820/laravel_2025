@@ -8,6 +8,7 @@
       :pagination="pagination"
       @search="onSearch"
       @page-change="fetchBrands"
+      :placeholder="'🔍 Tìm kiếm thương hiệu...'"
     >
       <template #buttons>
         <button

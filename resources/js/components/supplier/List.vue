@@ -1,21 +1,21 @@
 <template>
   <div>
-    <h1 class="text-2xl font-bold mb-4">Danh sách khách hàng</h1>
+    <h1 class="text-2xl font-bold mb-4">Danh sách nhà cung cấp</h1>
 
     <CommonTable
       :columns="columns"
-      :data="customers"
+      :data="suppliers"
       :pagination="pagination"
       @search="onSearch"
       @page-change="onPageChange"
-      :placeholder="'🔍 Tìm kiếm khách hàng...'"
+      :placeholder="'🔍 Tìm kiếm nhà cung cấp...'"
     >
       <template #buttons>
         <button
           class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 shadow font-semibold cursor-pointer"
-          @click="$router.push('/sale/customer/create')"
+          @click="$router.push('/purchase/supplier/create')"
         >
-          + Thêm khách hàng
+          + Thêm nhà cung cấp
         </button>
       </template>
       <template #actions="{ item }">
@@ -49,11 +49,11 @@ import CommonTable from '../common/TableList.vue'
 import { encodeQuery, decodeQuery } from '@/utils/queryEncoder'
 
 export default {
-  name: 'ListCustomer',
+  name: 'ListSupplier',
   components: { CommonTable },
   data() {
     return {
-      customers: [],
+      suppliers: [],
       pagination: {
         current_page: 1,
         last_page: 1,
@@ -63,8 +63,7 @@ export default {
         per_page: 10
       },
       columns: [
-        { label: 'Tên khách hàng', key: 'name' },
-        { label: 'Ảnh', key: 'avatar_url',type : 'image_file' },
+        { label: 'Tên nhà cung cấp', key: 'name' },
         { label: 'Email', key: 'email' },
         { label: 'SĐT', key: 'phone' },
         { label: 'Địa chỉ', key: 'address' }
@@ -83,7 +82,7 @@ export default {
       this.pagination.per_page = parseInt(decoded.limit) || 10
     }
 
-    this.fetchCustomers(this.pagination.current_page)
+    this.fetchSuppliers(this.pagination.current_page)
   },
   beforeDestroy() {
      document.removeEventListener('click', this.closeDropdown)
@@ -96,15 +95,15 @@ export default {
       this.dropdownId = this.dropdownId === id ? null : id
     },
     onView(item) {
-      this.$router.push(`/sale/customer/${item.id}/detail`)
+      this.$router.push(`/purchase/supplier/${item.id}/detail`)
       this.dropdownId = null
     },
     onEdit(item) {
-      this.$router.push(`/sale/customer/${item.id}/edit`)
+      this.$router.push(`/purchase/supplier/${item.id}/edit`)
       this.dropdownId = null
     },
     onDelete(item) {
-      if (confirm(`Xóa khách hàng: ${item.name}?`)) {
+      if (confirm(`Xóa nhà cung cấp: ${item.name}?`)) {
         console.log('Đã xoá:', item)
       }
       this.dropdownId = null
@@ -122,7 +121,7 @@ export default {
         query: { query: encoded }
       })
     },
-    fetchCustomers(page = 1) {
+    fetchSuppliers(page = 1) {
       const params = {
         page,
         keyword: this.searchKeyword,
@@ -131,8 +130,8 @@ export default {
 
       this.updateUrlQuery(page)
 
-      window.axios.get('/api/customer/list', { params }).then(res => {
-        this.customers = res.data.data
+      window.axios.get('/api/supplier/list', { params }).then(res => {
+        this.suppliers = res.data.data
 
         const {
           current_page,
@@ -155,10 +154,10 @@ export default {
     },
     onSearch(keyword) {
       this.searchKeyword = keyword
-      this.fetchCustomers(1)
+      this.fetchSuppliers(1)
     },
     onPageChange(page) {
-      this.fetchCustomers(page)
+      this.fetchSuppliers(page)
     }
   }
 }

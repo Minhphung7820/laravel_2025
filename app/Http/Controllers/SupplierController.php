@@ -7,7 +7,7 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-class CustomerController extends Controller
+class SupplierController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -15,7 +15,7 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         try {
-            $customers = Customer::where('is_customer', 1)->when(
+            $suppliers = Customer::where('is_customer', 0)->when(
                 isset($request['keyword']) && $request['keyword'],
                 function ($query) use ($request) {
                     return $query->where(function ($query) use ($request) {
@@ -24,7 +24,7 @@ class CustomerController extends Controller
                     });
                 }
             )->orderBy('created_at', 'desc')->paginate($request['limit'] ?? 10);
-            return response()->json($customers);
+            return response()->json($suppliers);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -54,7 +54,7 @@ class CustomerController extends Controller
                 'string',
                 'max:20',
                 \Illuminate\Validation\Rule::unique('customers', 'phone')
-                    ->where(fn($query) => $query->where('is_customer', 1)),
+                    ->where(fn($query) => $query->where('is_customer', 0)),
             ],
             'email' => 'nullable|email|max:255',
             'birthday' => 'nullable|date',
@@ -74,16 +74,17 @@ class CustomerController extends Controller
 
         $validated['total_orders'] = 0;
         $validated['total_spent'] = 0;
+        $validated['is_customer'] = 0;
 
         if ($request->hasFile('avatar')) {
             $path = $request->file('avatar')->store('avatars', 'public');
             $validated['avatar'] = '/storage/' . $path;
         }
-        $customer = Customer::create($validated);
+        $supplier = Customer::create($validated);
 
         return response()->json([
-            'message' => 'Tạo khách hàng thành công',
-            'data' => $customer
+            'message' => 'Tạo nhà cung cấp thành công',
+            'data' => $supplier
         ], 201);
     }
 
@@ -113,7 +114,7 @@ class CustomerController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $customer = Customer::findOrFail($id);
+        $supplier = Customer::findOrFail($id);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'phone' => [
@@ -122,9 +123,9 @@ class CustomerController extends Controller
                 'max:20',
                 \Illuminate\Validation\Rule::unique('customers')
                     ->where(function ($query) use ($request) {
-                        return $query->where('is_customer', 1);
+                        return $query->where('is_customer', 0);
                     })
-                    ->ignore($customer->id),
+                    ->ignore($supplier->id),
             ],
             'email' => 'nullable|email',
             'birthday' => 'nullable|date',
@@ -146,20 +147,21 @@ class CustomerController extends Controller
         // Nếu có file ảnh mới được gửi lên
         if ($request->hasFile('avatar')) {
             // Xóa ảnh cũ nếu có
-            if ($customer->avatar && Storage::exists($customer->avatar)) {
-                Storage::delete($customer->avatar);
+            if ($supplier->avatar && Storage::exists($supplier->avatar)) {
+                Storage::delete($supplier->avatar);
             }
 
             // Lưu ảnh mới
             $avatarPath = $request->file('avatar')->store('avatars', 'public');
             $validated['avatar'] = '/storage/' . $avatarPath;
         }
+        $validated['is_customer'] = 0;
 
-        $customer->update($validated);
+        $supplier->update($validated);
 
         return response()->json([
             'message' => 'Cập nhật thành công!',
-            'customer' => $customer
+            'customer' => $supplier
         ]);
     }
 

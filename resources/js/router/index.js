@@ -7,11 +7,17 @@ import AuthLayout from '../layouts/AuthLayout.vue'
 import Home from '../components/Home.vue'
 import About from '../components/About.vue'
 import Login from '../components/Login.vue'
+//
 import ListCustomer from '../components/customer/List.vue'
 import CreateCustomer from '../components/customer/Create.vue'
 import EditCustomer from '../components/customer/Edit.vue'
 import DetailCustomer from '../components/customer/Detail.vue'
-
+//
+import ListSupplier from '../components/supplier/List.vue'
+import CreateSupplier from '../components/supplier/Create.vue'
+import EditSupplier from '../components/supplier/Edit.vue'
+import DetailSupplier from '../components/supplier/Detail.vue'
+//
 import ListProduct from '../components/warehouse/product/List.vue'
 //
 import ListUnit from '../components/warehouse/unit/List.vue'
@@ -57,6 +63,22 @@ const routes = [{
   {
     path: 'sale/customer/:id/detail',
     component: DetailCustomer
+  },
+  {
+    path: 'purchase/supplier',
+    component: ListSupplier
+  },
+  {
+    path: 'purchase/supplier/create',
+    component: CreateSupplier
+  },
+  {
+    path: 'purchase/supplier/:id/edit',
+    component: EditSupplier
+  },
+  {
+    path: 'purchase/supplier/:id/detail',
+    component: DetailSupplier
   },
   {
     path: 'warehouse/product',

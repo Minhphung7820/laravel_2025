@@ -8,6 +8,7 @@
       :pagination="pagination"
       @page-change="fetchCategories"
       @search="onSearch"
+      :placeholder="'🔍 Tìm kiếm danh mục...'"
     >
       <!-- Nút thêm -->
       <template #buttons>

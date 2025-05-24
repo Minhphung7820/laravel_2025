@@ -1,5 +1,5 @@
 <template>
-  <Form />
+  <Form :mode="'update'" :supplierId="$route.params.id" />
 </template>
 
 <script>

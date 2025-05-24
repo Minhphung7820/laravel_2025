@@ -8,6 +8,7 @@
       :pagination="pagination"
       @search="onSearch"
       @page-change="fetchStocks"
+      :placeholder="'🔍 Tìm kiếm kho...'"
     >
       <template #buttons>
         <button

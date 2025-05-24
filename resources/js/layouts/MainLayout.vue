@@ -124,7 +124,7 @@ export default {
         {
           name: 'Mua hàng',
           epics: [
-            { name: 'Quản lý nhà cung cấp', path: '/sale/customer' },
+            { name: 'Quản lý nhà cung cấp', path: '/purchase/supplier' },
             { name: 'Yêu cầu mua hàng', path: '/quotes' },
             { name: 'Đơn mua hàng', path: '/orders' },
             { name: 'Trả hàng mua', path: '/returns' }

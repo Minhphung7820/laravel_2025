@@ -23,18 +23,13 @@ class Product extends Model
         'warranty'
     ];
 
-    public function stockProducts()
-    {
-        return $this->hasMany(StockProduct::class);
-    }
-
     public function attributes()
     {
-        return $this->belongsToMany(Attribute::class, 'stock_products')
-            ->withPivot(['attribute_first_id', 'attribute_second_id']);
+        return $this->hasMany(StockProduct::class)
+            ->where('product_type', 'variable');
     }
 
-    public function images()
+    public function galleryImages()
     {
         return $this->hasMany(ProductImage::class);
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ProductAttributesResource;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ProductVariantImage;
@@ -15,9 +16,74 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+
+    public function index(Request $request)
     {
-        //
+        $limit = $request->input('limit', 20);
+        $urlPrefix = url('/');
+
+        $query = DB::table('stock_products as st')
+            ->join('products as p', 'st.product_id', '=', 'p.id')
+            ->join('stocks as s', function ($join) {
+                $join->on('st.stock_id', '=', 's.id')
+                    ->where('s.is_default', 1);
+            })
+            ->leftJoin('units as u', 'st.unit_id', '=', 'u.id')
+            ->where(function ($q) {
+                $q->where(function ($q2) {
+                    $q2->where('p.type', 'variable')
+                        ->where('st.product_type', 'variable');
+                })->orWhere(function ($q2) {
+                    $q2->whereIn('p.type', ['single', 'combo'])
+                        ->where('st.product_type', 'root_stock');
+                });
+            });
+
+        // Filter theo tên, sku
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('p.name', 'like', "%{$search}%")
+                    ->orWhere('st.sku', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter theo status
+        if ($status = $request->input('status')) {
+            $query->where('p.status', $status);
+        }
+
+        // Chọn các cột cần thiết
+        $query->select([
+            'st.id',
+            'p.name as product_name',
+            DB::raw("CASE WHEN p.type = 'variable' THEN st.sku ELSE p.sku END AS sku"),
+            's.name as stock_name',
+            'p.type as product_type',
+            'st.purchase_price',
+            'st.sell_price',
+            'st.quantity',
+            'u.name as unit_name',
+            DB::raw("CASE
+                WHEN p.type = 'variable' THEN (
+                    SELECT CONCAT('$urlPrefix', pvi.image)
+                    FROM product_variant_images pvi
+                    WHERE pvi.stock_product_id = st.id
+                    LIMIT 1
+                )
+                ELSE CONCAT('$urlPrefix', p.image_cover)
+            END AS image"),
+            'p.status',
+        ])
+            ->orderByRaw("
+            CASE
+                WHEN p.type = 'variable' THEN st.created_at
+                ELSE p.created_at
+            END DESC
+        ");
+
+        $results = $query->paginate($limit);
+
+        return response()->json($results);
     }
 
     /**
@@ -202,7 +268,17 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $product = Product::with([
+            'attributes.attributeFirst.variant',
+            'attributes.attributeSecond.variant',
+            'attributes.variantImages',
+            'galleryImages'
+        ])->findOrFail($id);
+
+        return [
+            'product'         => $product,
+            'stock_products'  => ProductAttributesResource::collection($product->attributes ?? []),
+        ];
     }
 
     /**

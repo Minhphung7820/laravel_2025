@@ -52,7 +52,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         });
 
         Route::group(['prefix' => 'product'], function () {
+            Route::get('/list', [ProductController::class, 'index']);
             Route::post('/create', [ProductController::class, 'store']);
+            Route::get('/detail/{id}', [ProductController::class, 'show']);
         });
 
         Route::group(['prefix' => 'brand'], function () {

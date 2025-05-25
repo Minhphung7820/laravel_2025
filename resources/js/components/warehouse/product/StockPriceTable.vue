@@ -21,10 +21,10 @@
             <input type="number" v-model.number="localData[stock.id].qty" class="w-full px-1 py-1 text-xs border border-gray-300 rounded" />
           </td>
           <td class="border px-2 py-1 text-center">
-            <input type="number" v-model.number="localData[stock.id].cost_price" class="w-full px-1 py-1 text-xs border border-gray-300 rounded" />
+            <input type="number" v-model.number="localData[stock.id].purchase_price" class="w-full px-1 py-1 text-xs border border-gray-300 rounded" />
           </td>
           <td class="border px-2 py-1 text-center">
-            <input type="number" v-model.number="localData[stock.id].sale_price" class="w-full px-1 py-1 text-xs border border-gray-300 rounded" />
+            <input type="number" v-model.number="localData[stock.id].sell_price" class="w-full px-1 py-1 text-xs border border-gray-300 rounded" />
           </td>
           <td class="border px-2 py-1 text-center">
             <input type="number" v-model.number="localData[stock.id].max_discount_percent" class="w-full px-1 py-1 text-xs border border-gray-300 rounded" />
@@ -71,8 +71,8 @@ export default {
           // Vue 3: Gán trực tiếp là reactive, không cần this.$set
           this.localData[stock.id] = {
             qty: 0,
-            cost_price: 0,
-            sale_price: 0,
+            purchase_price: 0,
+            sell_price: 0,
             max_discount_percent: 0,
             max_increase_percent: 0,
             auto_calc: false,
@@ -91,9 +91,9 @@ export default {
   methods: {
     calcSalePrice(stockId) {
       const row = this.localData[stockId]
-      if (row.auto_calc && row.cost_price > 0) {
+      if (row.auto_calc && row.purchase_price > 0) {
         const percent = row.max_increase_percent || 0
-        row.sale_price = Math.round(row.cost_price * (1 + percent / 100))
+        row.sell_price = Math.round(row.purchase_price * (1 + percent / 100))
       }
     }
   }

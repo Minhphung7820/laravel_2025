@@ -18,7 +18,11 @@ class StockProduct extends Model
         'barcode',
         'sku',
         'unit_id',
-        'is_sale'
+        'is_sale',
+        'is_product_variant',
+        'max_discount_percent',
+        'max_increase_percent',
+        'auto_calc'
     ];
 
     public function stock()

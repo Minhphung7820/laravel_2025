@@ -28,8 +28,19 @@
     </div>
 
     <div>
-      <h2 class="font-semibold text-blue-600">Thông tin bảo hành mặc định</h2>
-      <input v-model="form.warranty" type="text" placeholder="Hình thức bảo hành" class="w-full mt-2 px-4 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <label class="block font-semibold">Hình thức bảo hành</label>
+      <select
+        v-model="form.warranty"
+        class="w-full mt-2 px-4 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        <option value="">-- Chọn bảo hành --</option>
+        <option value="6_months">6 tháng</option>
+        <option value="12_months">12 tháng</option>
+        <option value="1_year">1 năm</option>
+        <option value="5_years">5 năm</option>
+        <option value="10_years">10 năm</option>
+        <option value="21_years">21 năm</option>
+      </select>
     </div>
 
     <!-- Phân loại -->
@@ -109,7 +120,7 @@
           type="checkbox"
           v-model="form.has_variant"
           class="mr-2"
-          @change="form.type = form.has_variant ? 'variant' : 'single'"
+          @change="form.type = form.has_variant ? 'variable' : 'single'"
         />
         Sản phẩm có biến thể
       </label>
@@ -367,8 +378,79 @@ export default {
       this.form.gallery_images.splice(index, 1)
     },
     async handleSubmit() {
-      // Gửi request create hoặc update sản phẩm
+      try {
+        const formData = new FormData()
+
+        // Xử lý các field thông thường
+        Object.entries(this.form).forEach(([key, value]) => {
+          if (['cover_image', 'gallery_images', 'variants', 'stock_data'].includes(key)) return
+
+          if (typeof value === 'object' && value !== null) {
+            formData.append(key, JSON.stringify(value))
+          } else {
+            formData.append(key, value ?? '')
+          }
+        })
+
+        // Xử lý stock_data (đảm bảo là object → stringify)
+        const stockData = typeof this.form.stock_data === 'string'
+          ? this.form.stock_data
+          : JSON.stringify(this.form.stock_data)
+
+        formData.append('stock_data', stockData)
+
+        // Xử lý ảnh bìa
+        if (this.form.cover_image instanceof File) {
+          formData.append('cover_image', this.form.cover_image)
+        }
+
+        // Xử lý ảnh chính
+        this.form.gallery_images.forEach((file, index) => {
+          if (file instanceof File) {
+            formData.append(`gallery_images[${index}]`, file)
+          }
+        })
+
+        // Xử lý biến thể
+        this.form.variants.forEach((variant, i) => {
+          formData.append(`variants[${i}][stock_id]`, variant.stock_id)
+          formData.append(`variants[${i}][quantity]`, variant.quantity)
+          formData.append(`variants[${i}][sell_price]`, variant.sell_price)
+          formData.append(`variants[${i}][purchase_price]`, variant.purchase_price)
+          formData.append(`variants[${i}][sku]`, variant.sku || '')
+          formData.append(`variants[${i}][barcode]`, variant.barcode || '')
+          formData.append(`variants[${i}][is_sale]`, variant.is_sale)
+
+          if (variant.image instanceof File) {
+            formData.append(`variants[${i}][image]`, variant.image)
+          }
+
+          variant.attributes.forEach((attr, j) => {
+            formData.append(`variants[${i}][attributes][${j}][attribute_id]`, attr.attribute.id)
+            formData.append(`variants[${i}][attributes][${j}][value_id]`, attr.value.id)
+          })
+        })
+
+        const url = this.mode === 'update'
+          ? `/api/warehouse/product/update/${this.id}`
+          : '/api/warehouse/product/create'
+
+        // Nếu là update, Laravel có thể yêu cầu method PUT
+        if (this.mode === 'update') {
+          formData.append('_method', 'PUT')
+        }
+
+        const res = await window.axios.post(url, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+
+        alert('✔️ Thành công!')
+        this.$router.push('/warehouse/product')
+      } catch (err) {
+        console.error(err)
+        alert('❌ Thất bại khi gửi form.')
+      }
     },
-  },
+ },
 }
 </script>

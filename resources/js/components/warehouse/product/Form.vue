@@ -290,7 +290,8 @@ export default {
             purchase_price: 0,
             barcode: '',
             sku: '',
-            image: null
+            image: null,
+            is_sale: 1
           })
         })
       })

@@ -15,6 +15,7 @@
             <th class="px-4 py-2 font-semibold">Giá bán</th>
             <th class="px-4 py-2 font-semibold">SKU</th>
             <th class="px-4 py-2 font-semibold">Barcode</th>
+            <th class="px-4 py-2 font-semibold">Mở bán</th>
           </tr>
         </thead>
         <tbody>
@@ -42,19 +43,28 @@
             </td>
             <td class="px-4 py-2">{{ getStockName(variant.stock_id) }}</td>
              <td class="px-4 py-2">
-              <input v-model="variant.quantity" type="number" min="0" class="w-24 px-2 py-1 border rounded" />
+              <input v-model="variant.quantity" type="number" min="0" class="w-32 px-2 py-1 border rounded" />
             </td>
             <td class="px-4 py-2">
-              <input v-model="variant.purchase_price" type="number" min="0" class="w-24 px-2 py-1 border rounded" />
+              <input v-model="variant.purchase_price" type="number" min="0" class="w-32 px-2 py-1 border rounded" />
             </td>
             <td class="px-4 py-2">
-              <input v-model="variant.sell_price" type="number" min="0" class="w-24 px-2 py-1 border rounded" />
+              <input v-model="variant.sell_price" type="number" min="0" class="w-32 px-2 py-1 border rounded" />
             </td>
             <td class="px-4 py-2">
               <input v-model="variant.sku" type="text" class="w-32 px-2 py-1 border rounded" />
             </td>
             <td class="px-4 py-2">
               <input v-model="variant.barcode" type="text" class="w-32 px-2 py-1 border rounded" />
+            </td>
+            <td class="px-4 py-2 text-center align-middle">
+              <input
+                type="checkbox"
+                v-model="variant.is_sale"
+                true-value="1"
+                false-value="0"
+                class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+              />
             </td>
           </tr>
         </tbody>

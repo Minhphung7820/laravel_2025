@@ -148,8 +148,9 @@
     <!-- Lưới biến thể -->
     <VariantGrid
       v-if="form.has_variant && form.category_id"
-     :variants="form.variants"
+      :variants="form.variants"
       :stocks="stocks"
+      :preview-attributes="previewAttributes"
     />
     <!-- Submit -->
     <button @click="handleSubmit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded shadow">
@@ -208,6 +209,7 @@ export default {
       variantAttributes: [], // từ API
       selectedAttributes: [],
       selectedAttributeValues: {}, // { [attrId]: [giá trị đã chọn] }
+      previewAttributes: []
     }
   },
   watch: {
@@ -258,9 +260,15 @@ export default {
         alert("Vui lòng chọn ít nhất 1 giá trị mỗi thuộc tính.")
         return
       }
-
+      this.previewAttributes = selected.map(item => item.attr.title)
       // Sinh tổ hợp các dòng
-      const combinations = this.generateCombinations(selected.map(item => item.values))
+      const combinations = this.generateCombinations(
+        selected.map(item => ({
+          attribute: item.attr,
+          values: item.values
+        }))
+      )
+
       const stockVariants = []
 
       combinations.forEach(combo => {
@@ -268,7 +276,10 @@ export default {
           stockVariants.push({
             stock_id: stock.id,
             attributes: combo,
-            price: 0,
+            quantity: 0,
+            sell_price: 0,
+            purchase_price: 0,
+            barcode: '',
             sku: '',
             image: null
           })
@@ -276,16 +287,27 @@ export default {
       })
 
       this.form.variants = stockVariants
+      console.log(this.form.variants);
+
     },
-    generateCombinations(arrays) {
-      if (arrays.length === 1) return arrays[0].map(i => [i])
+    generateCombinations(attributeValueSets) {
+      if (!attributeValueSets.length) return []
+
       const result = []
-      const rest = this.generateCombinations(arrays.slice(1))
-      for (const item of arrays[0]) {
-        for (const r of rest) {
-          result.push([item, ...r])
+
+      const helper = (index, current) => {
+        const currentSet = attributeValueSets[index]
+        for (const value of currentSet.values) {
+          const next = [...current, { attribute: currentSet.attribute, value }]
+          if (index === attributeValueSets.length - 1) {
+            result.push(next)
+          } else {
+            helper(index + 1, next)
+          }
         }
       }
+
+      helper(0, [])
       return result
     },
     async loadInitialData() {

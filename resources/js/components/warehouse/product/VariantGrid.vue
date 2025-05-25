@@ -19,22 +19,22 @@
         </thead>
         <tbody>
           <tr v-for="(variant, index) in variants" :key="index" class="hover:bg-gray-50">
-            <td v-for="attr in variant.attributes" :key="attr.id" class="px-4 py-2">{{ attr.title }}</td>
+            <td v-for="attr in variant.attributes" :key="attr.id" class="px-4 py-2">{{ attr.value.title }}</td>
             <td class="px-4 py-2">{{ getStockName(variant.stock_id) }}</td>
              <td class="px-4 py-2">
-              <input v-model="variant.price" type="number" min="0" class="w-24 px-2 py-1 border rounded" />
+              <input v-model="variant.quantity" type="number" min="0" class="w-24 px-2 py-1 border rounded" />
             </td>
             <td class="px-4 py-2">
-              <input v-model="variant.price" type="number" min="0" class="w-24 px-2 py-1 border rounded" />
+              <input v-model="variant.purchase_price" type="number" min="0" class="w-24 px-2 py-1 border rounded" />
             </td>
             <td class="px-4 py-2">
-              <input v-model="variant.price" type="number" min="0" class="w-24 px-2 py-1 border rounded" />
-            </td>
-            <td class="px-4 py-2">
-              <input v-model="variant.sku" type="text" class="w-32 px-2 py-1 border rounded" />
+              <input v-model="variant.sell_price" type="number" min="0" class="w-24 px-2 py-1 border rounded" />
             </td>
             <td class="px-4 py-2">
               <input v-model="variant.sku" type="text" class="w-32 px-2 py-1 border rounded" />
+            </td>
+            <td class="px-4 py-2">
+              <input v-model="variant.barcode" type="text" class="w-32 px-2 py-1 border rounded" />
             </td>
             <td class="px-4 py-2">
               <input type="file" @change="onImageChange($event, index)" accept="image/*" class="mb-1" />
@@ -60,13 +60,8 @@ export default {
     stocks: {
       type: Array,
       required: true
-    }
-  },
-  computed: {
-    previewAttributes() {
-      const first = this.variants[0]
-      return first ? first.attributes.map(attr => attr.attr_title || attr.title) : []
-    }
+    },
+    previewAttributes: Array
   },
   methods: {
     getStockName(stockId) {

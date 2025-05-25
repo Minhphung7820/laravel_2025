@@ -54,7 +54,7 @@ class SupplierController extends Controller
                 'string',
                 'max:20',
                 \Illuminate\Validation\Rule::unique('customers', 'phone')
-                    ->where(fn ($query) => $query->where('is_customer', 0)),
+                    ->where(fn($query) => $query->where('is_customer', 0)),
             ],
             'email'            => 'nullable|email|max:255',
             'birthday'         => 'nullable|date',

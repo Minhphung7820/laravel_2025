@@ -26,8 +26,19 @@ class Product extends Model
 
     protected $appends = [
         'status_text',
-        'type_text'
+        'type_text',
+        'image_cover_url'
     ];
+
+    public function stockData()
+    {
+        return $this->hasMany(StockProduct::class, 'product_id')->where('product_type', 'root_stock');
+    }
+
+    public function getImageCoverUrlAttribute()
+    {
+        return $this->image_cover ? url($this->image_cover) : null;
+    }
 
     public function getStatusTextAttribute()
     {

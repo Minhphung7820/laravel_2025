@@ -114,7 +114,7 @@
     </div>
 
     <!-- Biến thể -->
-    <div v-if="showVariantCheckbox">
+    <div v-if="showVariantCheckbox || form.type !== 'combo'">
       <label class="inline-flex items-center">
         <input
           type="checkbox"
@@ -170,6 +170,7 @@ export default {
   name: 'ProductForm',
   components: { VariantGrid, StockPriceTable },
   props: {
+    type : { type: String, default: 'single' },
     mode: { type: String, default: 'create' },
     id: { type: [Number, null], default: null },
   },
@@ -235,17 +236,10 @@ export default {
       deep: true
     }
   },
-  mounted() {
-    const path = this.$route.path
-
-    if (path.includes('/warehouse/product/create/combo')) {
-      this.form.type = 'combo'
-    } else if (path.includes('/warehouse/product/create/variable')) {
-      this.form.type = 'single'
-    }
-
+  async mounted() {
+    this.form.type = this.type
     this.loadInitialData()
-    if (this.mode === 'update' && this.id) this.loadProduct()
+    if (this.mode === 'update' && this.id) await this.loadProduct()
   },
   methods: {
     async checkAndLoadVariants() {
@@ -359,7 +353,7 @@ export default {
       }
     },
     async loadProduct() {
-      // Load dữ liệu sản phẩm theo ID để edit
+
     },
     handleCoverImage(e) {
       const file = e.target.files[0]

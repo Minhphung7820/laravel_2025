@@ -287,7 +287,8 @@ class ProductController extends Controller
             'attributes.attributeFirst.variant',
             'attributes.attributeSecond.variant',
             'attributes.variantImages',
-            'galleryImages'
+            'galleryImages',
+            'stockData'
         ])->findOrFail($id);
 
         return [

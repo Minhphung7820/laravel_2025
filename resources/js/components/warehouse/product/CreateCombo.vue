@@ -1,15 +1,13 @@
 <template>
-
+    <div class="p-4 bg-white rounded-xl shadow-md">
+      <Form mode="create" :type="'combo'" />
+    </div>
 </template>
 
 <script>
+import Form from './Form.vue'
 
 export default {
-  name: 'ProductForm',
+  components: { Form },
 }
 </script>
-
-<style>
-
-</style>
-

@@ -179,10 +179,15 @@ export default {
       return this.$route.path.includes('/warehouse/product/create/variable')
     },
     coverImagePreview() {
-      return this.form.cover_image ? URL.createObjectURL(this.form.cover_image) : null
+      if (!this.form.cover_image) return null
+      return typeof this.form.cover_image === 'string'
+        ? this.form.cover_image
+        : URL.createObjectURL(this.form.cover_image)
     },
     galleryImagePreviews() {
-      return this.form.gallery_images.map(file => URL.createObjectURL(file))
+      return this.form.gallery_images.map(file =>
+        typeof file === 'string' ? file : URL.createObjectURL(file)
+      )
     },
   },
   data() {
@@ -238,7 +243,7 @@ export default {
   },
   async mounted() {
     this.form.type = this.type
-    this.loadInitialData()
+    await this.loadInitialData()
     if (this.mode === 'update' && this.id) await this.loadProduct()
   },
   methods: {
@@ -259,9 +264,11 @@ export default {
       }
     },
     generateVariantGrid() {
-      const selected = this.selectedAttributes.map(attr => ({
+      const selected = this.selectedAttributes
+      .filter(attr => attr && attr.id && this.selectedAttributeValues[attr.id]) // Lọc undefined/null
+      .map(attr => ({
         attr,
-        values: this.selectedAttributeValues[attr.id]
+        values: this.selectedAttributeValues[attr.id] || []
       }))
 
       // Nếu chưa chọn đủ (ít nhất 1 giá trị mỗi thuộc tính), không generate
@@ -353,7 +360,91 @@ export default {
       }
     },
     async loadProduct() {
+      try {
+        const res = await fetch(`/api/warehouse/product/detail/${this.id}`)
+        const data = await res.json()
+        const product = data.product
 
+        // Gán data cơ bản
+        Object.assign(this.form, {
+          name: product.name,
+          sku: product.sku,
+          barcode: product.barcode,
+          has_serial: Boolean(product.has_serial),
+          warranty: product.warranty,
+          unit_id: product.unit_id,
+          brand_id: product.brand_id,
+          category_id: product.category_id,
+          supplier_id: product.supplier_id,
+          description: product.description || '',
+          type: product.type,
+          has_variant: Boolean(product.have_variant),
+        })
+
+        // Ảnh bìa (dùng ảnh URL để preview)
+        if (product.image_cover_url) {
+          this.form.cover_image = product.image_cover_url
+        }
+
+        // Gallery (convert mỗi ảnh thành URL để preview)
+        if (Array.isArray(product.gallery_images)) {
+          this.form.gallery_images = product.gallery_images.map(img => img.image_url)
+        }
+
+        // Gán dữ liệu kho gốc (cho StockPriceTable)
+        this.form.stock_data = product.stock_data || []
+
+        // Gán biến thể cho VariantGrid
+        this.form.variants = (data.stock_products || []).map(v => ({
+          stock_id: v.stock_id,
+          quantity: v.quantity,
+          sell_price: v.sell_price,
+          purchase_price: v.purchase_price,
+          sku: v.sku || '',
+          barcode: v.barcode || '',
+          is_sale: v.is_sale,
+          image: v.image_url || null,
+          attributes: v.attributes.map(attr => ({
+            attribute: {
+              id: attr.value.variant_id,
+              title: attr.attribute?.title || '',
+            },
+            value: {
+              id: attr.value.id,
+              title: attr.value.title,
+              variant_id: attr.value.variant_id,
+            }
+          }))
+        }))
+
+        // Gán selectedAttributes & selectedAttributeValues để dựng lại VariantGrid nếu cần
+        if (this.form.has_variant && product.attributes?.length) {
+          this.selectedAttributes = [...new Map(product.attributes.map(a => [a.variant_id, a.variant])).values()]
+
+          this.selectedAttributeValues = {}
+          product.attributes.forEach(attr => {
+            if (!this.selectedAttributeValues[attr.variant_id]) {
+              this.selectedAttributeValues[attr.variant_id] = []
+            }
+
+            if (!this.selectedAttributeValues[attr.variant_id].some(v => v.id === attr.id)) {
+              this.selectedAttributeValues[attr.variant_id].push({
+                id: attr.id,
+                title: attr.title
+              })
+            }
+          })
+
+          this.previewAttributes = this.selectedAttributes
+            .filter(attr => attr && attr.title)
+            .map(attr => attr.title)
+        }
+           console.log(this.form.variants);
+
+      } catch (err) {
+        console.error('Lỗi khi load product:', err)
+        alert('❌ Không thể tải dữ liệu sản phẩm')
+      }
     },
     handleCoverImage(e) {
       const file = e.target.files[0]

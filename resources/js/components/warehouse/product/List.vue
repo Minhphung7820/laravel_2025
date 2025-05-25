@@ -102,7 +102,7 @@ export default {
       // this.$route.push(`/warehouse/product/edit/${item.id}/${item.type}`)
     },
     onEdit(item) {
-      this.$router.push(`/warehouse/product/edit/${item.id}/${item.product_type}`)
+      this.$router.push(`/warehouse/product/edit/${item.product_id}/${item.product_type}`)
     },
     onDelete(item) {
       if (confirm(`Xoá sản phẩm ${item.product_name}?`)) {

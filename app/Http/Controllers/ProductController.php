@@ -55,6 +55,7 @@ class ProductController extends Controller
         // Chọn các cột cần thiết
         $query->select([
             'st.id',
+            'st.product_id',
             'p.name as product_name',
             DB::raw("CASE WHEN p.type = 'variable' THEN st.sku ELSE p.sku END AS sku"),
             's.name as stock_name',

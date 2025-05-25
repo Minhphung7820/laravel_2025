@@ -135,14 +135,6 @@
           </label>
         </div>
       </div>
-
-      <button
-        class="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700"
-        @click="generateVariantGrid"
-        :disabled="selectedAttributes.length === 0"
-      >
-        Xác nhận và tạo lưới biến thể
-      </button>
     </div>
 
     <!-- Lưới biến thể -->
@@ -218,6 +210,18 @@ export default {
     },
     'form.has_variant'(val) {
       this.checkAndLoadVariants()
+    },
+    selectedAttributes: {
+      handler() {
+        this.generateVariantGrid()
+      },
+      deep: true
+    },
+    selectedAttributeValues: {
+      handler() {
+        this.generateVariantGrid()
+      },
+      deep: true
     }
   },
   mounted() {
@@ -255,13 +259,18 @@ export default {
         values: this.selectedAttributeValues[attr.id]
       }))
 
-      // Tối thiểu 1 giá trị mỗi thuộc tính
-      if (selected.some(item => item.values.length === 0)) {
-        alert("Vui lòng chọn ít nhất 1 giá trị mỗi thuộc tính.")
+      // Nếu chưa chọn đủ (ít nhất 1 giá trị mỗi thuộc tính), không generate
+      if (
+        selected.length === 0 ||
+        selected.some(item => !item.values || item.values.length === 0)
+      ) {
+        this.form.variants = []
+        this.previewAttributes = []
         return
       }
+
       this.previewAttributes = selected.map(item => item.attr.title)
-      // Sinh tổ hợp các dòng
+
       const combinations = this.generateCombinations(
         selected.map(item => ({
           attribute: item.attr,
@@ -287,8 +296,6 @@ export default {
       })
 
       this.form.variants = stockVariants
-      console.log(this.form.variants);
-
     },
     generateCombinations(attributeValueSets) {
       if (!attributeValueSets.length) return []

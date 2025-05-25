@@ -230,7 +230,7 @@ export default {
     if (path.includes('/warehouse/product/create/combo')) {
       this.form.type = 'combo'
     } else if (path.includes('/warehouse/product/create/variable')) {
-      this.form.type = 'single' // mặc định là 'single'
+      this.form.type = 'single'
     }
 
     this.loadInitialData()

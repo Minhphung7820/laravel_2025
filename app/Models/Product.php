@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Constants\Common;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
@@ -22,6 +23,21 @@ class Product extends Model
         'supplier_id',
         'warranty'
     ];
+
+    protected $appends = [
+        'status_text',
+        'type_text'
+    ];
+
+    public function getStatusTextAttribute()
+    {
+        return Common::PRODUCT_STATUS[$this->status] ?? null;
+    }
+
+    public function getTypeTextAttribute()
+    {
+        return Common::PRODUCT_TYPE[$this->type] ?? null;
+    }
 
     public function attributes()
     {

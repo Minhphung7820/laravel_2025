@@ -64,15 +64,30 @@ class ProductController extends Controller
             'st.quantity',
             'u.name as unit_name',
             DB::raw("CASE
-                WHEN p.type = 'variable' THEN (
-                    SELECT CONCAT('$urlPrefix', pvi.image)
-                    FROM product_variant_images pvi
-                    WHERE pvi.stock_product_id = st.id
-                    LIMIT 1
-                )
-                ELSE CONCAT('$urlPrefix', p.image_cover)
-            END AS image"),
+        WHEN p.type = 'variable' THEN (
+            SELECT CONCAT('$urlPrefix', pvi.image)
+            FROM product_variant_images pvi
+            WHERE pvi.stock_product_id = st.id
+            LIMIT 1
+        )
+        ELSE CONCAT('$urlPrefix', p.image_cover)
+    END AS image"),
             'p.status',
+
+            // ✅ Thêm field product_type_text
+            DB::raw("CASE
+        WHEN p.type = 'variable' THEN 'Sản phẩm biến thể'
+        WHEN p.type = 'single' THEN 'Sản phẩm đơn'
+        WHEN p.type = 'combo' THEN 'Sản phẩm combo'
+        ELSE 'Không xác định'
+    END AS product_type_text"),
+
+            // ✅ Thêm field status_text
+            DB::raw("CASE
+        WHEN p.status = 'pending' THEN 'Đang chờ'
+        WHEN p.status = 'approved' THEN 'Đã duyệt'
+        ELSE 'Không rõ'
+    END AS status_text"),
         ])
             ->orderByRaw("
             CASE

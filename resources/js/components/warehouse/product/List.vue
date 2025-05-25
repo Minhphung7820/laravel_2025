@@ -67,12 +67,12 @@ export default {
         { label: 'Ảnh', key: 'image', type: 'image_file' },
         { label: 'SKU', key: 'sku' },
         { label: 'Kho', key: 'stock_name' },
-        { label: 'Loại', key: 'product_type' },
+        { label: 'Loại', key: 'product_type_text' },
         { label: 'Giá nhập', key: 'purchase_price' },
         { label: 'Giá bán', key: 'sell_price' },
         { label: 'Tồn kho', key: 'quantity' },
         { label: 'Đơn vị', key: 'unit_name' },
-        { label: 'Trạng thái', key: 'status' },
+        { label: 'Trạng thái', key: 'status_text' },
       ]
     }
   },

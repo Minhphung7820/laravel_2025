@@ -39,13 +39,13 @@ class Customer extends Model
     ];
 
     protected $casts = [
-        'birthday' => 'date',
+        'birthday'        => 'date',
         'last_order_date' => 'date',
-        'vip_at' => 'date',
-        'tags' => 'array',
-        'debt_amount' => 'decimal:2',
-        'credit_limit' => 'decimal:2',
-        'total_spent' => 'decimal:2',
+        'vip_at'          => 'date',
+        'tags'            => 'array',
+        'debt_amount'     => 'decimal:2',
+        'credit_limit'    => 'decimal:2',
+        'total_spent'     => 'decimal:2',
     ];
 
     protected $appends = ['avatar_url'];

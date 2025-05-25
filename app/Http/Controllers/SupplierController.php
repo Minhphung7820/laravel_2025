@@ -48,28 +48,28 @@ class SupplierController extends Controller
         }
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name'     => 'required|string|max:255',
             'phone'    => [
                 'required',
                 'string',
                 'max:20',
                 \Illuminate\Validation\Rule::unique('customers', 'phone')
-                    ->where(fn($query) => $query->where('is_customer', 0)),
+                    ->where(fn ($query) => $query->where('is_customer', 0)),
             ],
-            'email' => 'nullable|email|max:255',
-            'birthday' => 'nullable|date',
-            'gender' => 'nullable|in:male,female,other,unknown',
-            'address' => 'nullable|string|max:255',
-            'type' => 'in:individual,company',
-            'status' => 'in:active,inactive,blacklist',
+            'email'            => 'nullable|email|max:255',
+            'birthday'         => 'nullable|date',
+            'gender'           => 'nullable|in:male,female,other,unknown',
+            'address'          => 'nullable|string|max:255',
+            'type'             => 'in:individual,company',
+            'status'           => 'in:active,inactive,blacklist',
             'assigned_user_id' => 'nullable|exists:users,id',
-            'facebook_url' => 'nullable|string|max:255',
-            'zalo_phone' => 'nullable|string|max:20',
-            'tax_code' => 'nullable|string|max:100',
-            'debt_amount' => 'nullable|numeric',
-            'credit_limit' => 'nullable|numeric',
-            'note' => 'nullable|string',
-            'avatar' => 'nullable|image|max:2048'
+            'facebook_url'     => 'nullable|string|max:255',
+            'zalo_phone'       => 'nullable|string|max:20',
+            'tax_code'         => 'nullable|string|max:100',
+            'debt_amount'      => 'nullable|numeric',
+            'credit_limit'     => 'nullable|numeric',
+            'note'             => 'nullable|string',
+            'avatar'           => 'nullable|image|max:2048'
         ]);
 
         $validated['total_orders'] = 0;
@@ -84,7 +84,7 @@ class SupplierController extends Controller
 
         return response()->json([
             'message' => 'Tạo nhà cung cấp thành công',
-            'data' => $supplier
+            'data'    => $supplier
         ], 201);
     }
 
@@ -116,7 +116,7 @@ class SupplierController extends Controller
     {
         $supplier = Customer::findOrFail($id);
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name'  => 'required|string|max:255',
             'phone' => [
                 'required',
                 'string',
@@ -127,21 +127,21 @@ class SupplierController extends Controller
                     })
                     ->ignore($supplier->id),
             ],
-            'email' => 'nullable|email',
-            'birthday' => 'nullable|date',
-            'gender' => 'nullable|in:male,female,other,unknown',
-            'address' => 'nullable|string|max:255',
-            'type' => 'required|in:individual,company',
-            'source' => 'nullable|string|max:255',
-            'status' => 'required|in:active,inactive,blacklist',
+            'email'            => 'nullable|email',
+            'birthday'         => 'nullable|date',
+            'gender'           => 'nullable|in:male,female,other,unknown',
+            'address'          => 'nullable|string|max:255',
+            'type'             => 'required|in:individual,company',
+            'source'           => 'nullable|string|max:255',
+            'status'           => 'required|in:active,inactive,blacklist',
             'assigned_user_id' => 'nullable|exists:users,id',
-            'facebook_url' => 'nullable|string|max:255',
-            'zalo_phone' => 'nullable|string|max:20',
-            'tax_code' => 'nullable|string|max:50',
-            'debt_amount' => 'nullable|numeric|min:0',
-            'credit_limit' => 'nullable|numeric|min:0',
-            'note' => 'nullable|string',
-            'avatar' => 'nullable|image|max:2048', // 2MB
+            'facebook_url'     => 'nullable|string|max:255',
+            'zalo_phone'       => 'nullable|string|max:20',
+            'tax_code'         => 'nullable|string|max:50',
+            'debt_amount'      => 'nullable|numeric|min:0',
+            'credit_limit'     => 'nullable|numeric|min:0',
+            'note'             => 'nullable|string',
+            'avatar'           => 'nullable|image|max:2048', // 2MB
         ]);
 
         // Nếu có file ảnh mới được gửi lên
@@ -160,7 +160,7 @@ class SupplierController extends Controller
         $supplier->update($validated);
 
         return response()->json([
-            'message' => 'Cập nhật thành công!',
+            'message'  => 'Cập nhật thành công!',
             'customer' => $supplier
         ]);
     }

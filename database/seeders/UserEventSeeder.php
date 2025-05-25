@@ -24,9 +24,9 @@ class UserEventSeeder extends Seeder
                 // Simulate video views (0–10)
                 for ($i = 0; $i < rand(0, 10); $i++) {
                     $events[] = [
-                        'user_id' => $user->id,
+                        'user_id'    => $user->id,
                         'event_type' => 'view_video',
-                        'metadata' => json_encode(['video_id' => rand(1, 1000)]),
+                        'metadata'   => json_encode(['video_id' => rand(1, 1000)]),
                         'created_at' => $created->copy()->addMinutes(rand(1, 1440)),
                     ];
                 }
@@ -34,9 +34,9 @@ class UserEventSeeder extends Seeder
                 // Simulate comment (0–3)
                 if (rand(0, 100) < 50) {
                     $events[] = [
-                        'user_id' => $user->id,
+                        'user_id'    => $user->id,
                         'event_type' => 'comment',
-                        'metadata' => json_encode(['post_id' => rand(1, 500)]),
+                        'metadata'   => json_encode(['post_id' => rand(1, 500)]),
                         'created_at' => $created->copy()->addHours(rand(1, 48)),
                     ];
                 }
@@ -44,9 +44,9 @@ class UserEventSeeder extends Seeder
                 // Like/share (random)
                 if (rand(0, 100) < 70) {
                     $events[] = [
-                        'user_id' => $user->id,
+                        'user_id'    => $user->id,
                         'event_type' => rand(0, 1) ? 'like' : 'share',
-                        'metadata' => json_encode(['target_id' => rand(1, 300)]),
+                        'metadata'   => json_encode(['target_id' => rand(1, 300)]),
                         'created_at' => $created->copy()->addHours(rand(1, 48)),
                     ];
                 }
@@ -54,9 +54,9 @@ class UserEventSeeder extends Seeder
                 // Login again 2–7 ngày sau
                 if (rand(0, 100) < 60) {
                     $events[] = [
-                        'user_id' => $user->id,
+                        'user_id'    => $user->id,
                         'event_type' => 'login',
-                        'metadata' => null,
+                        'metadata'   => null,
                         'created_at' => $created->copy()->addDays(rand(2, 7))->addHours(rand(0, 23)),
                     ];
                 }

@@ -16,9 +16,9 @@ class CrmSeeder extends Seeder
         $types = ['single', 'combo', 'variable'];
         for ($i = 1; $i <= 10; $i++) {
             $products[] = [
-                'id' => $i,
-                'name' => 'Product ' . $i,
-                'type' => $types[array_rand($types)],
+                'id'         => $i,
+                'name'       => 'Product ' . $i,
+                'type'       => $types[array_rand($types)],
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
@@ -59,33 +59,33 @@ class CrmSeeder extends Seeder
             foreach ($stocks as $stock) {
                 if ($product['type'] !== 'variable') {
                     $stockProducts[] = [
-                        'id' => $spId++,
-                        'stock_id' => $stock['id'],
-                        'product_id' => $product['id'],
-                        'quantity' => rand(10, 100),
-                        'sell_price' => rand(100000, 500000),
-                        'purchase_price' => rand(80000, 400000),
-                        'product_type' => $product['type'],
-                        'attribute_first_id' => null,
+                        'id'                  => $spId++,
+                        'stock_id'            => $stock['id'],
+                        'product_id'          => $product['id'],
+                        'quantity'            => rand(10, 100),
+                        'sell_price'          => rand(100000, 500000),
+                        'purchase_price'      => rand(80000, 400000),
+                        'product_type'        => $product['type'],
+                        'attribute_first_id'  => null,
                         'attribute_second_id' => null,
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        'created_at'          => now(),
+                        'updated_at'          => now(),
                     ];
                 } else {
                     foreach (range(1, 6) as $colorId) {
                         foreach (range(7, 12) as $sizeId) {
                             $stockProducts[] = [
-                                'id' => $spId++,
-                                'stock_id' => $stock['id'],
-                                'product_id' => $product['id'],
-                                'quantity' => rand(1, 20),
-                                'sell_price' => rand(150000, 600000),
-                                'purchase_price' => rand(100000, 500000),
-                                'product_type' => $product['type'],
-                                'attribute_first_id' => $colorId,
+                                'id'                  => $spId++,
+                                'stock_id'            => $stock['id'],
+                                'product_id'          => $product['id'],
+                                'quantity'            => rand(1, 20),
+                                'sell_price'          => rand(150000, 600000),
+                                'purchase_price'      => rand(100000, 500000),
+                                'product_type'        => $product['type'],
+                                'attribute_first_id'  => $colorId,
                                 'attribute_second_id' => $sizeId,
-                                'created_at' => now(),
-                                'updated_at' => now(),
+                                'created_at'          => now(),
+                                'updated_at'          => now(),
                             ];
                         }
                     }
@@ -108,33 +108,33 @@ class CrmSeeder extends Seeder
             for ($o = 0; $o < $orderCount; $o++) {
                 $transactionDate = Carbon::now()->subDays(rand(0, 60));
                 $orders[] = [
-                    'id' => $orderId,
-                    'code' => 'ORD-' . Str::upper(Str::random(8)),
+                    'id'               => $orderId,
+                    'code'             => 'ORD-' . Str::upper(Str::random(8)),
                     'transaction_type' => $transactionTypes[array_rand($transactionTypes)],
                     'transaction_date' => $transactionDate,
-                    'user_id' => $userId,
-                    'status' => $statuses[array_rand($statuses)],
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'user_id'          => $userId,
+                    'status'           => $statuses[array_rand($statuses)],
+                    'created_at'       => now(),
+                    'updated_at'       => now(),
                 ];
 
                 $itemCount = rand(1, 4);
                 for ($i = 0; $i < $itemCount; $i++) {
                     $sp = $stockProducts[array_rand($stockProducts)];
                     $items[] = [
-                        'id' => $itemId++,
-                        'order_id' => $orderId,
-                        'product_id' => $sp['product_id'],
-                        'stock_id' => $sp['stock_id'],
-                        'stock_product_id' => $sp['id'],
-                        'attribute_first_id' => $sp['attribute_first_id'],
+                        'id'                  => $itemId++,
+                        'order_id'            => $orderId,
+                        'product_id'          => $sp['product_id'],
+                        'stock_id'            => $sp['stock_id'],
+                        'stock_product_id'    => $sp['id'],
+                        'attribute_first_id'  => $sp['attribute_first_id'],
                         'attribute_second_id' => $sp['attribute_second_id'],
-                        'product_type' => $sp['product_type'],
-                        'quantity' => rand(1, 5),
-                        'sell_price' => $sp['sell_price'],
-                        'purchase_price' => $sp['purchase_price'],
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        'product_type'        => $sp['product_type'],
+                        'quantity'            => rand(1, 5),
+                        'sell_price'          => $sp['sell_price'],
+                        'purchase_price'      => $sp['purchase_price'],
+                        'created_at'          => now(),
+                        'updated_at'          => now(),
                     ];
                 }
 

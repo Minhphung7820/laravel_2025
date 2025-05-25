@@ -99,10 +99,10 @@ export default {
       this.dropdownId = this.dropdownId === id ? null : id
     },
     onView(item) {
-      alert(`Xem sản phẩm: ${item.product_name}`)
+      // this.$route.push(`/warehouse/product/edit/${item.id}/${item.type}`)
     },
     onEdit(item) {
-      alert(`Sửa sản phẩm: ${item.product_name}`)
+      this.$router.push(`/warehouse/product/edit/${item.id}/${item.product_type}`)
     },
     onDelete(item) {
       if (confirm(`Xoá sản phẩm ${item.product_name}?`)) {

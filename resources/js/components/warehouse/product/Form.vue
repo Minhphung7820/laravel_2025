@@ -3,7 +3,6 @@
     <h1 class="text-2xl font-bold">
       {{ mode === 'update' ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm mới' }}
     </h1>
-
     <!-- Thông tin chung -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div>
@@ -19,14 +18,12 @@
         <input v-model="form.barcode" type="text" placeholder="Vui lòng nhập" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
       </div>
     </div>
-
     <div>
       <label class="inline-flex items-center">
         <input type="checkbox" v-model="form.has_serial" class="mr-2" />
         Sản phẩm có mã serial Serial/IMEL
       </label>
     </div>
-
     <div>
       <label class="block font-semibold">Hình thức bảo hành</label>
       <select
@@ -42,7 +39,6 @@
         <option value="21_years">21 năm</option>
       </select>
     </div>
-
     <!-- Phân loại -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div>
@@ -67,7 +63,6 @@
         </select>
       </div>
     </div>
-
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
         <label class="block font-semibold">Nhà cung cấp *</label>
@@ -77,19 +72,16 @@
         </select>
       </div>
     </div>
-
     <!-- Kho hàng -->
     <StockPriceTable
       v-model="form.stock_data"
       :stocks="stocks"
     />
-
     <!-- Mô tả -->
     <div>
       <label class="block font-semibold">Mô tả</label>
       <textarea v-model="form.description" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm min-h-[100px] focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
     </div>
-
     <!-- Ảnh -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
@@ -100,7 +92,6 @@
           <button @click="removeCoverImage" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs">×</button>
         </div>
       </div>
-
       <div>
         <label class="block font-semibold">Ảnh chính</label>
         <input type="file" multiple @change="handleGalleryImages" accept="image/*" class="w-full border border-gray-300 px-4 py-2 rounded" />
@@ -112,7 +103,6 @@
         </div>
       </div>
     </div>
-
     <!-- Biến thể -->
     <div v-if="showVariantCheckbox || form.type !== 'combo'">
       <label class="inline-flex items-center">
@@ -125,7 +115,6 @@
         Sản phẩm có biến thể
       </label>
     </div>
-
     <!-- Chọn thuộc tính và giá trị con -->
     <div v-if="form.has_variant && variantAttributes.length" class="space-y-4">
       <h2 class="font-semibold text-blue-600">Chọn thuộc tính biến thể (tối đa 2)</h2>
@@ -135,19 +124,18 @@
             type="checkbox"
             :value="attr"
             v-model="selectedAttributes"
-            :disabled="!selectedAttributes.includes(attr) && selectedAttributes.length >= 2"
+            :disabled="!isAttrSelected(attr) && selectedAttributes.length >= 2"
           />
           {{ attr.title }}
         </label>
-        <div v-if="selectedAttributes.includes(attr)" class="ml-4 mt-2">
+        <div v-if="isAttrSelected(attr)" class="ml-4 mt-2">
           <label v-for="opt in attr.attributes" :key="opt.id" class="inline-flex items-center mr-3">
-            <input type="checkbox" :value="opt" v-model="selectedAttributeValues[attr.id]" />
+            <input type="checkbox" :value="Number(opt.id)" v-model="selectedAttributeValues[attr.id]" />
             <span class="ml-1">{{ opt.title }}</span>
           </label>
         </div>
       </div>
     </div>
-
     <!-- Lưới biến thể -->
     <VariantGrid
       v-if="form.has_variant && form.category_id"
@@ -217,25 +205,29 @@ export default {
       stocks: [],
       variantAttributes: [], // từ API
       selectedAttributes: [],
-      selectedAttributeValues: {}, // { [attrId]: [giá trị đã chọn] }
-      previewAttributes: []
+      selectedAttributeValues: [], // { [attrId]: [giá trị đã chọn] }
+      previewAttributes: [],
+      isMappingVariantData: false,
     }
   },
   watch: {
     'form.category_id'(val) {
-      this.checkAndLoadVariants()
+      this.checkAndLoadVariants(true)
     },
     'form.has_variant'(val) {
-      this.checkAndLoadVariants()
+      this.checkAndLoadVariants(true)
     },
     selectedAttributes: {
       handler() {
+        if (this.isMappingVariantData) return
         this.generateVariantGrid()
       },
       deep: true
     },
     selectedAttributeValues: {
       handler() {
+        console.log(12);
+        if (this.isMappingVariantData) return
         this.generateVariantGrid()
       },
       deep: true
@@ -247,16 +239,17 @@ export default {
     if (this.mode === 'update' && this.id) await this.loadProduct()
   },
   methods: {
-    async checkAndLoadVariants() {
+    async checkAndLoadVariants(isMappingData = false) {
       if (this.form.has_variant && this.form.category_id) {
         const res = await fetch(`/api/warehouse/category/${this.form.category_id}/attributes`)
         this.variantAttributes = await res.json()
-
-        // Khởi tạo cấu trúc chọn giá trị
-        this.selectedAttributeValues = {}
-        this.variantAttributes.forEach(attr => {
-          this.selectedAttributeValues[attr.id] = []
-        })
+        // ⚠️ Chỉ reset nếu KHÔNG phải đang load lại để mapping data
+        if (!isMappingData) {
+          this.selectedAttributeValues = {}
+          this.variantAttributes.forEach(attr => {
+            this.selectedAttributeValues[attr.id] = []
+          })
+        }
       } else {
         this.variantAttributes = []
         this.selectedAttributes = []
@@ -264,14 +257,14 @@ export default {
       }
     },
     generateVariantGrid() {
-      const selected = this.selectedAttributes
-      .filter(attr => attr && attr.id && this.selectedAttributeValues[attr.id]) // Lọc undefined/null
-      .map(attr => ({
-        attr,
-        values: this.selectedAttributeValues[attr.id] || []
-      }))
-
-      // Nếu chưa chọn đủ (ít nhất 1 giá trị mỗi thuộc tính), không generate
+      // Tạo selected từ selectedAttributes hiện tại
+      let selected = this.selectedAttributes
+        .filter(attr => attr && attr.id && this.selectedAttributeValues[attr.id])
+        .map(attr => ({
+          attr,
+          values: this.selectedAttributeValues[attr.id] ? attr.attributes.filter(attre => this.selectedAttributeValues[attr.id].includes(attre.id)) : []
+        }))
+      // Check đủ điều kiện để generate
       if (
         selected.length === 0 ||
         selected.some(item => !item.values || item.values.length === 0)
@@ -280,18 +273,14 @@ export default {
         this.previewAttributes = []
         return
       }
-
       this.previewAttributes = selected.map(item => item.attr.title)
-
       const combinations = this.generateCombinations(
         selected.map(item => ({
           attribute: item.attr,
           values: item.values
         }))
       )
-
       const stockVariants = []
-
       combinations.forEach(combo => {
         this.stocks.forEach(stock => {
           stockVariants.push({
@@ -307,14 +296,11 @@ export default {
           })
         })
       })
-
       this.form.variants = stockVariants
     },
     generateCombinations(attributeValueSets) {
       if (!attributeValueSets.length) return []
-
       const result = []
-
       const helper = (index, current) => {
         const currentSet = attributeValueSets[index]
         for (const value of currentSet.values) {
@@ -326,14 +312,15 @@ export default {
           }
         }
       }
-
       helper(0, [])
       return result
+    },
+    isAttrSelected(attr) {
+      return this.selectedAttributes.some(a => a.id === attr.id)
     },
     async loadInitialData() {
       try {
         const headers = { Accept: 'application/json' }
-
         const [unitRes, brandRes, categoryRes, supplierRes, stockRes] = await Promise.all([
           fetch('/api/warehouse/unit/list', { headers }),
           fetch('/api/warehouse/brand/list', { headers }),
@@ -341,7 +328,6 @@ export default {
           fetch('/api/supplier/list', { headers }),
           fetch('/api/warehouse/stock/list', { headers })
         ])
-
         const [units, brands, categories, suppliers, stocks] = await Promise.all([
           unitRes.json(),
           brandRes.json(),
@@ -349,7 +335,6 @@ export default {
           supplierRes.json(),
           stockRes.json()
         ])
-
         this.units = units.data
         this.brands = brands.data
         this.categories = categories.data
@@ -364,7 +349,6 @@ export default {
         const res = await fetch(`/api/warehouse/product/detail/${this.id}`)
         const data = await res.json()
         const product = data.product
-
         // Gán data cơ bản
         Object.assign(this.form, {
           name: product.name,
@@ -380,20 +364,16 @@ export default {
           type: product.type,
           has_variant: Boolean(product.have_variant),
         })
-
         // Ảnh bìa (dùng ảnh URL để preview)
         if (product.image_cover_url) {
           this.form.cover_image = product.image_cover_url
         }
-
         // Gallery (convert mỗi ảnh thành URL để preview)
         if (Array.isArray(product.gallery_images)) {
           this.form.gallery_images = product.gallery_images.map(img => img.image_url)
         }
-
         // Gán dữ liệu kho gốc (cho StockPriceTable)
         this.form.stock_data = product.stock_data || []
-
         // Gán biến thể cho VariantGrid
         this.form.variants = (data.stock_products || []).map(v => ({
           stock_id: v.stock_id,
@@ -416,31 +396,38 @@ export default {
             }
           }))
         }))
-
-        // Gán selectedAttributes & selectedAttributeValues để dựng lại VariantGrid nếu cần
+        // Load thuộc tính & gán selectedAttributes đúng tham chiếu
         if (this.form.has_variant && product.attributes?.length) {
-          this.selectedAttributes = [...new Map(product.attributes.map(a => [a.variant_id, a.variant])).values()]
-
+          this.isMappingVariantData = true
+          await this.checkAndLoadVariants(true)
+          this.selectedAttributes = []
           this.selectedAttributeValues = {}
           product.attributes.forEach(attr => {
-            if (!this.selectedAttributeValues[attr.variant_id]) {
-              this.selectedAttributeValues[attr.variant_id] = []
+            const foundAttr = this.variantAttributes.find(v => v.id === attr.attribute_first.variant_id
+            || v.id === attr.attribute_second.variant_id)
+            if (!foundAttr) return
+            if (!this.selectedAttributes.includes(foundAttr)) {
+              this.selectedAttributes.push(foundAttr)
             }
-
-            if (!this.selectedAttributeValues[attr.variant_id].some(v => v.id === attr.id)) {
-              this.selectedAttributeValues[attr.variant_id].push({
-                id: attr.id,
-                title: attr.title
-              })
+            if (!this.selectedAttributeValues[foundAttr.id]) {
+              this.selectedAttributeValues[foundAttr.id] = []
+            }
+            const alreadyExists = this.selectedAttributeValues[foundAttr.id].some(v =>
+                v.id === attr.attribute_first.id || v.id === attr.attribute_second.id
+            )
+            if (!alreadyExists) {
+              if (attr.attribute_first && attr.attribute_first.variant_id === foundAttr.id && !this.selectedAttributeValues[foundAttr.id].includes(Number(attr.attribute_first.id))) {
+                this.selectedAttributeValues[foundAttr.id].push(Number(attr.attribute_first.id))
+              }
+              if (attr.attribute_second && attr.attribute_second.variant_id === foundAttr.id && !this.selectedAttributeValues[foundAttr.id].includes(Number(attr.attribute_second.id))) {
+                this.selectedAttributeValues[foundAttr.id].push(Number(attr.attribute_second.id))
+              }
             }
           })
-
-          this.previewAttributes = this.selectedAttributes
-            .filter(attr => attr && attr.title)
-            .map(attr => attr.title)
+          this.previewAttributes = this.selectedAttributes.map(a => a.title)
+          this.generateVariantGrid()
+          this.isMappingVariantData = false
         }
-           console.log(this.form.variants);
-
       } catch (err) {
         console.error('Lỗi khi load product:', err)
         alert('❌ Không thể tải dữ liệu sản phẩm')
@@ -449,9 +436,6 @@ export default {
     handleCoverImage(e) {
       const file = e.target.files[0]
       this.form.cover_image = file
-
-      console.log(this.form.cover_image);
-
     },
     removeCoverImage() {
       this.form.cover_image = null
@@ -465,37 +449,30 @@ export default {
     async handleSubmit() {
       try {
         const formData = new FormData()
-
         // Xử lý các field thông thường
         Object.entries(this.form).forEach(([key, value]) => {
           if (['cover_image', 'gallery_images', 'variants', 'stock_data'].includes(key)) return
-
           if (typeof value === 'object' && value !== null) {
             formData.append(key, JSON.stringify(value))
           } else {
             formData.append(key, value ?? '')
           }
         })
-
         // Xử lý stock_data (đảm bảo là object → stringify)
         const stockData = typeof this.form.stock_data === 'string'
           ? this.form.stock_data
           : JSON.stringify(this.form.stock_data)
-
         formData.append('stock_data', stockData)
-
         // Xử lý ảnh bìa
         if (this.form.cover_image instanceof File) {
           formData.append('cover_image', this.form.cover_image)
         }
-
         // Xử lý ảnh chính
         this.form.gallery_images.forEach((file, index) => {
           if (file instanceof File) {
             formData.append(`gallery_images[${index}]`, file)
           }
         })
-
         // Xử lý biến thể
         this.form.variants.forEach((variant, i) => {
           formData.append(`variants[${i}][stock_id]`, variant.stock_id)
@@ -505,30 +482,24 @@ export default {
           formData.append(`variants[${i}][sku]`, variant.sku || '')
           formData.append(`variants[${i}][barcode]`, variant.barcode || '')
           formData.append(`variants[${i}][is_sale]`, variant.is_sale)
-
           if (variant.image instanceof File) {
             formData.append(`variants[${i}][image]`, variant.image)
           }
-
           variant.attributes.forEach((attr, j) => {
             formData.append(`variants[${i}][attributes][${j}][attribute_id]`, attr.attribute.id)
             formData.append(`variants[${i}][attributes][${j}][value_id]`, attr.value.id)
           })
         })
-
         const url = this.mode === 'update'
           ? `/api/warehouse/product/update/${this.id}`
           : '/api/warehouse/product/create'
-
         // Nếu là update, Laravel có thể yêu cầu method PUT
         if (this.mode === 'update') {
           formData.append('_method', 'PUT')
         }
-
         const res = await window.axios.post(url, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         })
-
         alert('✔️ Thành công!')
         this.$router.push('/warehouse/product')
       } catch (err) {

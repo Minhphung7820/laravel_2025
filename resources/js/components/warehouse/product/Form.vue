@@ -158,7 +158,7 @@ export default {
   name: 'ProductForm',
   components: { VariantGrid, StockPriceTable },
   props: {
-    type : { type: String, default: 'single' },
+    type: { type: String, default: 'single' },
     mode: { type: String, default: 'create' },
     id: { type: [Number, null], default: null },
   },
@@ -203,9 +203,9 @@ export default {
       categories: [],
       suppliers: [],
       stocks: [],
-      variantAttributes: [], // từ API
+      variantAttributes: [],
       selectedAttributes: [],
-      selectedAttributeValues: [], // { [attrId]: [giá trị đã chọn] }
+      selectedAttributeValues: {},
       previewAttributes: [],
       isMappingVariantData: false,
     }
@@ -226,7 +226,6 @@ export default {
     },
     selectedAttributeValues: {
       handler() {
-        console.log(12);
         if (this.isMappingVariantData) return
         this.generateVariantGrid()
       },
@@ -243,8 +242,8 @@ export default {
       if (this.form.has_variant && this.form.category_id) {
         const res = await fetch(`/api/warehouse/category/${this.form.category_id}/attributes`)
         this.variantAttributes = await res.json()
-        // ⚠️ Chỉ reset nếu KHÔNG phải đang load lại để mapping data
         if (!isMappingData) {
+          this.selectedAttributes = []
           this.selectedAttributeValues = {}
           this.variantAttributes.forEach(attr => {
             this.selectedAttributeValues[attr.id] = []
@@ -257,22 +256,22 @@ export default {
       }
     },
     generateVariantGrid() {
-      // Tạo selected từ selectedAttributes hiện tại
-      let selected = this.selectedAttributes
-        .filter(attr => attr && attr.id && this.selectedAttributeValues[attr.id])
+      const selected = this.selectedAttributes
+        .filter(attr => {
+          const values = this.selectedAttributeValues[attr.id]
+          return attr && attr.id && Array.isArray(values) && values.length > 0
+        })
         .map(attr => ({
           attr,
-          values: this.selectedAttributeValues[attr.id] ? attr.attributes.filter(attre => this.selectedAttributeValues[attr.id].includes(attre.id)) : []
+          values: this.selectedAttributeValues[attr.id]
         }))
-      // Check đủ điều kiện để generate
-      if (
-        selected.length === 0 ||
-        selected.some(item => !item.values || item.values.length === 0)
-      ) {
+
+      if (selected.length === 0) {
         this.form.variants = []
         this.previewAttributes = []
         return
       }
+
       this.previewAttributes = selected.map(item => item.attr.title)
       const combinations = this.generateCombinations(
         selected.map(item => ({
@@ -280,6 +279,7 @@ export default {
           values: item.values
         }))
       )
+
       const stockVariants = []
       combinations.forEach(combo => {
         this.stocks.forEach(stock => {
@@ -301,10 +301,24 @@ export default {
     generateCombinations(attributeValueSets) {
       if (!attributeValueSets.length) return []
       const result = []
+
       const helper = (index, current) => {
         const currentSet = attributeValueSets[index]
-        for (const value of currentSet.values) {
-          const next = [...current, { attribute: currentSet.attribute, value }]
+        for (const valueId of currentSet.values) {
+          const valueObj = currentSet.attribute.attributes.find(attr => attr.id === valueId)
+          if (!valueObj) continue
+
+          const next = [...current, {
+            attribute: {
+              id: currentSet.attribute.id,
+              title: currentSet.attribute.title
+            },
+            value: {
+              id: valueObj.id,
+              title: valueObj.title,
+              variant_id: currentSet.attribute.id
+            }
+          }]
           if (index === attributeValueSets.length - 1) {
             result.push(next)
           } else {
@@ -312,6 +326,7 @@ export default {
           }
         }
       }
+
       helper(0, [])
       return result
     },
@@ -349,7 +364,7 @@ export default {
         const res = await fetch(`/api/warehouse/product/detail/${this.id}`)
         const data = await res.json()
         const product = data.product
-        // Gán data cơ bản
+
         Object.assign(this.form, {
           name: product.name,
           sku: product.sku,
@@ -364,17 +379,14 @@ export default {
           type: product.type,
           has_variant: Boolean(product.have_variant),
         })
-        // Ảnh bìa (dùng ảnh URL để preview)
+
         if (product.image_cover_url) {
           this.form.cover_image = product.image_cover_url
         }
-        // Gallery (convert mỗi ảnh thành URL để preview)
         if (Array.isArray(product.gallery_images)) {
           this.form.gallery_images = product.gallery_images.map(img => img.image_url)
         }
-        // Gán dữ liệu kho gốc (cho StockPriceTable)
         this.form.stock_data = product.stock_data || []
-        // Gán biến thể cho VariantGrid
         this.form.variants = (data.stock_products || []).map(v => ({
           stock_id: v.stock_id,
           quantity: v.quantity,
@@ -396,34 +408,42 @@ export default {
             }
           }))
         }))
-        // Load thuộc tính & gán selectedAttributes đúng tham chiếu
+
         if (this.form.has_variant && product.attributes?.length) {
           this.isMappingVariantData = true
           await this.checkAndLoadVariants(true)
+
           this.selectedAttributes = []
           this.selectedAttributeValues = {}
+
           product.attributes.forEach(attr => {
-            const foundAttr = this.variantAttributes.find(v => v.id === attr.attribute_first.variant_id
-            || v.id === attr.attribute_second.variant_id)
-            if (!foundAttr) return
-            if (!this.selectedAttributes.includes(foundAttr)) {
-              this.selectedAttributes.push(foundAttr)
-            }
-            if (!this.selectedAttributeValues[foundAttr.id]) {
-              this.selectedAttributeValues[foundAttr.id] = []
-            }
-            const alreadyExists = this.selectedAttributeValues[foundAttr.id].some(v =>
-                v.id === attr.attribute_first.id || v.id === attr.attribute_second.id
-            )
-            if (!alreadyExists) {
-              if (attr.attribute_first && attr.attribute_first.variant_id === foundAttr.id && !this.selectedAttributeValues[foundAttr.id].includes(Number(attr.attribute_first.id))) {
-                this.selectedAttributeValues[foundAttr.id].push(Number(attr.attribute_first.id))
+            const variantIds = [
+              attr.attribute_first?.variant_id,
+              attr.attribute_second?.variant_id
+            ].filter(Boolean)
+
+            variantIds.forEach(variantId => {
+              const foundAttr = this.variantAttributes.find(v => v.id === variantId)
+              if (!foundAttr) return
+
+              if (!this.selectedAttributes.some(a => a.id === foundAttr.id)) {
+                this.selectedAttributes.push(foundAttr)
               }
-              if (attr.attribute_second && attr.attribute_second.variant_id === foundAttr.id && !this.selectedAttributeValues[foundAttr.id].includes(Number(attr.attribute_second.id))) {
-                this.selectedAttributeValues[foundAttr.id].push(Number(attr.attribute_second.id))
+
+              if (!this.selectedAttributeValues[foundAttr.id]) {
+                this.selectedAttributeValues[foundAttr.id] = []
               }
-            }
+
+              const idsToAdd = [attr.attribute_first?.id, attr.attribute_second?.id].filter(Boolean)
+              idsToAdd.forEach(id => {
+                id = Number(id)
+                if (!this.selectedAttributeValues[foundAttr.id].includes(id)) {
+                  this.selectedAttributeValues[foundAttr.id].push(id)
+                }
+              })
+            })
           })
+
           this.previewAttributes = this.selectedAttributes.map(a => a.title)
           this.generateVariantGrid()
           this.isMappingVariantData = false
@@ -449,7 +469,6 @@ export default {
     async handleSubmit() {
       try {
         const formData = new FormData()
-        // Xử lý các field thông thường
         Object.entries(this.form).forEach(([key, value]) => {
           if (['cover_image', 'gallery_images', 'variants', 'stock_data'].includes(key)) return
           if (typeof value === 'object' && value !== null) {
@@ -458,22 +477,18 @@ export default {
             formData.append(key, value ?? '')
           }
         })
-        // Xử lý stock_data (đảm bảo là object → stringify)
-        const stockData = typeof this.form.stock_data === 'string'
-          ? this.form.stock_data
-          : JSON.stringify(this.form.stock_data)
-        formData.append('stock_data', stockData)
-        // Xử lý ảnh bìa
+
+        formData.append('stock_data', JSON.stringify(this.form.stock_data))
+
         if (this.form.cover_image instanceof File) {
           formData.append('cover_image', this.form.cover_image)
         }
-        // Xử lý ảnh chính
         this.form.gallery_images.forEach((file, index) => {
           if (file instanceof File) {
             formData.append(`gallery_images[${index}]`, file)
           }
         })
-        // Xử lý biến thể
+
         this.form.variants.forEach((variant, i) => {
           formData.append(`variants[${i}][stock_id]`, variant.stock_id)
           formData.append(`variants[${i}][quantity]`, variant.quantity)
@@ -490,16 +505,18 @@ export default {
             formData.append(`variants[${i}][attributes][${j}][value_id]`, attr.value.id)
           })
         })
+
         const url = this.mode === 'update'
           ? `/api/warehouse/product/update/${this.id}`
           : '/api/warehouse/product/create'
-        // Nếu là update, Laravel có thể yêu cầu method PUT
         if (this.mode === 'update') {
           formData.append('_method', 'PUT')
         }
+
         const res = await window.axios.post(url, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         })
+
         alert('✔️ Thành công!')
         this.$router.push('/warehouse/product')
       } catch (err) {
@@ -507,6 +524,6 @@ export default {
         alert('❌ Thất bại khi gửi form.')
       }
     },
- },
+  }
 }
 </script>

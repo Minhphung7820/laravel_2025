@@ -125,12 +125,13 @@
             :value="attr"
             v-model="selectedAttributes"
             :disabled="!isAttrSelected(attr) && selectedAttributes.length >= 2"
+            @change="isMappingVariantData = false"
           />
           {{ attr.title }}
         </label>
         <div v-if="isAttrSelected(attr)" class="ml-4 mt-2">
           <label v-for="opt in attr.attributes" :key="opt.id" class="inline-flex items-center mr-3">
-            <input type="checkbox" :value="Number(opt.id)" v-model="selectedAttributeValues[attr.id]" />
+            <input type="checkbox" :value="Number(opt.id)" v-model="selectedAttributeValues[attr.id]" @change="isMappingVariantData = false" />
             <span class="ml-1">{{ opt.title }}</span>
           </label>
         </div>
@@ -207,7 +208,7 @@ export default {
       selectedAttributes: [],
       selectedAttributeValues: {},
       previewAttributes: [],
-      isMappingVariantData: false,
+      isMappingVariantData: true,
     }
   },
   watch: {
@@ -445,8 +446,6 @@ export default {
           })
 
           this.previewAttributes = this.selectedAttributes.map(a => a.title)
-          this.generateVariantGrid()
-          this.isMappingVariantData = false
         }
       } catch (err) {
         console.error('Lỗi khi load product:', err)

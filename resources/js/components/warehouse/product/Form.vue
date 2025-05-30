@@ -233,6 +233,13 @@ export default {
     if (this.mode === 'update' && this.id) await this.loadProduct()
   },
   methods: {
+    isSameAttributes(a, b) {
+      if (a.length !== b.length) return false
+      const key = v => `${v.attribute.id}-${v.value.id}`
+      const aKeys = a.map(key).sort()
+      const bKeys = b.map(key).sort()
+      return JSON.stringify(aKeys) === JSON.stringify(bKeys)
+    },
     onCategoryChange() {
       this.isMappingVariantData = false
       this.selectedAttributes = []
@@ -298,23 +305,31 @@ export default {
         }))
       )
 
-      const stockVariants = []
+      const newVariants = []
+
       combinations.forEach(combo => {
         this.stocks.forEach(stock => {
-          stockVariants.push({
+          // tìm variant cũ trùng attributes + stock_id
+          const old = this.form.variants.find(v =>
+            v.stock_id === stock.id &&
+            this.isSameAttributes(v.attributes, combo)
+          )
+
+          newVariants.push({
             stock_id: stock.id,
             attributes: combo,
-            quantity: 0,
-            sell_price: 0,
-            purchase_price: 0,
-            barcode: '',
-            sku: '',
-            image: null,
-            is_sale: 1
+            quantity: old?.quantity || 0,
+            sell_price: old?.sell_price || 0,
+            purchase_price: old?.purchase_price || 0,
+            barcode: old?.barcode || '',
+            sku: old?.sku || '',
+            image: old?.image || null,
+            is_sale: old?.is_sale ?? 1,
           })
         })
       })
-      this.form.variants = stockVariants
+
+      this.form.variants = newVariants
     },
     generateCombinations(attributeValueSets) {
       if (!attributeValueSets.length) return []

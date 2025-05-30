@@ -57,7 +57,7 @@
       </div>
       <div>
         <label class="block font-semibold">Danh mục</label>
-        <select v-model="form.category_id" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm">
+        <select @change="onCategoryChange" v-model="form.category_id" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm">
           <option value="">Vui lòng chọn</option>
           <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.title }}</option>
         </select>
@@ -110,7 +110,7 @@
           type="checkbox"
           v-model="form.has_variant"
           class="mr-2"
-          @change="form.type = form.has_variant ? 'variable' : 'single'"
+          @change="onToggleVariant"
         />
         Sản phẩm có biến thể
       </label>
@@ -212,14 +212,6 @@ export default {
     }
   },
   watch: {
-    'form.category_id'(val) {
-      if (this.isMappingVariantData) return
-      this.checkAndLoadVariants(true)
-    },
-    'form.has_variant'(val) {
-      if (this.isMappingVariantData) return
-      this.checkAndLoadVariants(true)
-    },
     selectedAttributes: {
       handler() {
         if (this.isMappingVariantData) return
@@ -241,6 +233,23 @@ export default {
     if (this.mode === 'update' && this.id) await this.loadProduct()
   },
   methods: {
+    onCategoryChange() {
+      this.isMappingVariantData = false
+      this.selectedAttributes = []
+      this.selectedAttributeValues = {}
+      this.previewAttributes = []
+      this.form.variants = []
+      this.checkAndLoadVariants()
+    },
+    onToggleVariant() {
+      this.isMappingVariantData = false
+      this.form.type = this.form.has_variant ? 'variable' : 'single'
+      this.selectedAttributes = []
+      this.selectedAttributeValues = {}
+      this.previewAttributes = []
+      this.form.variants = []
+      this.checkAndLoadVariants()
+    },
     onAttributeChange() {
       this.isMappingVariantData = false
       this.$nextTick(() => {

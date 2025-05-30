@@ -183,6 +183,9 @@ export default {
         typeof file === 'string' ? file : URL.createObjectURL(file)
       )
     },
+    hasTrashVariants() {
+      return this.trashVariants.length > 0
+    }
   },
   data() {
     return {
@@ -232,11 +235,6 @@ export default {
         this.generateVariantGrid()
       },
       deep: true
-    }
-  },
-  computed:{
-    hasTrashVariants() {
-      return this.trashVariants.length > 0
     }
   },
   async mounted() {

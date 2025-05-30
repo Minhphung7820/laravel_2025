@@ -125,13 +125,13 @@
             :value="attr"
             v-model="selectedAttributes"
             :disabled="!isAttrSelected(attr) && selectedAttributes.length >= 2"
-            @change="isMappingVariantData = false"
+            @change="onAttributeChange"
           />
           {{ attr.title }}
         </label>
         <div v-if="isAttrSelected(attr)" class="ml-4 mt-2">
           <label v-for="opt in attr.attributes" :key="opt.id" class="inline-flex items-center mr-3">
-            <input type="checkbox" :value="Number(opt.id)" v-model="selectedAttributeValues[attr.id]" @change="isMappingVariantData = false" />
+            <input type="checkbox" :value="Number(opt.id)" v-model="selectedAttributeValues[attr.id]" @change="onAttributeChange" />
             <span class="ml-1">{{ opt.title }}</span>
           </label>
         </div>
@@ -213,9 +213,11 @@ export default {
   },
   watch: {
     'form.category_id'(val) {
+      if (this.isMappingVariantData) return
       this.checkAndLoadVariants(true)
     },
     'form.has_variant'(val) {
+      if (this.isMappingVariantData) return
       this.checkAndLoadVariants(true)
     },
     selectedAttributes: {
@@ -239,6 +241,12 @@ export default {
     if (this.mode === 'update' && this.id) await this.loadProduct()
   },
   methods: {
+    onAttributeChange() {
+      this.isMappingVariantData = false
+      this.$nextTick(() => {
+        this.generateVariantGrid()
+      })
+    },
     async checkAndLoadVariants(isMappingData = false) {
       if (this.form.has_variant && this.form.category_id) {
         const res = await fetch(`/api/warehouse/category/${this.form.category_id}/attributes`)

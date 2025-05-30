@@ -16,6 +16,7 @@
             <th class="px-4 py-2 font-semibold">SKU</th>
             <th class="px-4 py-2 font-semibold">Barcode</th>
             <th class="px-4 py-2 font-semibold">Mở bán</th>
+            <th class="px-4 py-2 font-semibold text-center">Xóa</th>
           </tr>
         </thead>
         <tbody>
@@ -66,6 +67,15 @@
                 class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
               />
             </td>
+            <td class="px-4 py-2 text-center">
+              <button
+                @click="removeVariant(index)"
+                class="text-red-600 hover:text-red-800 font-bold text-xl leading-none cursor-pointer"
+                title="Xóa dòng"
+              >
+                ×
+              </button>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -100,6 +110,9 @@ export default {
     },
     getImageUrl(file) {
       return typeof file === 'string' ? file : URL.createObjectURL(file)
+    },
+    removeVariant(index) {
+      this.variants.splice(index, 1)
     }
   }
 }

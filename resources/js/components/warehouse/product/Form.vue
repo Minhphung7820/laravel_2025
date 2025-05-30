@@ -124,14 +124,14 @@
             type="checkbox"
             :value="attr"
             v-model="selectedAttributes"
-            :disabled="!isAttrSelected(attr) && selectedAttributes.length >= 2"
+            :disabled="(!isAttrSelected(attr) && selectedAttributes.length >= 2) || hasTrashVariants"
             @change="onAttributeChange"
           />
           {{ attr.title }}
         </label>
         <div v-if="isAttrSelected(attr)" class="ml-4 mt-2">
           <label v-for="opt in attr.attributes" :key="opt.id" class="inline-flex items-center mr-3">
-            <input type="checkbox" :value="Number(opt.id)" v-model="selectedAttributeValues[attr.id]" @change="onAttributeChange" />
+            <input  :disabled="hasTrashVariants" type="checkbox" :value="Number(opt.id)" v-model="selectedAttributeValues[attr.id]" @change="onAttributeChange" />
             <span class="ml-1">{{ opt.title }}</span>
           </label>
         </div>
@@ -143,6 +143,11 @@
       :variants="form.variants"
       :stocks="stocks"
       :preview-attributes="previewAttributes"
+      :trash-variants="trashVariants"
+      @delete-variant="onDeleteVariant"
+      @start-restore="startRestore"
+      :restoring-variant="restoringVariant"
+      @confirm-restore="onRestoreConfirmed"
     />
     <!-- Submit -->
     <button @click="handleSubmit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded shadow">
@@ -209,6 +214,8 @@ export default {
       selectedAttributeValues: {},
       previewAttributes: [],
       isMappingVariantData: true,
+      trashVariants: [],
+      restoringVariant: null,
     }
   },
   watch: {
@@ -227,12 +234,52 @@ export default {
       deep: true
     }
   },
+  computed:{
+    hasTrashVariants() {
+      return this.trashVariants.length > 0
+    }
+  },
   async mounted() {
     this.form.type = this.type
     await this.loadInitialData()
     if (this.mode === 'update' && this.id) await this.loadProduct()
   },
   methods: {
+    onRestoreConfirmed(variant) {
+      this.form.variants.unshift(variant)
+
+      const index = this.trashVariants.findIndex(v =>
+        v.stock_id === variant.stock_id &&
+        this.isSameAttributes(v.attributes, variant.attributes)
+      )
+      if (index !== -1) {
+        this.trashVariants.splice(index, 1)
+      }
+      this.restoringVariant = null
+      console.log(this.trashVariants);
+
+    },
+    startRestore() {
+      this.restoringVariant = {
+        stock_id: '',
+        attributes: [],
+        quantity: 0,
+        sell_price: 0,
+        purchase_price: 0,
+        sku: '',
+        barcode: '',
+        image: null,
+        is_sale: 1,
+      }
+    },
+    onDeleteVariant(index) {
+        const variant = this.form.variants[index]
+        this.trashVariants.push(variant)
+        this.form.variants.splice(index, 1)
+    },
+    removeVariant(index) {
+      this.$emit('delete-variant', index)
+    },
     isSameAttributes(a, b) {
       if (a.length !== b.length) return false
       const key = v => `${v.attribute.id}-${v.value.id}`
@@ -246,6 +293,7 @@ export default {
       this.selectedAttributeValues = {}
       this.previewAttributes = []
       this.form.variants = []
+      this.trashVariants = []
       this.checkAndLoadVariants()
     },
     onToggleVariant() {
@@ -255,6 +303,7 @@ export default {
       this.selectedAttributeValues = {}
       this.previewAttributes = []
       this.form.variants = []
+      this.trashVariants = []
       this.checkAndLoadVariants()
     },
     onAttributeChange() {

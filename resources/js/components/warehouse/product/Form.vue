@@ -124,14 +124,14 @@
             type="checkbox"
             :value="attr"
             v-model="selectedAttributes"
-            :disabled="(!isAttrSelected(attr) && selectedAttributes.length >= 2) || hasTrashVariants"
+            :disabled="(!isAttrSelected(attr) && selectedAttributes.length >= 2)"
             @change="onAttributeChange"
           />
           {{ attr.title }}
         </label>
         <div v-if="isAttrSelected(attr)" class="ml-4 mt-2">
           <label v-for="opt in attr.attributes" :key="opt.id" class="inline-flex items-center mr-3">
-            <input  :disabled="hasTrashVariants" type="checkbox" :value="Number(opt.id)" v-model="selectedAttributeValues[attr.id]" @change="onAttributeChange" />
+            <input type="checkbox" :value="Number(opt.id)" v-model="selectedAttributeValues[attr.id]" @change="onAttributeChange" />
             <span class="ml-1">{{ opt.title }}</span>
           </label>
         </div>
@@ -303,6 +303,14 @@ export default {
     onAttributeChange() {
       this.isMappingVariantData = false
       this.$nextTick(() => {
+        // Lọc lại trashVariants sau khi checkbox cập nhật xong
+        this.trashVariants = this.trashVariants.filter(variant => {
+          return variant.attributes.every(attr => {
+            const allowedValues = this.selectedAttributeValues[attr.attribute.id] || []
+            return allowedValues.includes(attr.value.id)
+          })
+        })
+        // Cập nhật lại grid
         this.generateVariantGrid()
       })
     },
@@ -358,17 +366,23 @@ export default {
             this.isSameAttributes(v.attributes, combo)
           )
 
-          newVariants.push({
-            stock_id: stock.id,
-            attributes: combo,
-            quantity: old?.quantity || 0,
-            sell_price: old?.sell_price || 0,
-            purchase_price: old?.purchase_price || 0,
-            barcode: old?.barcode || '',
-            sku: old?.sku || '',
-            image: old?.image || null,
-            is_sale: old?.is_sale ?? 1,
-          })
+          const isTrashed = this.trashVariants.some(tv =>
+            tv.stock_id === stock.id &&
+            this.isSameAttributes(tv.attributes, combo)
+          )
+          if (!isTrashed) {
+            newVariants.push({
+              stock_id: stock.id,
+              attributes: combo,
+              quantity: old?.quantity || 0,
+              sell_price: old?.sell_price || 0,
+              purchase_price: old?.purchase_price || 0,
+              barcode: old?.barcode || '',
+              sku: old?.sku || '',
+              image: old?.image || null,
+              is_sale: old?.is_sale ?? 1,
+            })
+          }
         })
       })
 

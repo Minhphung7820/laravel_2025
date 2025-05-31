@@ -127,13 +127,13 @@
             :value="attr"
             v-model="selectedAttributes"
             :disabled="(!isAttrSelected(attr) && selectedAttributes.length >= 2)"
-            @change="onAttributeChange"
+            @change="onValueChange($event, attr.id, null)"
           />
           {{ attr.title }}
         </label>
         <div v-if="isAttrSelected(attr)" class="ml-4 mt-2">
           <label v-for="opt in attr.attributes" :key="opt.id" class="inline-flex items-center mr-3">
-            <input type="checkbox" :value="Number(opt.id)" v-model="selectedAttributeValues[attr.id]" @change="onAttributeChange" />
+            <input type="checkbox" :value="Number(opt.id)" v-model="selectedAttributeValues[attr.id]" @change="onValueChange($event, attr.id, opt.id)" />
             <span class="ml-1">{{ opt.title }}</span>
           </label>
         </div>
@@ -340,17 +340,24 @@ export default {
       this.trashVariants = []
       this.checkAndLoadVariants()
     },
-    onAttributeChange() {
-      this.isMappingVariantData = false
-      this.$nextTick(() => {
-        // Lọc lại trashVariants sau khi checkbox cập nhật xong
+    onValueChange(event, attrId, valueId) {
+      const isChecked = event.target.checked
+      if (!isChecked && !valueId) {
         this.trashVariants = this.trashVariants.filter(variant => {
           return variant.attributes.every(attr => {
-            const allowedValues = this.selectedAttributeValues[attr.attribute.id] || []
-            return allowedValues.includes(attr.value.id)
+            return attr.attribute.id !== attrId
           })
         })
-        // Cập nhật lại grid
+        this.selectedAttributeValues[attrId] = []
+      } else {
+         this.trashVariants = this.trashVariants.filter(variant => {
+            return variant.attributes.every(attr => {
+              const allowedValues = this.selectedAttributeValues[attr.attribute.id] || []
+              return allowedValues.includes(attr.value.id)
+            })
+         })
+      }
+      this.$nextTick(() => {
         this.generateVariantGrid()
       })
     },

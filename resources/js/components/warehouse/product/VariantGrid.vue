@@ -4,7 +4,7 @@
 
     <div v-if="trashVariants.length" class="flex justify-end items-center gap-2 mb-2">
       <button @click="$emit('start-restore')" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
-        + Khôi phục dòng
+        + Thêm thuộc tính
       </button>
       <span class="text-sm text-gray-500">({{ trashVariants.length }})</span>
     </div>

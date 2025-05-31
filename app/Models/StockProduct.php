@@ -22,7 +22,8 @@ class StockProduct extends Model
         'is_product_variant',
         'max_discount_percent',
         'max_increase_percent',
-        'auto_calc'
+        'auto_calc',
+        'is_using'
     ];
 
     public function stock()

@@ -477,28 +477,43 @@ export default {
           this.form.gallery_images = product.gallery_images.map(img => img.image_url)
         }
         this.form.stock_data = product.stock_data || []
-        this.form.variants = (data.stock_products || []).map(v => ({
-          stock_id: v.stock_id,
-          quantity: v.quantity,
-          sell_price: v.sell_price,
-          purchase_price: v.purchase_price,
-          sku: v.sku || '',
-          barcode: v.barcode || '',
-          is_sale: v.is_sale,
-          image: v.image_url || null,
-          attributes: v.attributes.map(attr => ({
-            attribute: {
-              id: attr.value.variant_id,
-              title: attr.attribute?.title || '',
-            },
-            value: {
-              id: attr.value.id,
-              title: attr.value.title,
-              variant_id: attr.value.variant_id,
-            }
-          }))
-        }))
+        //
+        const variants = []
+        const trash = []
 
+        data.stock_products.forEach(v => {
+          const variant = {
+            stock_id: v.stock_id,
+            quantity: v.quantity,
+            sell_price: v.sell_price,
+            purchase_price: v.purchase_price,
+            sku: v.sku || '',
+            barcode: v.barcode || '',
+            is_sale: v.is_sale,
+            image: v.image_url || null,
+            attributes: v.attributes.map(attr => ({
+              attribute: {
+                id: attr.value.variant_id,
+                title: attr.attribute?.title || '',
+              },
+              value: {
+                id: attr.value.id,
+                title: attr.value.title,
+                variant_id: attr.value.variant_id,
+              }
+            }))
+          }
+
+          if (v.is_using === 1) {
+            variants.push(variant)
+          } else {
+            trash.push(variant)
+          }
+        })
+
+        this.form.variants = variants
+        this.trashVariants = trash
+        //
         if (this.form.has_variant && product.attributes?.length) {
           this.isMappingVariantData = true
           await this.checkAndLoadVariants(true)

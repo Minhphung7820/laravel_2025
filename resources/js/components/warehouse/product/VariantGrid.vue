@@ -175,7 +175,7 @@ export default {
     onImageChange(e, index) {
       const file = e.target.files[0]
       if (file) {
-        this.variants[index].image = file
+        this.$emit('update:image', { index, file })
       }
     },
     getImageUrl(file) {

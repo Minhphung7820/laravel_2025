@@ -151,6 +151,7 @@
       :restoring-variant="restoringVariant"
       @confirm-restore="onRestoreConfirmed"
       @cancel-restore="restoringVariant = null"
+      @update:image="onVariantImageChange"
     />
     <!-- Submit -->
     <button @click="handleSubmit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded shadow">
@@ -258,6 +259,11 @@ export default {
     if (this.mode === 'update' && this.id) await this.loadProduct()
   },
   methods: {
+    onVariantImageChange({ index, file }) {
+      if (this.form.variants[index]) {
+        this.form.variants[index].image = file
+      }
+    },
     onRestoreConfirmed(variant) {
       // Tìm lại biến thể đã xóa trong trashVariants
       const original = this.trashVariants.find(v =>

@@ -121,6 +121,8 @@
 </template>
 
 <script>
+import Swal from 'sweetalert2'
+
 export default {
   name: 'VariantGrid',
   props: {
@@ -235,7 +237,12 @@ export default {
     },
     confirmRestore() {
       if (this.restoringAttributes.includes('') || !this.restoringStock) {
-        alert('Vui lòng chọn đầy đủ các giá trị')
+        Swal.fire({
+          icon: 'warning',
+          title: 'Thiếu thông tin',
+          text: 'Vui lòng chọn đầy đủ các giá trị!',
+          confirmButtonText: 'Đã hiểu'
+        })
         return
       }
       const attributes = this.restoringAttributes.map((valueId, index) => {

@@ -3,15 +3,15 @@
     <h2 class="text-xl font-semibold text-blue-600">Lưới biến thể sản phẩm</h2>
 
     <div v-if="trashVariants.length" class="flex justify-end items-center gap-2 mb-2">
-      <button @click="$emit('start-restore')" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
+      <button @click="handleAddRestore" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
         + Thêm thuộc tính
       </button>
       <span class="text-sm text-gray-500">({{ trashVariants.length }})</span>
     </div>
 
-    <div class="overflow-auto rounded border border-gray-300">
+    <div ref="variantScrollContainer" class="rounded border border-gray-300 overflow-y-auto max-h-[500px] custom-scroll">
       <table class="min-w-full divide-y divide-gray-200 text-sm">
-        <thead class="bg-gray-100 sticky top-0">
+        <thead class="bg-gray-100 sticky top-0 z-20">
           <tr>
             <th v-for="(attrName, index) in previewAttributes" :key="index" class="px-4 py-2 text-left font-semibold">
               {{ attrName }}
@@ -168,6 +168,16 @@ export default {
     }
   },
   methods: {
+    handleAddRestore() {
+      this.$emit('start-restore')
+
+      this.$nextTick(() => {
+        const el = this.$refs.variantScrollContainer
+        if (el) {
+          el.scrollTo({ top: 0, behavior: 'smooth' })
+        }
+      })
+    },
     getStockName(stockId) {
       const stock = this.stocks.find(s => s.id === stockId)
       return stock ? stock.name : '—'
@@ -266,4 +276,20 @@ table th,
 table td {
   white-space: nowrap;
 }
+.custom-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scroll::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+  background-color: #a0aec0;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: #718096;
+}
+
 </style>

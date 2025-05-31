@@ -332,9 +332,11 @@ class ProductController extends Controller
                 'description' => $request['description'] ?? '',
                 'has_variant' => $request['has_variant'] ?? 0,
                 'type'        => $request['type'] ?? 'single',
-                'image_cover' => $coverPath ? '/storage/' . $coverPath : null,
                 'status'      => 'pending'
             ];
+            if ($coverPath) {
+                $data['image_cover'] = '/storage/' . $coverPath;
+            }
             $attributes = $request['variants'] ?? [];
             if (empty($attributes)) {
                 throw new Exception("Vui lòng chọn ít nhất 1 biến thể !");

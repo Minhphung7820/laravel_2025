@@ -623,7 +623,8 @@ export default {
       this.form.cover_image = null
     },
     handleGalleryImages(e) {
-      this.form.gallery_images = [...e.target.files]
+      const newFiles = Array.from(e.target.files)
+      this.form.gallery_images.push(...newFiles)
     },
     removeGalleryImage(index) {
       this.form.gallery_images.splice(index, 1)

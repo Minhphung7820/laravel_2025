@@ -25,6 +25,7 @@ class ProductAttributesResource extends JsonResource
             'is_product_variant' => $this->is_product_variant,
             'sku'                => $this->sku,
             'barcode'            => $this->barcode,
+            'is_using'           => $this->is_using,
             'image_url'          => isset($this->variantImages[0]) ? url($this->variantImages[0]->image) : '',
             'attributes'         => collect([
                 $this->attributeFirst,

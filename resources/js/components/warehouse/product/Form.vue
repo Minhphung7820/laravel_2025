@@ -76,6 +76,8 @@
     <StockPriceTable
       v-model="form.stock_data"
       :stocks="stocks"
+      :is-variable-product="form.type === 'variable'"
+      :variant-stock-totals="variantStockTotals"
     />
     <!-- Mô tả -->
     <div>
@@ -170,6 +172,15 @@ export default {
     id: { type: [Number, null], default: null },
   },
   computed: {
+    variantStockTotals() {
+      const totals = {}
+      this.stocks.forEach(stock => {
+        totals[stock.id] = this.form.variants
+          .filter(v => v.stock_id === stock.id)
+          .reduce((sum, v) => sum + Number(v.quantity || 0), 0)
+      })
+      return totals
+    },
     showVariantCheckbox() {
       return this.$route.path.includes('/warehouse/product/create/variable')
     },

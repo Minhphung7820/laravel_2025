@@ -18,13 +18,31 @@
         <tr v-for="stock in filteredStocks" :key="stock.id">
           <td class="border px-3 py-2">{{ stock.name }}</td>
           <td class="border px-2 py-1 text-center">
-            <input type="number" v-model.number="localData[stock.id].qty" class="w-full px-1 py-1 text-xs border border-gray-300 rounded" />
+            <input
+              type="number"
+              v-if="!isVariableProduct"
+              v-model.number="localData[stock.id].qty"
+              class="w-full px-1 py-1 text-xs border border-gray-300 rounded"
+            />
+            <span v-else>{{ variantStockTotals[stock.id] || 0 }}</span>
           </td>
           <td class="border px-2 py-1 text-center">
-            <input type="number" v-model.number="localData[stock.id].purchase_price" class="w-full px-1 py-1 text-xs border border-gray-300 rounded" />
+            <span v-if="isVariableProduct" class="block w-full py-1 text-xs text-gray-400">—</span>
+            <input
+              v-else
+              v-model.number="localData[stock.id].purchase_price"
+              type="number"
+              class="w-full px-1 py-1 text-xs border border-gray-300 rounded"
+            />
           </td>
           <td class="border px-2 py-1 text-center">
-            <input type="number" v-model.number="localData[stock.id].sell_price" class="w-full px-1 py-1 text-xs border border-gray-300 rounded" />
+            <span v-if="isVariableProduct" class="block w-full py-1 text-xs text-gray-400">—</span>
+            <input
+              v-else
+              v-model.number="localData[stock.id].sell_price"
+              type="number"
+              class="w-full px-1 py-1 text-xs border border-gray-300 rounded"
+            />
           </td>
           <td class="border px-2 py-1 text-center">
             <input type="number" v-model.number="localData[stock.id].max_discount_percent" class="w-full px-1 py-1 text-xs border border-gray-300 rounded" />
@@ -50,6 +68,8 @@ export default {
   props: {
     stocks: Array,
     modelValue: Object,
+    isVariableProduct: Boolean,
+    variantStockTotals: Object
   },
   emits: ['update:modelValue'],
   data() {

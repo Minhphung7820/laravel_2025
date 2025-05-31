@@ -332,27 +332,27 @@ export default {
       this.trashVariants = []
       this.checkAndLoadVariants()
     },
- async handleToggleHasVariant() {
-  const willUncheck = this.form.has_variant === true
+    async handleToggleHasVariant() {
+      const willUncheck = this.form.has_variant === true
 
-  if (this.mode === 'update' && this.hasVariantInitial && willUncheck) {
-    const result = await Swal.fire({
-      title: '⚠️ Bỏ chọn sản phẩm có biến thể?',
-      text: 'Thao tác này sẽ xóa toàn bộ lưới biến thể đang có. Bạn có chắc chắn không?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Có, tôi chắc chắn',
-      cancelButtonText: 'Hủy',
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6'
-    })
+      if (this.mode === 'update' && this.hasVariantInitial && willUncheck) {
+        const result = await Swal.fire({
+          title: 'Bỏ biến thể?',
+          text: 'Thao tác này sẽ xóa toàn bộ lưới biến thể đang có. Bạn có chắc chắn không?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Có, tôi chắc chắn',
+          cancelButtonText: 'Hủy',
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6'
+        })
 
-    if (!result.isConfirmed) return
-  }
+        if (!result.isConfirmed) return
+      }
 
-  this.form.has_variant = !this.form.has_variant
-  this.onToggleVariantLogic()
-},
+      this.form.has_variant = !this.form.has_variant
+      this.onToggleVariantLogic()
+    },
     onToggleVariantLogic() {
       this.isMappingVariantData = false
       this.form.type = this.form.has_variant ? 'variable' : 'single'

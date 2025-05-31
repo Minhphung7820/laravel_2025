@@ -238,6 +238,7 @@ export default {
     selectedAttributes: {
       handler() {
         if (this.isMappingVariantData) return
+        this.trashVariants = []
         this.generateVariantGrid()
       },
       deep: true
@@ -245,6 +246,7 @@ export default {
     selectedAttributeValues: {
       handler() {
         if (this.isMappingVariantData) return
+        this.trashVariants = []
         this.generateVariantGrid()
       },
       deep: true

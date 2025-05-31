@@ -245,15 +245,33 @@ export default {
   },
   methods: {
     onRestoreConfirmed(variant) {
-      this.form.variants.unshift(variant)
-
-      const index = this.trashVariants.findIndex(v =>
+      // Tìm lại biến thể đã xóa trong trashVariants
+      const original = this.trashVariants.find(v =>
         v.stock_id === variant.stock_id &&
         this.isSameAttributes(v.attributes, variant.attributes)
       )
-      if (index !== -1) {
+
+      // Nếu có dữ liệu gốc thì dùng lại toàn bộ thông tin cũ
+      const restored = original
+        ? { ...original }
+        : {
+            ...variant,
+            quantity: 0,
+            sell_price: 0,
+            purchase_price: 0,
+            sku: '',
+            barcode: '',
+            image: null,
+            is_sale: 1
+          }
+
+      this.form.variants.unshift(restored)
+
+      if (original) {
+        const index = this.trashVariants.indexOf(original)
         this.trashVariants.splice(index, 1)
       }
+
       this.restoringVariant = null
     },
     startRestore() {

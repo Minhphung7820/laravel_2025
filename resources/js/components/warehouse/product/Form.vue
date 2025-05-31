@@ -591,8 +591,9 @@ export default {
             formData.append(`gallery_images[${index}]`, file)
           }
         })
+        const allVariants = [...this.form.variants, ...this.trashVariants]
 
-        this.form.variants.forEach((variant, i) => {
+        allVariants.forEach((variant, i) => {
           formData.append(`variants[${i}][stock_id]`, variant.stock_id)
           formData.append(`variants[${i}][quantity]`, variant.quantity)
           formData.append(`variants[${i}][sell_price]`, variant.sell_price)
@@ -600,9 +601,14 @@ export default {
           formData.append(`variants[${i}][sku]`, variant.sku || '')
           formData.append(`variants[${i}][barcode]`, variant.barcode || '')
           formData.append(`variants[${i}][is_sale]`, variant.is_sale)
+
+          const isUsing = this.trashVariants.includes(variant) ? 0 : 1
+          formData.append(`variants[${i}][is_using]`, isUsing)
+
           if (variant.image instanceof File) {
             formData.append(`variants[${i}][image]`, variant.image)
           }
+
           variant.attributes.forEach((attr, j) => {
             formData.append(`variants[${i}][attributes][${j}][attribute_id]`, attr.attribute.id)
             formData.append(`variants[${i}][attributes][${j}][value_id]`, attr.value.id)

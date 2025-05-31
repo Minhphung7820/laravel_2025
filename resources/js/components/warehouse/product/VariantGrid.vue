@@ -47,10 +47,12 @@
               <select v-model="restoringStock" class="w-32 px-2 py-1 border rounded">
                 <option value="">Chọn kho</option>
                 <option
-                  v-for="stock in trashVariants.map(v => v.stock_id).filter((v, i, a) => a.indexOf(v) === i)"
+                  v-for="stock in restoringStockOptions"
                   :key="stock"
                   :value="stock"
-                >{{ getStockName(stock) }}</option>
+                >
+                  {{ getStockName(stock) }}
+                </option>
               </select>
             </td>
             <td colspan="6" class="px-4 py-2 text-center text-gray-400">(Các trường khác bị vô hiệu hóa)</td>
@@ -125,6 +127,37 @@ export default {
     return {
       restoringAttributes: [],
       restoringStock: ''
+    }
+  },
+  computed: {
+    isRestoreReady() {
+      return (
+        this.restoringAttributes.length === this.previewAttributes.length &&
+        !this.restoringAttributes.includes('')
+      )
+    },
+    restoringStockOptions() {
+      if (!this.isRestoreReady) return []
+
+      const selectedKey = this.restoringAttributes
+        .map((valueId, index) => {
+          const attr = this.$parent.selectedAttributes[index]
+          return `${attr.id}:${valueId}`
+        })
+        .sort()
+        .join('|')
+
+      const matchedStocks = this.trashVariants
+        .filter(variant => {
+          const key = variant.attributes
+            .map(a => `${a.attribute.id}:${a.value.id}`)
+            .sort()
+            .join('|')
+          return key === selectedKey
+        })
+        .map(v => v.stock_id)
+
+      return [...new Set(matchedStocks)]
     }
   },
   methods: {

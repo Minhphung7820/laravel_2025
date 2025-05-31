@@ -192,8 +192,8 @@ export default {
         : URL.createObjectURL(this.form.cover_image)
     },
     galleryImagePreviews() {
-      return this.form.gallery_images.map(file =>
-        typeof file === 'string' ? file : URL.createObjectURL(file)
+      return this.form.gallery_images.map(img =>
+        img.isOld ? img.url : URL.createObjectURL(img.file)
       )
     },
     hasTrashVariants() {
@@ -530,7 +530,10 @@ export default {
           this.form.cover_image = product.image_cover_url
         }
         if (Array.isArray(product.gallery_images)) {
-          this.form.gallery_images = product.gallery_images.map(img => img.image_url)
+          this.form.gallery_images = product.gallery_images.map(img => ({
+            url: img.image_url, // ảnh cũ từ backend
+            isOld: true
+          }))
         }
         this.form.stock_data = product.stock_data || []
         //
@@ -623,7 +626,10 @@ export default {
       this.form.cover_image = null
     },
     handleGalleryImages(e) {
-      const newFiles = Array.from(e.target.files)
+      const newFiles = Array.from(e.target.files).map(file => ({
+        file,
+        isOld: false
+      }))
       this.form.gallery_images.push(...newFiles)
     },
     removeGalleryImage(index) {
@@ -646,9 +652,9 @@ export default {
         if (this.form.cover_image instanceof File) {
           formData.append('cover_image', this.form.cover_image)
         }
-        this.form.gallery_images.forEach((file, index) => {
-          if (file instanceof File) {
-            formData.append(`gallery_images[${index}]`, file)
+        this.form.gallery_images.forEach((img, index) => {
+          if (!img.isOld && img.file instanceof File) {
+            formData.append('gallery_images[]', img.file)
           }
         })
         const allVariants = [...this.form.variants, ...this.trashVariants]

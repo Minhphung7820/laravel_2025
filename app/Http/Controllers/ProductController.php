@@ -352,6 +352,10 @@ class ProductController extends Controller
             $result = $product->update($data);
 
             if ($request->hasFile('gallery_images')) {
+                // ❌ Xóa toàn bộ ảnh cũ của sản phẩm
+                ProductImage::where('product_id', $product->id)->delete();
+
+                // ✅ Insert lại các ảnh mới gửi lên
                 $imagesData = [];
                 foreach ($request->file('gallery_images') as $file) {
                     $path = $file->store('products/gallery', 'public');

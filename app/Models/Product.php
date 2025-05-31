@@ -21,7 +21,8 @@ class Product extends Model
         'category_id',
         'brand_id',
         'supplier_id',
-        'warranty'
+        'warranty',
+        'description'
     ];
 
     protected $appends = [

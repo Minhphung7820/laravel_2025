@@ -9,7 +9,7 @@
       <span class="text-sm text-gray-500">({{ trashVariants.length }})</span>
     </div>
 
-    <div ref="variantScrollContainer" class="rounded border border-gray-300 overflow-y-auto max-h-[500px] custom-scroll">
+    <div ref="variantScrollContainer" class="rounded border border-gray-300 overflow-y-auto max-h-[600px] custom-scroll">
       <table class="min-w-full divide-y divide-gray-200 text-sm">
         <thead class="bg-gray-100 sticky top-0 z-20">
           <tr>

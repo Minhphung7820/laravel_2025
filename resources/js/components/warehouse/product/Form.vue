@@ -110,8 +110,8 @@
       <label class="inline-flex items-center">
       <input
         type="checkbox"
-        :checked="form.has_variant"
-        @click.prevent="handleToggleHasVariant"
+        v-model="form.has_variant"
+        @change="onVariantCheckboxChange"
       />
       Sản phẩm có biến thể
       </label>
@@ -332,8 +332,8 @@ export default {
       this.trashVariants = []
       this.checkAndLoadVariants()
     },
-    async handleToggleHasVariant() {
-      const willUncheck = this.form.has_variant === true
+    async onVariantCheckboxChange(e) {
+      const willUncheck = !e.target.checked
 
       if (this.mode === 'update' && this.hasVariantInitial && willUncheck) {
         const result = await Swal.fire({
@@ -347,10 +347,11 @@ export default {
           cancelButtonColor: '#3085d6'
         })
 
-        if (!result.isConfirmed) return
+        if (!result.isConfirmed) {
+          this.form.has_variant = true
+          return
+        }
       }
-
-      this.form.has_variant = !this.form.has_variant
       this.onToggleVariantLogic()
     },
     onToggleVariantLogic() {
@@ -725,11 +726,19 @@ export default {
           headers: { 'Content-Type': 'multipart/form-data' }
         })
 
-        alert('✔️ Thành công!')
-        this.$router.push('/warehouse/product')
+      await Swal.fire({
+        icon: 'success',
+        title: 'Thành công!',
+        showConfirmButton: false,
+        timer: 1500
+      })
+      this.$router.push('/warehouse/product')
       } catch (err) {
-        console.error(err)
-        alert('❌ Thất bại khi gửi form.')
+        Swal.fire({
+          icon: 'error',
+          title: 'Thất bại khi gửi form.',
+          text: err?.response?.data?.message || 'Đã xảy ra lỗi. Vui lòng thử lại.'
+        })
       }
     },
   }

@@ -490,7 +490,7 @@ export default {
       }
     },
     async loadProduct() {
-      try {
+
         const res = await fetch(`/api/warehouse/product/detail/${this.id}`)
         const data = await res.json()
         const product = data.product
@@ -563,7 +563,10 @@ export default {
 
           this.selectedAttributes = []
           this.selectedAttributeValues = {}
-
+          // Khởi tạo giá trị rỗng cho từng attribute
+          this.variantAttributes.forEach(attr => {
+            this.selectedAttributeValues[attr.id] = []
+          })
           product.attributes.forEach(attr => {
             const variantIds = [
               attr.attribute_first?.variant_id,
@@ -579,13 +582,15 @@ export default {
               }
 
               if (!this.selectedAttributeValues[foundAttr.id]) {
-                this.selectedAttributeValues[foundAttr.id] = []
+                this.$set(this.selectedAttributeValues, foundAttr.id, [])
               }
 
               const idsToAdd = [attr.attribute_first?.id, attr.attribute_second?.id].filter(Boolean)
               idsToAdd.forEach(id => {
                 id = Number(id)
-                if (!this.selectedAttributeValues[foundAttr.id].includes(id)) {
+                // Chỉ thêm nếu giá trị này vẫn còn trong variantAttributes hiện tại
+                const exist = foundAttr.attributes.some(opt => opt.id === id)
+                if (exist && !this.selectedAttributeValues[foundAttr.id].includes(id)) {
                   this.selectedAttributeValues[foundAttr.id].push(id)
                 }
               })
@@ -594,10 +599,7 @@ export default {
 
           this.previewAttributes = this.selectedAttributes.map(a => a.title)
         }
-      } catch (err) {
-        console.error('Lỗi khi load product:', err)
-        alert('❌ Không thể tải dữ liệu sản phẩm')
-      }
+
     },
     handleCoverImage(e) {
       const file = e.target.files[0]

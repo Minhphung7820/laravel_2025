@@ -349,13 +349,16 @@ class ProductController extends Controller
             if (!$product) {
                 throw new Exception("Không tìm thấy sản phẩm !");
             }
+
             $result = $product->update($data);
+            $deletedIds = $request->input('deleted_gallery_ids', []);
+
+            if (is_array($deletedIds) && count($deletedIds) > 0) {
+                $validIds = array_filter($deletedIds, fn($id) => is_numeric($id));
+                ProductImage::whereIn('id', $validIds)->delete();
+            }
 
             if ($request->hasFile('gallery_images')) {
-                // ❌ Xóa toàn bộ ảnh cũ của sản phẩm
-                ProductImage::where('product_id', $product->id)->delete();
-
-                // ✅ Insert lại các ảnh mới gửi lên
                 $imagesData = [];
                 foreach ($request->file('gallery_images') as $file) {
                     $path = $file->store('products/gallery', 'public');

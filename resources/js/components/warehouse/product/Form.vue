@@ -219,6 +219,7 @@ export default {
         stock_data: [],
         cover_image: null,
         gallery_images: [],
+        deleted_gallery_ids : []
       },
       units: [],
       brands: [],
@@ -534,7 +535,8 @@ export default {
         }
         if (Array.isArray(product.gallery_images)) {
           this.form.gallery_images = product.gallery_images.map(img => ({
-            url: img.image_url, // ảnh cũ từ backend
+            id: img.id,
+            url: img.image_url,
             isOld: true
           }))
         }
@@ -636,6 +638,13 @@ export default {
       this.form.gallery_images.push(...newFiles)
     },
     removeGalleryImage(index) {
+      const img = this.form.gallery_images[index]
+      if (img && img.isOld && img.id) {
+        if (!Array.isArray(this.form.deleted_gallery_ids)) {
+          this.form.deleted_gallery_ids = []
+        }
+        this.form.deleted_gallery_ids.push(img.id)
+      }
       this.form.gallery_images.splice(index, 1)
     },
     async handleSubmit() {
@@ -660,6 +669,11 @@ export default {
             formData.append('gallery_images[]', img.file)
           }
         })
+        if (this.form.deleted_gallery_ids?.length) {
+          this.form.deleted_gallery_ids.forEach((id, i) => {
+            formData.append(`deleted_gallery_ids[]`, id)
+          })
+        }
         const allVariants = [...this.form.variants, ...this.trashVariants]
 
         allVariants.forEach((variant, i) => {

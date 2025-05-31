@@ -254,8 +254,6 @@ export default {
         this.trashVariants.splice(index, 1)
       }
       this.restoringVariant = null
-      console.log(this.trashVariants);
-
     },
     startRestore() {
       this.restoringVariant = {
@@ -274,9 +272,6 @@ export default {
         const variant = this.form.variants[index]
         this.trashVariants.push(variant)
         this.form.variants.splice(index, 1)
-    },
-    removeVariant(index) {
-      this.$emit('delete-variant', index)
     },
     isSameAttributes(a, b) {
       if (a.length !== b.length) return false

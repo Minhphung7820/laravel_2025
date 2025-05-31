@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -48,8 +47,8 @@ class CustomerController extends Controller
         }
 
         $validated = $request->validate([
-            'name'     => 'required|string|max:255',
-            'phone'    => [
+            'name'  => 'required|string|max:255',
+            'phone' => [
                 'required',
                 'string',
                 'max:20',

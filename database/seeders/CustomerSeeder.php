@@ -3,9 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\Customer;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 use Faker\Factory as Faker;
+use Illuminate\Database\Seeder;
 
 class CustomerSeeder extends Seeder
 {

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -48,13 +47,13 @@ class SupplierController extends Controller
         }
 
         $validated = $request->validate([
-            'name'     => 'required|string|max:255',
-            'phone'    => [
+            'name'  => 'required|string|max:255',
+            'phone' => [
                 'required',
                 'string',
                 'max:20',
                 \Illuminate\Validation\Rule::unique('customers', 'phone')
-                    ->where(fn($query) => $query->where('is_customer', 0)),
+                    ->where(fn ($query) => $query->where('is_customer', 0)),
             ],
             'email'            => 'nullable|email|max:255',
             'birthday'         => 'nullable|date',

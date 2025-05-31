@@ -419,6 +419,7 @@ export default {
           )
           if (!isTrashed) {
             newVariants.push({
+              id: old?.id ?? null,
               stock_id: stock.id,
               attributes: combo,
               quantity: old?.quantity || 0,

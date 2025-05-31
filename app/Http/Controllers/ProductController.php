@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Http\Resources\ProductAttributesResource;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ProductVariantImage;
 use App\Models\StockProduct;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -178,19 +178,19 @@ class ProductController extends Controller
 
             // Tạo sản phẩm chính
             $product = Product::create([
-                'name'           => $request->input('name'),
-                'sku'            => $request->input('sku'),
-                'barcode'        => $request->input('barcode'),
-                'type'           => $request->input('type'),
-                'have_variant'   => $request->boolean('has_variant'),
-                'have_serial'    => $request->boolean('has_serial'),
-                'warranty'       => $request->input('warranty'),
-                'unit_id'        => $request->input('unit_id'),
-                'brand_id'       => $request->input('brand_id'),
-                'category_id'    => $request->input('category_id'),
-                'supplier_id'    => $request->input('supplier_id'),
-                'image_cover'    => $coverPath ? '/storage/' . $coverPath : null,
-                'status'         => 'pending',
+                'name'         => $request->input('name'),
+                'sku'          => $request->input('sku'),
+                'barcode'      => $request->input('barcode'),
+                'type'         => $request->input('type'),
+                'have_variant' => $request->boolean('has_variant'),
+                'have_serial'  => $request->boolean('has_serial'),
+                'warranty'     => $request->input('warranty'),
+                'unit_id'      => $request->input('unit_id'),
+                'brand_id'     => $request->input('brand_id'),
+                'category_id'  => $request->input('category_id'),
+                'supplier_id'  => $request->input('supplier_id'),
+                'image_cover'  => $coverPath ? '/storage/' . $coverPath : null,
+                'status'       => 'pending',
             ]);
 
             // Lưu ảnh chính (gallery_images) hàng loạt
@@ -234,18 +234,18 @@ class ProductController extends Controller
             if ($request->has('variants')) {
                 foreach ($request->input('variants') as $i => $variant) {
                     $variantStock = StockProduct::create([
-                        'stock_id'             => $variant['stock_id'],
-                        'product_id'           => $product->id,
-                        'attribute_first_id'   => $variant['attributes'][0]['value_id'] ?? null,
-                        'attribute_second_id'  => $variant['attributes'][1]['value_id'] ?? null,
-                        'quantity'             => $variant['quantity'],
-                        'sell_price'           => $variant['sell_price'],
-                        'purchase_price'       => $variant['purchase_price'],
-                        'sku'                  => $variant['sku'] ?: $this->generateUniqueSku($request->input('sku') ?? 'SP'),
-                        'barcode'              => $variant['barcode'],
-                        'is_sale'              => $variant['is_sale'],
-                        'is_product_variant'   => 1,
-                        'product_type'         => 'variable'
+                        'stock_id'            => $variant['stock_id'],
+                        'product_id'          => $product->id,
+                        'attribute_first_id'  => $variant['attributes'][0]['value_id'] ?? null,
+                        'attribute_second_id' => $variant['attributes'][1]['value_id'] ?? null,
+                        'quantity'            => $variant['quantity'],
+                        'sell_price'          => $variant['sell_price'],
+                        'purchase_price'      => $variant['purchase_price'],
+                        'sku'                 => $variant['sku'] ?: $this->generateUniqueSku($request->input('sku') ?? 'SP'),
+                        'barcode'             => $variant['barcode'],
+                        'is_sale'             => $variant['is_sale'],
+                        'is_product_variant'  => 1,
+                        'product_type'        => 'variable'
                     ]);
 
                     // Lưu ảnh cho biến thể
@@ -270,12 +270,14 @@ class ProductController extends Controller
         }
     }
 
-    protected function generateUniqueSku($prefix)
+    protected function generateUniqueSku($prefix, $id = null)
     {
         do {
             $suffix = strtoupper(\Illuminate\Support\Str::random(6));
             $sku = "{$prefix}-{$suffix}";
-        } while (StockProduct::where('sku', $sku)->exists());
+        } while (StockProduct::where('sku', $sku)->when($id, function ($q) use ($id) {
+            return $q->where('id', '!=', $id);
+        })->exists());
 
         return $sku;
     }
@@ -293,8 +295,8 @@ class ProductController extends Controller
         ])->findOrFail($id);
 
         return [
-            'product'         => $product,
-            'stock_products'  => ProductAttributesResource::collection($product->attributes ?? []),
+            'product'        => $product,
+            'stock_products' => ProductAttributesResource::collection($product->attributes ?? []),
         ];
     }
 
@@ -311,7 +313,153 @@ class ProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $coverPath = null;
+            if ($request->hasFile('cover_image')) {
+                $coverPath = $request->file('cover_image')->store('products/cover', 'public');
+            }
+            $data = [
+                'name'        => $request['name'],
+                'sku'         => $request['sku'] ?? '',
+                'barcode'     => $request['barcode'] ?? '',
+                'has_serial'  => $request['has_serial'] ?? '',
+                'warranty'    => $request['warranty'] ?? '',
+                'unit_id'     => $request['unit_id'] ?? null,
+                'brand_id'    => $request['brand_id'] ?? null,
+                'category_id' => $request['category_id'] ?? null,
+                'supplier_id' => $request['supplier_id'] ?? null,
+                'description' => $request['description'] ?? '',
+                'has_variant' => $request['has_variant'] ?? 0,
+                'type'        => $request['type'] ?? 'single',
+                'image_cover' => $coverPath ? '/storage/' . $coverPath : null,
+                'status'      => 'pending'
+            ];
+            $attributes = $request['variants'] ?? [];
+            if (empty($attributes)) {
+                throw new Exception("Vui lòng chọn ít nhất 1 biến thể !");
+            }
+            $stocks = json_decode($request['stock_data'], true);
+            if (empty($stocks)) {
+                throw new Exception("Vui lòng chọn ít nhất 1 kho !");
+            }
+            $product = Product::findOrFail($id);
+            if (!$product) {
+                throw new Exception("Không tìm thấy sản phẩm !");
+            }
+            $result = $product->update($data);
+
+            if ($request->hasFile('gallery_images')) {
+                $imagesData = [];
+                foreach ($request->file('gallery_images') as $file) {
+                    $path = $file->store('products/gallery', 'public');
+                    $imagesData[] = [
+                        'product_id' => $product->id,
+                        'image'      => '/storage/' . $path,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+                ProductImage::insert($imagesData);
+            }
+
+            if ($result) {
+                $stockData = [];
+                foreach ($stocks as $key => $stock) {
+                    $fillStock = [
+                        'id'                   => $stock['id'] ?? null,
+                        'product_id'           => $id,
+                        'quantity'             => $stock['quantity'] ?? 0,
+                        'max_discount_percent' => $stock['max_discount_percent'] ?? 0,
+                        'max_increase_percent' => $stock['max_increase_percent'] ?? 0,
+                        'auto_calc'            => $stock['auto_calc'] ?? 1
+                    ];
+                    if ($data['type'] !== 'variable') {
+                        $fillStock = array_merge($fillStock, ['sell_price' => 0, 'purchase_price' => 0]);
+                    } else {
+                        $fillStock = array_merge($fillStock, ['sell_price' => 0, 'purchase_price' => 0]);
+                    }
+                    $stockData[] = $fillStock;
+                }
+
+                batch(new StockProduct(), array_filter($stockData, function ($item) {
+                    return !is_null($item['id']);
+                }), 'id');
+
+                StockProduct::insert(array_filter($stockData, function ($item) {
+                    return is_null($item['id']);
+                }));
+
+                StockProduct::where('product_id', $id)
+                    ->where('product_type', 'root_stock')
+                    ->whereNotIn('id', array_column($stockData, 'id'))
+                    ->delete();
+
+                if ($data['type'] === 'variable') {
+                    $canceledVariant = [];
+                    foreach ($attributes as $key => $attribute) {
+                        // Xử lý SKU
+                        $sku = $attribute['sku'] ?: $this->generateUniqueSku($request->input('sku') ?? 'SP', $attribute['id'] ?? null);
+                        // Chuẩn bị dữ liệu cập nhật
+                        $fillAttribute = [
+                            'id'                   => $attribute['id'] ?? null,
+                            'product_id'           => $id,
+                            'stock_id'             => $attribute['stock_id'] ?? null,
+                            'quantity'             => $attribute['quantity'] ?? 0,
+                            'sell_price'           => $attribute['sell_price'] ?? 0,
+                            'purchase_price'       => $attribute['purchase_price'] ?? 0,
+                            'sku'                  => $sku,
+                            'barcode'              => $attribute['barcode'] ?? '',
+                            'is_sale'              => $attribute['is_sale'] ?? 1,
+                            'max_discount_percent' => $attribute['max_discount_percent'] ?? 0,
+                            'max_increase_percent' => $attribute['max_increase_percent'] ?? 0,
+                            'auto_calc'            => $attribute['auto_calc'] ?? 1,
+                            'is_using'             => $attribute['is_using'] ?? 1,
+                            'attribute_first_id'   => $attribute['attributes'][0]['value_id'] ?? null,
+                            'attribute_second_id'  => $attribute['attributes'][1]['value_id'] ?? null,
+                            'product_type'         => 'variable',
+                            'is_product_variant'   => 1
+                        ];
+
+                        // Tạo mới hoặc cập nhật
+                        $attributeModel = is_null($fillAttribute['id'])
+                            ? StockProduct::create($fillAttribute)
+                            : tap(StockProduct::findOrFail($fillAttribute['id']))->update($fillAttribute);
+
+                        if (!$attributeModel) {
+                            throw new \Exception("Lỗi khi thêm biến thể!");
+                        }
+
+                        $canceledVariant[] = $attributeModel->id;
+
+                        // Xử lý ảnh nếu có
+                        if ($request->hasFile("variants.$key.image")) {
+                            $file = $request->file("variants.$key.image");
+                            $path = $file->store('products/variants', 'public');
+
+                            ProductVariantImage::create([
+                                'stock_product_id' => $attributeModel->id,
+                                'image'            => '/storage/' . $path,
+                            ]);
+                        }
+                    }
+
+                    // Xóa các biến thể không còn sử dụng
+                    if (!empty($canceledVariant)) {
+                        StockProduct::where('product_id', $id)
+                            ->where('product_type', 'variable')
+                            ->whereNotIn('id', $canceledVariant)
+                            ->delete();
+                    }
+                }
+            }
+
+            DB::commit();
+            return response()->json(['message' => 'Chỉnh sửa sản phẩm thành công!'], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     /**

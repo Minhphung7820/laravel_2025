@@ -354,7 +354,7 @@ class ProductController extends Controller
             $deletedIds = $request->input('deleted_gallery_ids', []);
 
             if (is_array($deletedIds) && count($deletedIds) > 0) {
-                $validIds = array_filter($deletedIds, fn($id) => is_numeric($id));
+                $validIds = array_filter($deletedIds, fn ($id) => is_numeric($id));
                 ProductImage::whereIn('id', $validIds)->delete();
             }
 

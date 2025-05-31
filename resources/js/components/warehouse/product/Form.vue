@@ -513,7 +513,7 @@ export default {
           name: product.name,
           sku: product.sku,
           barcode: product.barcode,
-          has_serial: Boolean(product.has_serial),
+          has_serial: Number(product.have_serial) === 1,
           warranty: product.warranty,
           unit_id: product.unit_id,
           brand_id: product.brand_id,
@@ -521,7 +521,7 @@ export default {
           supplier_id: product.supplier_id,
           description: product.description || '',
           type: product.type,
-          has_variant: Boolean(product.have_variant),
+          has_variant: Number(product.have_variant) === 1,
         })
 
         this.hasVariantInitial = this.form.has_variant

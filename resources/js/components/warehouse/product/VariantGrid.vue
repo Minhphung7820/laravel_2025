@@ -2,10 +2,11 @@
   <div class="mt-6 space-y-4">
     <h2 class="text-xl font-semibold text-blue-600">Lưới biến thể sản phẩm</h2>
 
-    <div v-if="trashVariants.length" class="flex justify-end mb-2">
+    <div v-if="trashVariants.length" class="flex justify-end items-center gap-2 mb-2">
       <button @click="$emit('start-restore')" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
         + Khôi phục dòng
       </button>
+      <span class="text-sm text-gray-500">({{ trashVariants.length }})</span>
     </div>
 
     <div class="overflow-auto rounded border border-gray-300">
@@ -23,7 +24,7 @@
             <th class="px-4 py-2 font-semibold">SKU</th>
             <th class="px-4 py-2 font-semibold">Barcode</th>
             <th class="px-4 py-2 font-semibold">Mở bán</th>
-            <th class="px-4 py-2 font-semibold text-center">Xóa</th>
+            <th class="px-4 py-2 font-semibold text-center">Thao tác</th>
           </tr>
         </thead>
         <tbody>
@@ -61,8 +62,9 @@
               </select>
             </td>
             <td colspan="6" class="px-4 py-2 text-center text-gray-400">(Các trường khác bị vô hiệu hóa)</td>
-            <td class="px-4 py-2 text-center">
+            <td class="px-4 py-2 text-center space-x-2">
               <button @click="confirmRestore" class="text-green-600 hover:text-green-800 font-bold text-xl leading-none">✔</button>
+              <button @click="cancelRestore" class="text-gray-500 hover:text-gray-700 font-bold text-xl leading-none">×</button>
             </td>
           </tr>
 
@@ -214,6 +216,11 @@ export default {
       for (let i = index + 1; i < this.restoringAttributes.length; i++) {
         this.restoringAttributes[i] = ''
       }
+      this.restoringStock = ''
+    },
+    cancelRestore() {
+      this.$emit('cancel-restore')
+      this.restoringAttributes = []
       this.restoringStock = ''
     },
     confirmRestore() {

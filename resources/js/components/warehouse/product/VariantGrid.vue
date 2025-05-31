@@ -29,7 +29,12 @@
         <tbody>
           <tr v-if="restoringVariant">
             <td v-for="(attrName, index) in previewAttributes" :key="'restore-' + index" class="px-4 py-2">
-              <select v-model="restoringAttributes[index]" class="w-32 px-2 py-1 border rounded">
+              <select
+                v-model="restoringAttributes[index]"
+                class="w-32 px-2 py-1 border rounded"
+                :disabled="index > 0 && !restoringAttributes[index - 1]"
+                @change="onRestoreAttrChange(index)"
+              >
                 <option value="">Chọn</option>
                 <option
                   v-for="opt in getDeletedAttributeOptions(index)"
@@ -187,10 +192,29 @@ export default {
         }
       })
 
-      return attrObj.attributes.filter(a => used.includes(a.id)).map(a => ({
-        valueId: a.id,
-        valueTitle: a.title
-      }))
+      if (index > 0 && this.restoringAttributes[index - 1]) {
+        const prevAttr = this.previewAttributes[index - 1]
+        const prevAttrObj = this.$parent.selectedAttributes.find(a => a.title === prevAttr)
+        const prevVal = this.restoringAttributes[index - 1]
+
+        return attrObj.attributes.filter(a => {
+          return this.trashVariants.some(v =>
+            v.attributes.some(attr =>
+              attr.attribute.id === attrObj.id &&
+              a.id === attr.value.id &&
+              v.attributes.some(p => p.attribute.id === prevAttrObj.id && p.value.id == prevVal)
+            )
+          )
+        }).map(a => ({ valueId: a.id, valueTitle: a.title }))
+      }
+
+      return attrObj.attributes.filter(a => used.includes(a.id)).map(a => ({ valueId: a.id, valueTitle: a.title }))
+    },
+    onRestoreAttrChange(index) {
+      for (let i = index + 1; i < this.restoringAttributes.length; i++) {
+        this.restoringAttributes[i] = ''
+      }
+      this.restoringStock = ''
     },
     confirmRestore() {
       if (this.restoringAttributes.includes('') || !this.restoringStock) {

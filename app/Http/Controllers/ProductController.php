@@ -375,6 +375,7 @@ class ProductController extends Controller
                     $fillStock = [
                         'id'                   => $stock['id'] ?? null,
                         'product_id'           => $id,
+                        'stock_id'             => $stock['stock_id'] ?? null,
                         'quantity'             => $stock['quantity'] ?? 0,
                         'max_discount_percent' => $stock['max_discount_percent'] ?? 0,
                         'max_increase_percent' => $stock['max_increase_percent'] ?? 0,

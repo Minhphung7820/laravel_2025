@@ -90,6 +90,7 @@ export default {
         if (!this.localData[stock.id]) {
           // Vue 3: Gán trực tiếp là reactive, không cần this.$set
           this.localData[stock.id] = {
+            stock_id : stock.id,
             qty: 0,
             purchase_price: 0,
             sell_price: 0,

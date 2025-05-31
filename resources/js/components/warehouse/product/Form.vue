@@ -483,6 +483,7 @@ export default {
 
         data.stock_products.forEach(v => {
           const variant = {
+            id: v.id,
             stock_id: v.stock_id,
             quantity: v.quantity,
             sell_price: v.sell_price,
@@ -594,6 +595,9 @@ export default {
         const allVariants = [...this.form.variants, ...this.trashVariants]
 
         allVariants.forEach((variant, i) => {
+          if (variant.id) {
+            formData.append(`variants[${i}][id]`, variant.id)
+          }
           formData.append(`variants[${i}][stock_id]`, variant.stock_id)
           formData.append(`variants[${i}][quantity]`, variant.quantity)
           formData.append(`variants[${i}][sell_price]`, variant.sell_price)

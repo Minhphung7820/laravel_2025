@@ -255,8 +255,11 @@ export default {
   },
   async mounted() {
     this.form.type = this.type
-    await this.loadInitialData()
-    if (this.mode === 'update' && this.id) await this.loadProduct()
+    const promises = [this.loadInitialData()]
+    if (this.mode === 'update' && this.id) {
+      promises.push(this.loadProduct())
+    }
+    await Promise.all(promises)
   },
   methods: {
     onVariantImageChange({ index, file }) {

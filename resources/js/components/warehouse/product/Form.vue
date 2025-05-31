@@ -324,7 +324,7 @@ export default {
       return JSON.stringify(aKeys) === JSON.stringify(bKeys)
     },
     onCategoryChange() {
-      this.isMappingVariantData = false
+      this.isMappingVariantData = this.mode === 'create';
       this.selectedAttributes = []
       this.selectedAttributeValues = {}
       this.previewAttributes = []
@@ -355,7 +355,7 @@ export default {
       this.onToggleVariantLogic()
     },
     onToggleVariantLogic() {
-      this.isMappingVariantData = false
+      this.isMappingVariantData = this.mode === 'create';
       this.form.type = this.form.has_variant ? 'variable' : 'single'
       this.selectedAttributes = []
       this.selectedAttributeValues = {}
@@ -366,13 +366,21 @@ export default {
     },
     onValueChange(event, attrId, valueId) {
       const isChecked = event.target.checked
-      if (!isChecked && !valueId) {
-        this.trashVariants = this.trashVariants.filter(variant => {
-          return variant.attributes.every(attr => {
-            return attr.attribute.id !== attrId
+      if (!isChecked && (!valueId || valueId)) {
+         if(!valueId){
+          this.trashVariants = this.trashVariants.filter(variant => {
+            return variant.attributes.every(attr => {
+              return attr.attribute.id !== attrId
+            })
           })
-        })
-        this.selectedAttributeValues[attrId] = []
+          this.selectedAttributeValues[attrId] = []
+         } else if(valueId){
+          this.trashVariants = this.trashVariants.filter(variant => {
+            return variant.attributes.every(attr => {
+              return attr.value.id !== valueId
+            })
+          })
+         }
       } else {
          this.trashVariants = this.trashVariants.filter(variant => {
             return variant.attributes.every(attr => {

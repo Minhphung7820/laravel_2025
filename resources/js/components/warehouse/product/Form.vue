@@ -231,6 +231,7 @@ export default {
       isMappingVariantData: true,
       trashVariants: [],
       restoringVariant: null,
+      hasVariantInitial: false
     }
   },
   watch: {
@@ -320,6 +321,14 @@ export default {
       this.checkAndLoadVariants()
     },
     onToggleVariant() {
+      if (this.mode === 'update' && this.hasVariantInitial && !this.form.has_variant) {
+        const confirmReset = confirm('⚠️ Bạn đang bỏ chọn "Sản phẩm có biến thể". Thao tác này sẽ xóa toàn bộ lưới biến thể đang có. Bạn có chắc chắn không?')
+        if (!confirmReset) {
+          this.form.has_variant = true
+          return
+        }
+      }
+
       this.isMappingVariantData = false
       this.form.type = this.form.has_variant ? 'variable' : 'single'
       this.selectedAttributes = []
@@ -498,6 +507,8 @@ export default {
           type: product.type,
           has_variant: Boolean(product.have_variant),
         })
+
+        this.hasVariantInitial = this.form.has_variant
 
         if (product.image_cover_url) {
           this.form.cover_image = product.image_cover_url

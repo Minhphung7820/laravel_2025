@@ -10,6 +10,7 @@ use App\Models\StockProduct;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Search\StockProductSearchService;
 
 class ProductController extends Controller
 {
@@ -17,10 +18,27 @@ class ProductController extends Controller
      * Display a listing of the resource.
      */
 
-    public function index(Request $request)
+    public function index(Request $request, StockProductSearchService $searchService)
     {
         $limit = $request->input('limit', 20);
         $urlPrefix = url('/');
+        $keyword = $request->input('keyword');
+        $status = $request->input('status');
+        $page = $request->input('page', 1);
+
+        $ids = [];
+
+        if ($keyword) {
+            $result = $searchService->search($keyword, $page, $limit);
+            $ids = collect($result['hits']['hits'])->pluck('_id')->toArray();
+            if (empty($ids)) {
+                return response()->json([
+                    'data' => [],
+                    'total' => 0,
+                    'current_page' => $page,
+                ]);
+            }
+        }
 
         $query = DB::table('stock_products as st')
             ->join('products as p', 'st.product_id', '=', 'p.id')
@@ -39,20 +57,17 @@ class ProductController extends Controller
                 });
             });
 
-        // Filter theo tên, sku
-        if ($search = $request->input('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('p.name', 'like', "%{$search}%")
-                    ->orWhere('st.sku', 'like', "%{$search}%");
-            });
+        // 🔥 Áp dụng lọc từ Elasticsearch
+        if (!empty($ids)) {
+            $query->whereIn('st.id', $ids);
         }
 
-        // Filter theo status
-        if ($status = $request->input('status')) {
+        // Lọc status như cũ
+        if ($status) {
             $query->where('p.status', $status);
         }
 
-        // Chọn các cột cần thiết
+        // Chọn các cột như cũ
         $query->select([
             'st.id',
             'st.product_id',
@@ -65,37 +80,32 @@ class ProductController extends Controller
             'st.quantity',
             'u.name as unit_name',
             DB::raw("CASE
-        WHEN p.type = 'variable' THEN (
-            SELECT CONCAT('$urlPrefix', pvi.image)
-            FROM product_variant_images pvi
-            WHERE pvi.stock_product_id = st.id
-            LIMIT 1
-        )
-        ELSE CONCAT('$urlPrefix', p.image_cover)
-    END AS image"),
+            WHEN p.type = 'variable' THEN (
+                SELECT CONCAT('$urlPrefix', pvi.image)
+                FROM product_variant_images pvi
+                WHERE pvi.stock_product_id = st.id
+                LIMIT 1
+            )
+            ELSE CONCAT('$urlPrefix', p.image_cover)
+        END AS image"),
             'p.status',
-
-            // ✅ Thêm field product_type_text
             DB::raw("CASE
-        WHEN p.type = 'variable' THEN 'Sản phẩm biến thể'
-        WHEN p.type = 'single' THEN 'Sản phẩm đơn'
-        WHEN p.type = 'combo' THEN 'Sản phẩm combo'
-        ELSE 'Không xác định'
-    END AS product_type_text"),
-
-            // ✅ Thêm field status_text
+            WHEN p.type = 'variable' THEN 'Sản phẩm biến thể'
+            WHEN p.type = 'single' THEN 'Sản phẩm đơn'
+            WHEN p.type = 'combo' THEN 'Sản phẩm combo'
+            ELSE 'Không xác định'
+        END AS product_type_text"),
             DB::raw("CASE
-        WHEN p.status = 'pending' THEN 'Đang chờ'
-        WHEN p.status = 'approved' THEN 'Đã duyệt'
-        ELSE 'Không rõ'
-    END AS status_text"),
+            WHEN p.status = 'pending' THEN 'Đang chờ'
+            WHEN p.status = 'approved' THEN 'Đã duyệt'
+            ELSE 'Không rõ'
+        END AS status_text"),
         ])
             ->orderByRaw("
-            CASE
-                WHEN p.type = 'variable' THEN st.created_at
-                ELSE p.created_at
-            END DESC
-        ");
+        CASE
+            WHEN p.type = 'variable' THEN st.created_at
+            ELSE p.created_at
+        END DESC");
 
         $results = $query->paginate($limit);
 
@@ -354,7 +364,7 @@ class ProductController extends Controller
             $deletedIds = $request->input('deleted_gallery_ids', []);
 
             if (is_array($deletedIds) && count($deletedIds) > 0) {
-                $validIds = array_filter($deletedIds, fn ($id) => is_numeric($id));
+                $validIds = array_filter($deletedIds, fn($id) => is_numeric($id));
                 ProductImage::whereIn('id', $validIds)->delete();
             }
 

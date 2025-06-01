@@ -15,36 +15,33 @@
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-100 sticky top-0 z-10">
           <tr>
+            <th v-if="withCheckbox" class="px-4 py-3"><input type="checkbox" @change="toggleAll" :checked="allSelected" /></th>
             <th v-for="col in columns" :key="col.key" class="px-4 py-3 text-left font-semibold text-sm text-gray-700 uppercase tracking-wider">
               {{ col.label }}
             </th>
-              <th class="px-4 py-3"></th>
+            <th class="px-4 py-3"></th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 bg-white">
-          <tr v-for="item in data" :key="item.id" class="hover:bg-blue-50 transition-all duration-200">
-          <td
-            v-for="col in columns"
-            :key="col.key"
-            class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap"
+          <tr
+            v-for="item in data"
+            :key="item.id"
+            class="hover:bg-blue-50 transition-all duration-200"
           >
-            <template v-if="col.type === 'image_file' && item[col.key]">
-              <img
-                :src="`${item[col.key]}`"
-                alt="ảnh"
-                class="w-10 h-10 rounded-full object-cover border"
-              />
-            </template>
-            <template v-else>
-              {{ item[col.key] }}
-            </template>
-          </td>
-          <td class="px-4 py-2 text-center">
-            <slot name="actions" :item="item" />
-          </td>
-          </tr>
-          <tr v-if="!data.length">
-            <td :colspan="columns.length" class="text-center py-6 text-gray-500 italic">Không có dữ liệu</td>
+            <td v-if="withCheckbox" class="px-4 py-2">
+              <input type="checkbox" :value="item" v-model="selected" @change="$emit('selection-change', selected)" />
+            </td>
+            <td v-for="col in columns" :key="col.key" class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap">
+              <template v-if="col.type === 'image_file' && item[col.key]">
+                <img :src="item[col.key]" class="w-10 h-10 rounded-full object-cover border" />
+              </template>
+              <template v-else>
+                {{ item[col.key] }}
+              </template>
+            </td>
+            <td class="px-4 py-2 text-center">
+              <slot name="actions" :item="item" />
+            </td>
           </tr>
         </tbody>
       </table>
@@ -124,14 +121,19 @@ export default {
     placeholder: {
       type: String,
       default: 'Nhập nội dung...'
-    }
+    },
+    withCheckbox: { type: Boolean, default: false }
   },
   data() {
     return {
-      search: ''
+      search: '',
+      selected: []
     }
   },
   computed: {
+    allSelected() {
+      return this.data.length > 0 && this.selected.length === this.data.length
+    },
     pagesToShow() {
       const current = this.pagination.current_page
       const last = this.pagination.last_page
@@ -150,6 +152,12 @@ export default {
       if (current < last - 2) pages.push(last)
 
       return pages
+    }
+  },
+  methods: {
+    toggleAll(e) {
+      this.selected = e.target.checked ? [...this.data] : []
+      this.$emit('selection-change', this.selected)
     }
   }
 }

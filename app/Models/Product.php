@@ -38,7 +38,7 @@ class Product extends Model
 
     public function getImageCoverUrlAttribute()
     {
-        return $this->image_cover ? url($this->image_cover) : null;
+        return $this->image_cover ? url($this->image_cover) : env('IMAGE_DEFAULT');
     }
 
     public function getStatusTextAttribute()

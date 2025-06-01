@@ -18,7 +18,7 @@ class ProductVariantImage extends Model
 
     public function getImageUrlAttribute()
     {
-        return $this->image ? url($this->image) : null;
+        return $this->image ? url($this->image) : env('IMAGE_DEFAULT');
     }
 
     public function stockProduct()

@@ -54,8 +54,8 @@ class ProductController extends Controller
         $query->select([
             'st.id',
             'st.product_id',
-            'p.name as product_name',
             DB::raw("CASE WHEN p.type = 'variable' THEN st.sku ELSE p.sku END AS sku"),
+            'p.name as product_name',
             's.name as stock_name',
             'p.type as product_type',
             'st.purchase_price',
@@ -63,30 +63,30 @@ class ProductController extends Controller
             'st.quantity',
             'u.name as unit_name',
             DB::raw("CASE
-        WHEN p.type = 'variable' THEN (
-            SELECT CONCAT('$urlPrefix', pvi.image)
-            FROM product_variant_images pvi
-            WHERE pvi.stock_product_id = st.id
-            LIMIT 1
-        )
-        ELSE CONCAT('$urlPrefix', p.image_cover)
-    END AS image"),
+                WHEN p.type = 'variable' THEN
+                    COALESCE(CONCAT('$urlPrefix', pvi.image), '" . env('IMAGE_DEFAULT') . "')
+                ELSE
+                    COALESCE(CONCAT('$urlPrefix', p.image_cover), '" . env('IMAGE_DEFAULT') . "')
+            END AS image"),
+            DB::raw("CASE
+                WHEN p.type = 'variable' THEN 'Sản phẩm biến thể'
+                WHEN p.type = 'single' THEN 'Sản phẩm đơn'
+                WHEN p.type = 'combo' THEN 'Sản phẩm combo'
+                ELSE 'Không xác định'
+            END AS product_type_text"),
+            DB::raw("CASE
+                WHEN p.status = 'pending' THEN 'Đang chờ'
+                WHEN p.status = 'approved' THEN 'Đã duyệt'
+                ELSE 'Không rõ'
+            END AS status_text"),
             'p.status',
+        ]);
 
-            DB::raw("CASE
-        WHEN p.type = 'variable' THEN 'Sản phẩm biến thể'
-        WHEN p.type = 'single' THEN 'Sản phẩm đơn'
-        WHEN p.type = 'combo' THEN 'Sản phẩm combo'
-        ELSE 'Không xác định'
-    END AS product_type_text"),
+        $query->leftJoin('product_variant_images as pvi', function ($join) {
+            $join->on('pvi.stock_product_id', '=', 'st.id');
+        });
 
-            DB::raw("CASE
-        WHEN p.status = 'pending' THEN 'Đang chờ'
-        WHEN p.status = 'approved' THEN 'Đã duyệt'
-        ELSE 'Không rõ'
-    END AS status_text"),
-        ])
-            ->orderByRaw("
+        $query->orderByRaw("
             CASE
                 WHEN p.type = 'variable' THEN st.created_at
                 ELSE p.created_at
@@ -96,6 +96,78 @@ class ProductController extends Controller
         $results = $query->paginate($limit);
 
         return response()->json($results);
+    }
+
+    public function getInitCombo(Request $request)
+    {
+        $limit = $request->input('limit', 20);
+        $search = $request->input('keyword');
+        $urlPrefix = url('/');
+        $imageDefault = env('IMAGE_DEFAULT');
+
+        $query = \App\Models\StockProduct::with([
+            'product:id',
+            'product.stockData'
+        ])
+            ->select([
+                'stock_products.id',
+                'stock_products.product_id',
+                DB::raw("CASE WHEN products.type = 'variable' THEN stock_products.sku ELSE products.sku END AS sku"),
+                'products.name as product_name',
+                'stocks.name as stock_name',
+                'products.type as product_type',
+                'stock_products.purchase_price',
+                'stock_products.sell_price',
+                'stock_products.quantity',
+                'units.name as unit_name',
+                DB::raw("CASE
+                WHEN products.type = 'variable' THEN
+                    COALESCE(CONCAT('$urlPrefix', product_variant_images.image), '$imageDefault')
+                ELSE
+                    COALESCE(CONCAT('$urlPrefix', products.image_cover), '$imageDefault')
+            END AS image"),
+                DB::raw("CASE
+                WHEN products.type = 'variable' THEN 'Sản phẩm biến thể'
+                WHEN products.type = 'single' THEN 'Sản phẩm đơn'
+                WHEN products.type = 'combo' THEN 'Sản phẩm combo'
+                ELSE 'Không xác định'
+            END AS product_type_text"),
+                DB::raw("CASE
+                WHEN products.status = 'pending' THEN 'Đang chờ'
+                WHEN products.status = 'approved' THEN 'Đã duyệt'
+                ELSE 'Không rõ'
+            END AS status_text"),
+                'products.status'
+            ])
+            ->join('products', 'stock_products.product_id', '=', 'products.id')
+            ->join('stocks', function ($join) {
+                $join->on('stock_products.stock_id', '=', 'stocks.id')
+                    ->where('stocks.is_default', 1);
+            })
+            ->leftJoin('units', 'stock_products.unit_id', '=', 'units.id')
+            ->leftJoin('product_variant_images', 'product_variant_images.stock_product_id', '=', 'stock_products.id')
+            ->where(function ($q) {
+                $q->where(function ($q2) {
+                    $q2->where('products.type', 'variable')
+                        ->where('stock_products.product_type', 'variable');
+                })->orWhere(function ($q2) {
+                    $q2->whereIn('products.type', ['single', 'combo'])
+                        ->where('stock_products.product_type', 'root_stock');
+                });
+            });
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('products.name', 'like', "%$search%")
+                    ->orWhere('stock_products.sku', 'like', "%$search%");
+            });
+        }
+        $query->orderByRaw("
+            CASE
+                WHEN products.type = 'variable' THEN stock_products.created_at
+                ELSE products.created_at
+            END DESC
+        ");
+        return response()->json($query->paginate($limit));
     }
 
     /**

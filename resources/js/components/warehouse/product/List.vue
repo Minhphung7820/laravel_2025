@@ -11,12 +11,20 @@
       :placeholder="'🔍 Tìm kiếm sản phẩm...'"
     >
       <template #buttons>
-        <button
-          class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 shadow font-semibold cursor-pointer"
-          @click="$router.push('/warehouse/product/create/variable')"
-        >
-          + Thêm sản phẩm
-        </button>
+        <div class="flex gap-2 justify-end">
+          <button
+            class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 shadow font-semibold cursor-pointer"
+            @click="$router.push('/warehouse/product/create/variable')"
+          >
+            + Thêm sản phẩm
+          </button>
+          <button
+            class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 shadow font-semibold cursor-pointer"
+            @click="$router.push('/warehouse/product/create/combo')"
+          >
+            + Thêm sản phẩm Combo
+          </button>
+        </div>
       </template>
       <template #actions="{ item }">
         <div class="relative" @click.stop>

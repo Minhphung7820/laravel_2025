@@ -94,6 +94,10 @@ const routes = [{
     component: CreateProductVariable
   },
   {
+    path: 'warehouse/product/create/combo',
+    component: CreateProductCombo
+  },
+  {
     path: 'warehouse/product/edit/:id/combo',
     component: EditProductCombo
   },

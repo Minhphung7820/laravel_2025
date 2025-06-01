@@ -1,6 +1,6 @@
 <template>
     <div class="p-4 bg-white rounded-xl shadow-md">
-      <Form mode="create" :type="'variable'" />
+      <Form mode="create" :type="'single'" />
     </div>
 </template>
 

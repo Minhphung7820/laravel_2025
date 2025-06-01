@@ -56,6 +56,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
             Route::post('/create', [ProductController::class, 'store']);
             Route::get('/detail/{id}', [ProductController::class, 'show']);
             Route::put('/update/{id}', [ProductController::class, 'update']);
+            Route::get('/get-init-combo', [ProductController::class, 'getInitCombo']);
         });
 
         Route::group(['prefix' => 'brand'], function () {

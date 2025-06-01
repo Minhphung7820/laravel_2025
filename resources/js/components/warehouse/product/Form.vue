@@ -63,7 +63,7 @@
         </select>
       </div>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div v-if="type !== 'combo'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
         <label class="block font-semibold">Nhà cung cấp *</label>
         <select v-model="form.supplier_id" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm">
@@ -106,7 +106,7 @@
       </div>
     </div>
     <!-- Biến thể -->
-    <div v-if="showVariantCheckbox || form.type !== 'combo'">
+    <div v-if="showVariantCheckbox || (mode === 'create' && form.type !== 'combo') || mode !== 'create'">
       <label class="inline-flex items-center">
       <input
         type="checkbox"
@@ -138,6 +138,10 @@
         </div>
       </div>
     </div>
+    <!-- Lưới Combo -->
+    <ComboGrid
+     v-if="form.type === 'combo'"
+     />
     <!-- Lưới biến thể -->
     <VariantGrid
       v-if="form.has_variant && form.category_id"
@@ -161,12 +165,13 @@
 
 <script>
 import VariantGrid from './VariantGrid.vue'
+import ComboGrid from './ComboGrid.vue'
 import StockPriceTable from './StockPriceTable.vue'
 import Swal from 'sweetalert2'
 
 export default {
   name: 'ProductForm',
-  components: { VariantGrid, StockPriceTable },
+  components: { VariantGrid, ComboGrid, StockPriceTable },
   props: {
     type: { type: String, default: 'single' },
     mode: { type: String, default: 'create' },
@@ -506,25 +511,27 @@ export default {
     async loadInitialData() {
       try {
         const headers = { Accept: 'application/json' }
-        const [unitRes, brandRes, categoryRes, supplierRes, stockRes] = await Promise.all([
+
+        const fetches = [
           fetch('/api/warehouse/unit/list', { headers }),
           fetch('/api/warehouse/brand/list', { headers }),
           fetch('/api/warehouse/category/list', { headers }),
-          fetch('/api/supplier/list', { headers }),
-          fetch('/api/warehouse/stock/list', { headers })
-        ])
-        const [units, brands, categories, suppliers, stocks] = await Promise.all([
-          unitRes.json(),
-          brandRes.json(),
-          categoryRes.json(),
-          supplierRes.json(),
-          stockRes.json()
-        ])
-        this.units = units.data
-        this.brands = brands.data
-        this.categories = categories.data
-        this.suppliers = suppliers.data
-        this.stocks = stocks.data
+          fetch('/api/warehouse/stock/list', { headers }),
+        ]
+
+        if (this.form.type !== 'combo') {
+          fetches.push(fetch('/api/supplier/list', { headers }))
+        }
+
+        const responses = await Promise.all(fetches)
+
+        const jsons = await Promise.all(responses.map(res => res.json()))
+
+        this.units = jsons[0].data
+        this.brands = jsons[1].data
+        this.categories = jsons[2].data
+        this.stocks = jsons[3].data
+        this.suppliers = this.form.type !== 'combo' ? jsons[4].data : []
       } catch (err) {
         console.error('Lỗi khi load dữ liệu:', err)
       }
@@ -601,7 +608,7 @@ export default {
         this.form.variants = variants
         this.trashVariants = trash
         //
-        if (this.form.has_variant && product.attributes?.length) {
+        if (this.form.has_variant) {
           this.isMappingVariantData = true
           await this.checkAndLoadVariants(true)
 

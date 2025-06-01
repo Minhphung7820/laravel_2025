@@ -13,14 +13,14 @@ class SyncAllStockProductsToElasticsearch extends Command
 
     public function handle()
     {
-        $this->info('🔁 Bắt đầu gửi job sync lên queue...');
+        // $this->info('🔁 Bắt đầu gửi job sync lên queue...');
 
-        $count = 0;
-        foreach (DB::table('stock_products')->select('id')->cursor() as $row) {
-            dispatch(new SyncStockProductToElasticsearchJob($row->id));
-            $count++;
-        }
+        // $count = 0;
+        // foreach (DB::table('stock_products')->select('id')->cursor() as $row) {
+        //     dispatch(new SyncStockProductToElasticsearchJob($row->id));
+        //     $count++;
+        // }
 
-        $this->info("✅ Đã gửi $count job đồng bộ lên queue.");
+        // $this->info("✅ Đã gửi $count job đồng bộ lên queue.");
     }
 }

@@ -40,7 +40,6 @@ class ProductController extends Controller
                 });
             });
 
-        // Filter theo tên, sku
         if ($search = $request->input('keyword')) {
             $query->where(function ($q) use ($search) {
                 $q->where('p.name', 'like', "%{$search}%")
@@ -48,12 +47,10 @@ class ProductController extends Controller
             });
         }
 
-        // Filter theo status
         if ($status = $request->input('status')) {
             $query->where('p.status', $status);
         }
 
-        // Chọn các cột cần thiết
         $query->select([
             'st.id',
             'st.product_id',
@@ -76,7 +73,6 @@ class ProductController extends Controller
     END AS image"),
             'p.status',
 
-            // ✅ Thêm field product_type_text
             DB::raw("CASE
         WHEN p.type = 'variable' THEN 'Sản phẩm biến thể'
         WHEN p.type = 'single' THEN 'Sản phẩm đơn'
@@ -84,7 +80,6 @@ class ProductController extends Controller
         ELSE 'Không xác định'
     END AS product_type_text"),
 
-            // ✅ Thêm field status_text
             DB::raw("CASE
         WHEN p.status = 'pending' THEN 'Đang chờ'
         WHEN p.status = 'approved' THEN 'Đã duyệt'

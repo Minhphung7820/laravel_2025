@@ -511,27 +511,35 @@ export default {
     async loadInitialData() {
       try {
         const headers = { Accept: 'application/json' }
-
         const fetches = [
           fetch('/api/warehouse/unit/list', { headers }),
           fetch('/api/warehouse/brand/list', { headers }),
           fetch('/api/warehouse/category/list', { headers }),
-          fetch('/api/warehouse/stock/list', { headers }),
         ]
-
-        if (this.form.type !== 'combo') {
+        const isCreate = this.mode === 'create'
+        const isNotCombo = this.form.type !== 'combo'
+        if (isCreate) {
+          fetches.push(fetch('/api/warehouse/stock/list', { headers }))
+        }
+        if (isNotCombo) {
           fetches.push(fetch('/api/supplier/list', { headers }))
         }
-
         const responses = await Promise.all(fetches)
-
-        const jsons = await Promise.all(responses.map(res => res.json()))
-
-        this.units = jsons[0].data
-        this.brands = jsons[1].data
-        this.categories = jsons[2].data
-        this.stocks = jsons[3].data
-        this.suppliers = this.form.type !== 'combo' ? jsons[4].data : []
+        const jsons = await Promise.all(responses.map(async (res, i) => {
+          if (!res.ok) {
+            throw new Error(`Request ${i} failed with status ${res.status}`)
+          }
+          return await res.json()
+        }))
+        this.units = jsons[0]?.data || []
+        this.brands = jsons[1]?.data || []
+        this.categories = jsons[2]?.data || []
+        if(isCreate){
+           this.stocks =(jsons[3]?.data || [])
+        }
+        this.suppliers = isNotCombo
+          ? (isCreate ? (jsons[4]?.data || []) : (jsons[3]?.data || []))
+          : []
       } catch (err) {
         console.error('Lỗi khi load dữ liệu:', err)
       }
@@ -569,7 +577,32 @@ export default {
             isOld: true
           }))
         }
-        this.form.stock_data = product.stock_data || []
+        const stockDataObj = {}
+        product.stock_data.forEach(item => {
+          stockDataObj[item.stock_id] = {
+            id: item.id,
+            stock_id: item.stock_id,
+            qty: item.quantity ?? 0,
+            purchase_price: item.purchase_price ?? 0,
+            sell_price: item.sell_price ?? 0,
+            max_discount_percent: item.max_discount_percent ?? 0,
+            max_increase_percent: item.max_increase_percent ?? 0,
+            auto_calc: item.auto_calc === 1,
+            name: item.stock?.name || ''
+          }
+        })
+        this.form.stock_data = stockDataObj
+        this.stocks = Object.keys(stockDataObj).map(stockId => ({
+          stock_id: parseInt(stockId),
+          name: stockDataObj[stockId].name,
+          qty: stockDataObj[stockId].quantity ?? 0,
+          purchase_price: stockDataObj[stockId].purchase_price ?? 0,
+          sell_price: stockDataObj[stockId].sell_price ?? 0,
+          max_discount_percent: stockDataObj[stockId].max_discount_percent ?? 0,
+          max_increase_percent: stockDataObj[stockId].max_increase_percent ?? 0,
+          auto_calc: stockDataObj[stockId].auto_calc === 1,
+          name: stockDataObj[stockId].name || ''
+        }))
         //
         const variants = []
         const trash = []
@@ -687,8 +720,35 @@ export default {
             formData.append(key, value ?? '')
           }
         })
-
-        formData.append('stock_data', JSON.stringify(this.form.stock_data))
+        const finalStockData = []
+        if (this.mode === 'update') {
+          Object.entries(this.form.stock_data).forEach(([stockId, row]) => {
+            finalStockData.push({
+              id:row.id??null,
+              stock_id: parseInt(stockId),
+              quantity: row.qty ?? 0,
+              purchase_price: row.purchase_price ?? 0,
+              sell_price: row.sell_price ?? 0,
+              max_discount_percent: row.max_discount_percent ?? 0,
+              max_increase_percent: row.max_increase_percent ?? 0,
+              auto_calc: row.auto_calc ? 1 : 0
+            })
+          })
+        } else {
+          Object.values(this.form.stock_data).forEach(row => {
+            finalStockData.push({
+              id: row.id ?? null,
+              stock_id: row.stock_id,
+              quantity: row.qty ?? 0,
+              purchase_price: row.purchase_price ?? 0,
+              sell_price: row.sell_price ?? 0,
+              max_discount_percent: row.max_discount_percent ?? 0,
+              max_increase_percent: row.max_increase_percent ?? 0,
+              auto_calc: row.auto_calc ? 1 : 0
+            })
+          })
+        }
+        formData.append('stock_data', JSON.stringify(finalStockData))
 
         if (this.form.cover_image instanceof File) {
           formData.append('cover_image', this.form.cover_image)

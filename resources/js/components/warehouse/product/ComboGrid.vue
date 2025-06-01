@@ -27,16 +27,70 @@
           <tbody>
             <tr v-for="(item, index) in comboItems" :key="item.id" class="hover:bg-gray-50">
               <td class="px-3 py-2"><img :src="item.image" class="w-10 h-10 rounded object-cover" /></td>
-              <td class="px-3 py-2">{{ item.product_name }}</td>
-              <td class="px-3 py-2">{{ item.stock_name }}</td>
+              <td class="px-3 py-2">
+                <span>
+                  {{ item.product_name }}
+                <template v-if="item.product?.type === 'variable'">
+                  - {{ item.attribute_first?.title || '' }}
+                  <template v-if="item.attribute_second">
+                    - {{ item.attribute_second.title }}
+                  </template>
+                </template>
+                </span>
+              </td>
+              <td class="px-3 py-2">
+                <select
+                  class="border px-2 py-1 rounded"
+                  v-model="item.stock_id"
+                  @change="onSelectStock(item)"
+                >
+                  <!-- Nếu là sản phẩm biến thể -->
+                  <template v-if="item.product?.type === 'variable'">
+                    <option
+                      v-for="variant in item.related_variants || []"
+                      :key="variant.id"
+                      :value="variant.stock_id"
+                    >
+                      {{ variant.stock_name || 'Không tên' }}
+                    </option>
+                  </template>
+
+                  <!-- Nếu là sản phẩm đơn -->
+                  <template v-else>
+                    <option
+                      v-for="s in item.product?.stock_data || []"
+                      :key="s.stock_id"
+                      :value="s.stock_id"
+                    >
+                      {{ s.stock?.name || 'Không tên' }}
+                    </option>
+                  </template>
+                </select>
+              </td>
               <td class="px-3 py-2">{{ item.product_type_text }}</td>
               <td class="px-3 py-2">{{ item.sku }}</td>
-              <td class="px-3 py-2">1</td>
+              <td class="px-3 py-2">
+              <input
+                type="number"
+                min="1"
+                class="border px-2 py-1 rounded w-20 text-center"
+                v-model.number="item.combo_quantity"
+                placeholder="1"
+              />
+            </td>
               <td class="px-3 py-2">{{ item.quantity }}</td>
               <td class="px-3 py-2">{{ item.unit_name || '' }}</td>
               <td class="px-3 py-2">{{ item.sell_price }}</td>
               <td class="px-3 py-2">{{ item.purchase_price }}</td>
-              <td class="px-3 py-2">0</td>
+              <td class="px-3 py-2">
+                <input
+                  type="number"
+                  min="0"
+                  class="border px-2 py-1 rounded w-24 text-right"
+                  v-model.number="item.combo_price"
+                  placeholder="0"
+                />
+              </td>
               <td class="px-3 py-2 text-center">
                 <button @click="removeComboItem(index)" class="text-red-600 hover:text-red-800 font-bold text-xl leading-none">×</button>
               </td>
@@ -106,6 +160,32 @@ export default {
     }
   },
   methods: {
+    onSelectStock(item) {
+      if (item.product?.type === 'variable') {
+        const selected = (item.related_variants || []).find(
+          v => v.stock_id === item.stock_id
+        )
+        if (selected) {
+          item.sku = selected.sku || ''
+          item.sell_price = selected.sell_price || 0
+          item.purchase_price = selected.purchase_price || 0
+          item.quantity = selected.quantity || 0
+          item.stock_name = selected.stock?.name || ''
+          item.attr1_title = selected.attr1_title || ''
+          item.attr2_title = selected.attr2_title || ''
+        }
+      } else {
+        const selected = (item.product?.stock_data || []).find(
+          s => s.stock_id === item.stock_id
+        )
+        if (selected) {
+          item.sell_price = selected.sell_price || 0
+          item.purchase_price = selected.purchase_price || 0
+          item.quantity = selected.quantity || 0
+          item.stock_name = selected.stock?.name || ''
+        }
+      }
+    },
     closeModal(){
       this.showModal = false
       this.searchKeyword = ''
@@ -123,13 +203,29 @@ export default {
       this.selectedProductItems = items
     },
     onSaveComboItems() {
+      this.selectedProductItems.forEach(item => {
+        if (typeof item.related_variants === 'string') {
+          try {
+            item.related_variants = JSON.parse(item.related_variants)
+          } catch (e) {
+            console.warn('Lỗi parse related_variants:', e)
+            item.related_variants = []
+          }
+        }
+        item.parent_id = item.id ?? null
+        item.combo_price = item.combo_price ?? 0
+        item.combo_quantity = item.combo_quantity ?? 1
+      })
       const newItems = this.selectedProductItems.filter(item =>
         !this.comboItems.some(c => c.id === item.id)
       )
-      this.comboItems.push(...newItems)
+      console.log(this.selectedProductItems);
+
+      this.comboItems.unshift(...newItems)
       this.selectedProductItems = []
       this.showModal = false
       this.productList = []
+      this.searchKeyword = ''
       this.pagination = {
         current_page: 1,
         last_page: 1,
@@ -146,7 +242,7 @@ export default {
         .map(i => i.id)
       const exceptsVariable = this.comboItems
         .filter(i => i.product?.type === 'variable')
-        .map(i => i.id)
+        .map(i => i.parent_id)
 
       await this.fetchProducts(1, exceptsSingle, exceptsVariable)
     },

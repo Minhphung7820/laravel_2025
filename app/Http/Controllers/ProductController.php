@@ -107,7 +107,10 @@ class ProductController extends Controller
 
         $query = \App\Models\StockProduct::with([
             'product:id,type,status',
-            'product.stockData'
+            'product.stockData',
+            'product.stockData.stock:id,name',
+            'attributeFirst:id,title',
+            'attributeSecond:id,title',
         ])
             ->select([
                 'stock_products.id',
@@ -115,28 +118,56 @@ class ProductController extends Controller
                 DB::raw("CASE WHEN products.type = 'variable' THEN stock_products.sku ELSE products.sku END AS sku"),
                 'products.name as product_name',
                 'stocks.name as stock_name',
+                'stocks.id as stock_id',
                 'products.type as product_type',
                 'stock_products.purchase_price',
                 'stock_products.sell_price',
                 'stock_products.quantity',
+                'stock_products.attribute_first_id',
+                'stock_products.attribute_second_id',
                 'units.name as unit_name',
                 DB::raw("CASE
-                WHEN products.type = 'variable' THEN
-                    COALESCE(CONCAT('$urlPrefix', product_variant_images.image), '$imageDefault')
-                ELSE
-                    COALESCE(CONCAT('$urlPrefix', products.image_cover), '$imageDefault')
-            END AS image"),
+                    WHEN products.type = 'variable' THEN
+                        COALESCE(CONCAT('$urlPrefix', product_variant_images.image), '$imageDefault')
+                    ELSE
+                        COALESCE(CONCAT('$urlPrefix', products.image_cover), '$imageDefault')
+                END AS image"),
                 DB::raw("CASE
-                WHEN products.type = 'variable' THEN 'Sản phẩm biến thể'
-                WHEN products.type = 'single' THEN 'Sản phẩm đơn'
-                ELSE 'Không xác định'
-            END AS product_type_text"),
+                    WHEN products.type = 'variable' THEN 'Sản phẩm biến thể'
+                    WHEN products.type = 'single' THEN 'Sản phẩm đơn'
+                    ELSE 'Không xác định'
+                END AS product_type_text"),
                 DB::raw("CASE
-                WHEN products.status = 'pending' THEN 'Đang chờ'
-                WHEN products.status = 'approved' THEN 'Đã duyệt'
-                ELSE 'Không rõ'
-            END AS status_text"),
-                'products.status'
+                    WHEN products.status = 'pending' THEN 'Đang chờ'
+                    WHEN products.status = 'approved' THEN 'Đã duyệt'
+                    ELSE 'Không rõ'
+                END AS status_text"),
+                'products.status',
+                DB::raw('(SELECT JSON_ARRAYAGG(JSON_OBJECT(
+                    "id", sp2.id,
+                    "product_id", sp2.product_id,
+                    "attribute_first_id", sp2.attribute_first_id,
+                    "attribute_second_id", sp2.attribute_second_id,
+                    "sell_price", sp2.sell_price,
+                    "purchase", sp2.sell_price,
+                    "sell_price", sp2.sell_price,
+                    "stock_name", s.name,
+                    "attr1_title", attr1.title,
+                    "attr2_title", attr2.title,
+                    "quantity", sp2.quantity,
+                    "stock_id", s.id,
+                    "is_stock_default", s.is_default,
+                    "sku", sp2.sku
+                    ))
+                    FROM stock_products sp2
+                    JOIN stocks as s ON sp2.stock_id = s.id
+                    LEFT JOIN attributes as attr1 ON sp2.attribute_first_id = attr1.id
+                    LEFT JOIN attributes as attr2 ON sp2.attribute_second_id = attr2.id
+                    WHERE sp2.product_id = stock_products.product_id
+                    AND sp2.attribute_first_id = stock_products.attribute_first_id
+                    AND sp2.attribute_second_id = stock_products.attribute_second_id
+                    AND sp2.product_type = "variable"
+                    ) AS related_variants')
             ])
             ->join('products', 'stock_products.product_id', '=', 'products.id')
             ->join('stocks', function ($join) {
@@ -289,15 +320,16 @@ class ProductController extends Controller
                 $stockInsert = [];
                 foreach ($stockData as $stockId => $item) {
                     $stockInsert[] = [
-                        'stock_id'             => $stockId,
+                        'stock_id'             => $item['stock_id'],
                         'product_id'           => $product->id,
-                        'quantity'             => $item['qty'] ?? 0,
-                        'purchase_price'       => $item['cost_price'] ?? 0,
-                        'sell_price'           => $item['sale_price'] ?? 0,
+                        'quantity'             => $item['quantity'] ?? 0,
+                        'purchase_price'       => $item['purchase_price'] ?? 0,
+                        'sell_price'           => $item['sell_price'] ?? 0,
                         'max_discount_percent' => $item['max_discount_percent'] ?? 0,
                         'max_increase_percent' => $item['max_increase_percent'] ?? 0,
                         'auto_calc'            => $item['auto_calc'] ?? false,
                         'is_product_variant'   => 0,
+                        'product_type'         => 'root_stock',
                         'created_at'           => now(),
                         'updated_at'           => now(),
                     ];
@@ -366,7 +398,7 @@ class ProductController extends Controller
             'attributes.attributeSecond.variant',
             'attributes.variantImages',
             'galleryImages',
-            'stockData'
+            'stockData.stock'
         ])->findOrFail($id);
 
         return [
@@ -412,9 +444,11 @@ class ProductController extends Controller
             if ($coverPath) {
                 $data['image_cover'] = '/storage/' . $coverPath;
             }
-            $attributes = $request['variants'] ?? [];
-            if (empty($attributes)) {
-                throw new Exception("Vui lòng chọn ít nhất 1 biến thể !");
+            if ($data['type'] === 'variable') {
+                $attributes = $request['variants'] ?? [];
+                if (empty($attributes)) {
+                    throw new Exception("Vui lòng chọn ít nhất 1 biến thể !");
+                }
             }
             $stocks = json_decode($request['stock_data'], true);
             if (empty($stocks)) {
@@ -457,21 +491,28 @@ class ProductController extends Controller
                         'quantity'             => $stock['quantity'] ?? 0,
                         'max_discount_percent' => $stock['max_discount_percent'] ?? 0,
                         'max_increase_percent' => $stock['max_increase_percent'] ?? 0,
-                        'auto_calc'            => $stock['auto_calc'] ?? 1
+                        'auto_calc'            => $stock['auto_calc'] ?? 1,
+                        'product_type'         => 'root_stock'
                     ];
                     if ($data['type'] !== 'variable') {
-                        $fillStock = array_merge($fillStock, ['sell_price' => 0, 'purchase_price' => 0]);
+                        $fillStock = array_merge($fillStock, ['sell_price' => $stock['sell_price'] ?? 0, 'purchase_price' => $stock['purchase_price'] ?? 0]);
                     } else {
-                        $fillStock = array_merge($fillStock, ['sell_price' => 0, 'purchase_price' => 0]);
+                        $fillStock = array_merge($fillStock,  ['sell_price' => $stock['sell_price'] ?? 0, 'purchase_price' => $stock['purchase_price'] ?? 0]);
                     }
                     $stockData[] = $fillStock;
                 }
 
-                batch(new StockProduct(), array_filter($stockData, function ($item) {
+                batch()->update(new StockProduct(), array_filter(array_map(function ($item) {
+                    $item['updated_at'] = now();
+                    return $item;
+                }, $stockData), function ($item) {
                     return !is_null($item['id']);
                 }), 'id');
 
-                StockProduct::insert(array_filter($stockData, function ($item) {
+                StockProduct::insert(array_filter(array_map(function ($item) {
+                    $item['created_at'] = now();
+                    return $item;
+                }, $stockData), function ($item) {
                     return is_null($item['id']);
                 }));
 

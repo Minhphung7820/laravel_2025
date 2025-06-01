@@ -15,22 +15,22 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="stock in filteredStocks" :key="stock.id">
+        <tr v-for="stock in filteredStocks" :key="stock.stock_id">
           <td class="border px-3 py-2">{{ stock.name }}</td>
           <td class="border px-2 py-1 text-center">
             <input
               type="number"
               v-if="!isVariableProduct"
-              v-model.number="localData[stock.id].qty"
+              v-model.number="localData[stock.stock_id].qty"
               class="w-full px-1 py-1 text-xs border border-gray-300 rounded"
             />
-            <span v-else>{{ variantStockTotals[stock.id] || 0 }}</span>
+            <span v-else>{{ variantStockTotals[stock.stock_id] || 0 }}</span>
           </td>
           <td class="border px-2 py-1 text-center">
             <span v-if="isVariableProduct" class="block w-full py-1 text-xs text-gray-400">—</span>
             <input
               v-else
-              v-model.number="localData[stock.id].purchase_price"
+              v-model.number="localData[stock.stock_id].purchase_price"
               type="number"
               class="w-full px-1 py-1 text-xs border border-gray-300 rounded"
             />
@@ -39,22 +39,22 @@
             <span v-if="isVariableProduct" class="block w-full py-1 text-xs text-gray-400">—</span>
             <input
               v-else
-              v-model.number="localData[stock.id].sell_price"
+              v-model.number="localData[stock.stock_id].sell_price"
               type="number"
               class="w-full px-1 py-1 text-xs border border-gray-300 rounded"
             />
           </td>
           <td class="border px-2 py-1 text-center">
-            <input type="number" v-model.number="localData[stock.id].max_discount_percent" class="w-full px-1 py-1 text-xs border border-gray-300 rounded" />
+            <input type="number" v-model.number="localData[stock.stock_id].max_discount_percent" class="w-full px-1 py-1 text-xs border border-gray-300 rounded" />
           </td>
           <td class="border px-2 py-1 text-center">
-            <input type="number" v-model.number="localData[stock.id].max_increase_percent" class="w-full px-1 py-1 text-xs border border-gray-300 rounded" />
+            <input type="number" v-model.number="localData[stock.stock_id].max_increase_percent" class="w-full px-1 py-1 text-xs border border-gray-300 rounded" />
           </td>
           <td class="border px-2 py-1 text-center">
-            <input type="checkbox" v-model="localData[stock.id].auto_calc" />
+            <input type="checkbox" v-model="localData[stock.stock_id].auto_calc" />
           </td>
           <td class="border px-2 py-1 text-center">
-            <button @click="calcSalePrice(stock.id)" class="bg-green-100 text-green-800 rounded px-2 py-1 text-xs font-semibold">Tính</button>
+            <button @click="calcSalePrice(stock.stock_id)" class="bg-green-100 text-green-800 rounded px-2 py-1 text-xs font-semibold">Tính</button>
           </td>
         </tr>
       </tbody>
@@ -79,7 +79,7 @@ export default {
   },
   computed: {
     filteredStocks() {
-      return this.stocks.filter(stock => this.localData[stock.id])
+      return this.stocks.filter(stock => this.localData[stock.stock_id])
     }
   },
   watch: {
@@ -87,17 +87,16 @@ export default {
     immediate: true,
     handler(stocks) {
       stocks.forEach(stock => {
-        if (!this.localData[stock.id]) {
-          // Vue 3: Gán trực tiếp là reactive, không cần this.$set
-          this.localData[stock.id] = {
-            stock_id : stock.id,
-            qty: 0,
-            purchase_price: 0,
-            sell_price: 0,
-            max_discount_percent: 0,
-            max_increase_percent: 0,
-            auto_calc: false,
-          }
+        const existing = this.modelValue[stock.stock_id] || {}
+        this.localData[stock.stock_id] = {
+          id: existing.id ?? null,
+          stock_id : stock.id,
+          qty: existing.qty ?? 0,
+          purchase_price: existing.purchase_price ?? 0,
+          sell_price: existing.sell_price ?? 0,
+          max_discount_percent: existing.max_discount_percent ?? 0,
+          max_increase_percent: existing.max_increase_percent ?? 0,
+          auto_calc: existing.auto_calc ?? false,
         }
        })
      }

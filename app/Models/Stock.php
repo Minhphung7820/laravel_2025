@@ -12,4 +12,11 @@ class Stock extends Model
     {
         return $this->hasMany(StockProduct::class);
     }
+
+    protected $appends = ['stock_id'];
+
+    public function getStockIdAttribute()
+    {
+        return $this->id;
+    }
 }

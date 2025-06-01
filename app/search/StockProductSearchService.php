@@ -13,13 +13,13 @@ class StockProductSearchService
     $this->es = $es;
   }
 
-  public function search(string $keyword, int $page = 1, int $limit = 20)
+  public function search(string $keyword, int $limit = 20, ?string $afterId = null)
   {
-    $from = ($page - 1) * $limit;
-
-    return $this->es->search('stock_products', [
-      'from' => $from,
+    $body = [
       'size' => $limit,
+      'sort' => [
+        ['_id' => 'asc']
+      ],
       'query' => [
         'multi_match' => [
           'query' => $keyword,
@@ -27,6 +27,12 @@ class StockProductSearchService
           'fuzziness' => 'AUTO',
         ]
       ]
-    ]);
+    ];
+
+    if ($afterId) {
+      $body['search_after'] = [$afterId];
+    }
+
+    return $this->es->search('stock_products', $body);
   }
 }

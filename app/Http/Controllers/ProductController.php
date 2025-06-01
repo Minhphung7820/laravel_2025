@@ -106,7 +106,7 @@ class ProductController extends Controller
         $imageDefault = env('IMAGE_DEFAULT');
 
         $query = \App\Models\StockProduct::with([
-            'product:id',
+            'product:id,type,status',
             'product.stockData'
         ])
             ->select([
@@ -129,7 +129,6 @@ class ProductController extends Controller
                 DB::raw("CASE
                 WHEN products.type = 'variable' THEN 'Sản phẩm biến thể'
                 WHEN products.type = 'single' THEN 'Sản phẩm đơn'
-                WHEN products.type = 'combo' THEN 'Sản phẩm combo'
                 ELSE 'Không xác định'
             END AS product_type_text"),
                 DB::raw("CASE
@@ -146,13 +145,21 @@ class ProductController extends Controller
             })
             ->leftJoin('units', 'stock_products.unit_id', '=', 'units.id')
             ->leftJoin('product_variant_images', 'product_variant_images.stock_product_id', '=', 'stock_products.id')
-            ->where(function ($q) {
-                $q->where(function ($q2) {
+            ->where(function ($q) use ($request) {
+                $q->where(function ($q2) use ($request) {
                     $q2->where('products.type', 'variable')
-                        ->where('stock_products.product_type', 'variable');
-                })->orWhere(function ($q2) {
-                    $q2->whereIn('products.type', ['single', 'combo'])
-                        ->where('stock_products.product_type', 'root_stock');
+                        ->where('stock_products.product_type', 'variable')
+                        ->where('stock_products.is_using', 1)
+                        ->where('stock_products.is_sale', 1)
+                        ->when(!empty($request['excepts_variable']), function ($q) use ($request) {
+                            return $q->whereNotIn('stock_products.id', explode(",", $request['excepts_variable']));
+                        });
+                })->orWhere(function ($q2) use ($request) {
+                    $q2->whereIn('products.type', ['single'])
+                        ->where('stock_products.product_type', 'root_stock')
+                        ->when(!empty($request['excepts_single']), function ($q) use ($request) {
+                            return $q->whereNotIn('stock_products.id', explode(",", $request['excepts_single']));
+                        });
                 });
             });
         if ($search) {

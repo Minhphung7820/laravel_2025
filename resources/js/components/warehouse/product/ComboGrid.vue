@@ -9,18 +9,18 @@
     <div class="relative">
       <table class="min-w-full border border-gray-300 text-sm">
         <thead class="bg-gray-100">
-          <tr>
-            <th class="px-3 py-2 text-left">Hình ảnh</th>
-            <th class="px-3 py-2 text-left">Tên sản phẩm</th>
-            <th class="px-3 py-2 text-left">Chi nhánh (Kho)</th>
-            <th class="px-3 py-2 text-left">Loại SP</th>
-            <th class="px-3 py-2 text-left">SKU</th>
-            <th class="px-3 py-2 text-left">Số lượng</th>
-            <th class="px-3 py-2 text-left">Tồn kho</th>
-            <th class="px-3 py-2 text-left">Đơn vị</th>
-            <th class="px-3 py-2 text-left">Giá bán lẻ</th>
-            <th class="px-3 py-2 text-left">Giá mua</th>
-            <th class="px-3 py-2 text-left">Giá bán combo</th>
+          <tr v-for="item in comboItems" :key="item.id">
+            <td class="px-3 py-2"><img :src="item.image" class="w-10 h-10 rounded object-cover" /></td>
+            <td class="px-3 py-2">{{ item.product_name }}</td>
+            <td class="px-3 py-2">{{ item.stock_name }}</td>
+            <td class="px-3 py-2">{{ item.product_type_text }}</td>
+            <td class="px-3 py-2">{{ item.sku }}</td>
+            <td class="px-3 py-2">1</td>
+            <td class="px-3 py-2">{{ item.quantity }}</td>
+            <td class="px-3 py-2">{{ item.unit_name || '' }}</td>
+            <td class="px-3 py-2">{{ item.sell_price }}</td>
+            <td class="px-3 py-2">{{ item.purchase_price }}</td>
+            <td class="px-3 py-2">0</td>
           </tr>
         </thead>
         <tbody>
@@ -51,7 +51,9 @@
         </CommonTable>
       <div class="flex justify-end gap-2 pt-6 mt-auto">
         <button class="px-4 py-1 rounded bg-red-300 text-white hover:bg-red-400" @click="closeModal">Hủy</button>
-        <button class="px-4 py-1 rounded bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
+        <button class="px-4 py-1 rounded bg-blue-600 text-white hover:bg-blue-700" @click="onSaveComboItems">
+          Lưu
+        </button>
       </div>
       </div>
     </div>
@@ -101,20 +103,42 @@ export default {
       this.selectedProductItems = items
     },
     onSaveComboItems() {
-      this.comboItems.push(...this.selectedProductItems)
+      const newItems = this.selectedProductItems.filter(item =>
+        !this.comboItems.some(c => c.id === item.id)
+      )
+      this.comboItems.push(...newItems)
+      this.selectedProductItems = []
       this.showModal = false
+      this.productList = []
+      this.pagination = {
+        current_page: 1,
+        last_page: 1,
+        from: 0,
+        to: 0,
+        total: 0,
+        per_page: 10
+      }
     },
     async openModal() {
       this.showModal = true
-      await this.fetchProducts()
+      const exceptsSingle = this.comboItems
+        .filter(i => i.product?.type === 'single')
+        .map(i => i.id)
+      const exceptsVariable = this.comboItems
+        .filter(i => i.product?.type === 'variable')
+        .map(i => i.id)
+
+      await this.fetchProducts(1, exceptsSingle, exceptsVariable)
     },
-    async fetchProducts(page = 1) {
+    async fetchProducts(page = 1, exceptsSingle = [], exceptsVariable = []) {
       try {
         const res = await window.axios.get('/api/warehouse/product/get-init-combo', {
           params: {
             page,
             keyword: this.searchKeyword,
-            limit: this.pagination.per_page
+            limit: this.pagination.per_page,
+            excepts_single: exceptsSingle.join(','),
+            excepts_variable: exceptsVariable.join(',')
           }
         })
         this.productList = res.data.data || []

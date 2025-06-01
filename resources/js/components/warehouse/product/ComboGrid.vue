@@ -6,32 +6,44 @@
           + Thêm nhanh sản phẩm
         </button>
       </div>
-    <div class="relative">
-      <table class="min-w-full border border-gray-300 text-sm">
-        <thead class="bg-gray-100">
-          <tr v-for="item in comboItems" :key="item.id">
-            <td class="px-3 py-2"><img :src="item.image" class="w-10 h-10 rounded object-cover" /></td>
-            <td class="px-3 py-2">{{ item.product_name }}</td>
-            <td class="px-3 py-2">{{ item.stock_name }}</td>
-            <td class="px-3 py-2">{{ item.product_type_text }}</td>
-            <td class="px-3 py-2">{{ item.sku }}</td>
-            <td class="px-3 py-2">1</td>
-            <td class="px-3 py-2">{{ item.quantity }}</td>
-            <td class="px-3 py-2">{{ item.unit_name || '' }}</td>
-            <td class="px-3 py-2">{{ item.sell_price }}</td>
-            <td class="px-3 py-2">{{ item.purchase_price }}</td>
-            <td class="px-3 py-2">0</td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="comboItems.length === 0">
-            <td colspan="11" class="text-center py-4 text-gray-500">
-              <i class="fa fa-file"></i> No data
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+      <div class="rounded border border-gray-300 overflow-y-auto max-h-[600px] min-h-[600px] custom-scroll">
+        <table class="min-w-full divide-y divide-gray-200 text-sm">
+          <thead class="bg-gray-100 sticky top-0 z-20">
+            <tr>
+              <th class="px-3 py-2">Hình ảnh</th>
+              <th class="px-3 py-2">Tên sản phẩm</th>
+              <th class="px-3 py-2">Chi nhánh</th>
+              <th class="px-3 py-2">Loại SP</th>
+              <th class="px-3 py-2">SKU</th>
+              <th class="px-3 py-2">Số lượng</th>
+              <th class="px-3 py-2">Tồn kho</th>
+              <th class="px-3 py-2">Đơn vị</th>
+              <th class="px-3 py-2">Giá bán</th>
+              <th class="px-3 py-2">Giá mua</th>
+              <th class="px-3 py-2">Giá combo</th>
+              <th class="px-3 py-2 text-center">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item, index) in comboItems" :key="item.id" class="hover:bg-gray-50">
+              <td class="px-3 py-2"><img :src="item.image" class="w-10 h-10 rounded object-cover" /></td>
+              <td class="px-3 py-2">{{ item.product_name }}</td>
+              <td class="px-3 py-2">{{ item.stock_name }}</td>
+              <td class="px-3 py-2">{{ item.product_type_text }}</td>
+              <td class="px-3 py-2">{{ item.sku }}</td>
+              <td class="px-3 py-2">1</td>
+              <td class="px-3 py-2">{{ item.quantity }}</td>
+              <td class="px-3 py-2">{{ item.unit_name || '' }}</td>
+              <td class="px-3 py-2">{{ item.sell_price }}</td>
+              <td class="px-3 py-2">{{ item.purchase_price }}</td>
+              <td class="px-3 py-2">0</td>
+              <td class="px-3 py-2 text-center">
+                <button @click="removeComboItem(index)" class="text-red-600 hover:text-red-800 font-bold text-xl leading-none">×</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
     <!-- Modal -->
     <div v-if="showModal" class="fixed inset-0 flex items-center justify-center z-50">
@@ -94,10 +106,18 @@ export default {
     }
   },
   methods: {
-    closeModal()
-    {
+    closeModal(){
       this.showModal = false
       this.searchKeyword = ''
+      this.productList = []
+      this.pagination = {
+        current_page: 1,
+        last_page: 1,
+        from: 0,
+        to: 0,
+        total: 0,
+        per_page: 10
+      }
     },
     onSelected(items) {
       this.selectedProductItems = items
@@ -153,7 +173,10 @@ export default {
     },
     onPageChange(page) {
       this.fetchProducts(page)
-    }
+    },
+    removeComboItem(index) {
+      this.comboItems.splice(index, 1)
+    },
   }
 }
 </script>

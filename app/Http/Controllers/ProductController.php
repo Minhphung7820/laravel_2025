@@ -483,8 +483,9 @@ class ProductController extends Controller
 
             if ($result) {
                 $stockData = [];
-                foreach ($stocks as $key => $stock) {
-                    $fillStock = [
+                
+                foreach ($stocks as $stock) {
+                    $stockData[] = [
                         'id'                   => $stock['id'] ?? null,
                         'product_id'           => $id,
                         'stock_id'             => $stock['stock_id'] ?? null,
@@ -492,14 +493,10 @@ class ProductController extends Controller
                         'max_discount_percent' => $stock['max_discount_percent'] ?? 0,
                         'max_increase_percent' => $stock['max_increase_percent'] ?? 0,
                         'auto_calc'            => $stock['auto_calc'] ?? 1,
-                        'product_type'         => 'root_stock'
+                        'product_type'         => 'root_stock',
+                        'sell_price'           => $stock['sell_price'] ?? 0,
+                        'purchase_price'       => $stock['purchase_price'] ?? 0,
                     ];
-                    if ($data['type'] !== 'variable') {
-                        $fillStock = array_merge($fillStock, ['sell_price' => $stock['sell_price'] ?? 0, 'purchase_price' => $stock['purchase_price'] ?? 0]);
-                    } else {
-                        $fillStock = array_merge($fillStock,  ['sell_price' => $stock['sell_price'] ?? 0, 'purchase_price' => $stock['purchase_price'] ?? 0]);
-                    }
-                    $stockData[] = $fillStock;
                 }
 
                 batch()->update(new StockProduct(), array_filter(array_map(function ($item) {

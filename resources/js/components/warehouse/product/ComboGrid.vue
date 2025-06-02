@@ -25,7 +25,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(item, index) in comboItems" :key="item.id" class="hover:bg-gray-50">
+            <tr v-for="(item, index) in comboItems" :key="item.parent_id" class="hover:bg-gray-50">
               <td class="px-3 py-2"><img :src="item.image" class="w-10 h-10 rounded object-cover" /></td>
               <td class="px-3 py-2">
                 <span>
@@ -212,12 +212,13 @@ export default {
             item.related_variants = []
           }
         }
-        item.parent_id = item.id ?? null
+        item.parent_id = item.id
+        item.id = null
         item.combo_price = item.combo_price ?? 0
         item.combo_quantity = item.combo_quantity ?? 1
       })
       const newItems = this.selectedProductItems.filter(item =>
-        !this.comboItems.some(c => c.id === item.id)
+        !this.comboItems.some(c => c.parent_id === item.parent_id)
       )
       console.log(this.selectedProductItems);
 
@@ -239,7 +240,7 @@ export default {
       this.showModal = true
       const exceptsSingle = this.comboItems
         .filter(i => i.product?.type === 'single')
-        .map(i => i.id)
+        .map(i => i.parent_id)
       const exceptsVariable = this.comboItems
         .filter(i => i.product?.type === 'variable')
         .map(i => i.parent_id)

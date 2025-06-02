@@ -483,7 +483,7 @@ class ProductController extends Controller
 
             if ($result) {
                 $stockData = [];
-                
+
                 foreach ($stocks as $stock) {
                     $stockData[] = [
                         'id'                   => $stock['id'] ?? null,

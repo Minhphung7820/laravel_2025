@@ -156,7 +156,9 @@ export default {
         { label: 'Tồn kho', key: 'quantity' },
         { label: 'Giá bán', key: 'sell_price' },
         { label: 'Giá mua', key: 'purchase_price' }
-      ]
+      ],
+      exceptsSingle: [],
+      exceptsVariable: []
     }
   },
   mounted() {
@@ -213,6 +215,8 @@ export default {
       this.showModal = false
       this.searchKeyword = ''
       this.productList = []
+      this.exceptsSingle = []
+      this.exceptsVariable = []
       this.pagination = {
         current_page: 1,
         last_page: 1,
@@ -261,24 +265,26 @@ export default {
     },
     async openModal() {
       this.showModal = true
-      const exceptsSingle = this.comboItems
+
+      this.exceptsSingle = this.comboItems
         .filter(i => i.product?.type === 'single')
         .map(i => i.parent_id)
-      const exceptsVariable = this.comboItems
+
+      this.exceptsVariable = this.comboItems
         .filter(i => i.product?.type === 'variable')
         .map(i => i.parent_id)
 
-      await this.fetchProducts(1, exceptsSingle, exceptsVariable)
+      await this.fetchProducts(1)
     },
-    async fetchProducts(page = 1, exceptsSingle = [], exceptsVariable = []) {
+    async fetchProducts(page = 1) {
       try {
         const res = await window.axios.get('/api/warehouse/product/get-init-combo', {
           params: {
             page,
             keyword: this.searchKeyword,
             limit: this.pagination.per_page,
-            excepts_single: exceptsSingle.join(','),
-            excepts_variable: exceptsVariable.join(',')
+            excepts_single: this.exceptsSingle.join(','),
+            excepts_variable: this.exceptsVariable.join(',')
           }
         })
         this.productList = res.data.data || []

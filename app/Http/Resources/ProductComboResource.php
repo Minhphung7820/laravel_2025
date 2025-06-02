@@ -18,9 +18,19 @@ class ProductComboResource extends JsonResource
 
         return [
             ...$parent,
-            'related_variants' => json_decode($parent['related_variants'] ?? '[]', true),
-            'attr1_title'      => $parent['attribute_first']['title'] ?? '',
-            'attr2_title'      => $parent['attribute_second']['title'] ?? '',
+            'related_variants'       => json_decode($parent['related_variants'] ?? '[]', true),
+            'attr1_title'            => $parent['attribute_first']['title'] ?? '',
+            'attr2_title'            => $parent['attribute_second']['title'] ?? '',
+            'product_name'           => $parent['product']['name'] ?? '',
+            'product_type_text'      => $parent['product']['type_text'] ?? '',
+            'status_text'            => $parent['product']['status_text'] ?? '',
+            'image'                  => $parent['product']['image_cover_url'] ?? '',
+            'sku'                    => $parent['product_type'] === 'variable' ? $parent['sku'] : ($parent['product']['sku'] ?? ''),
+            'parent_id'              => $parent['id'],
+            'sell_price_combo'       => $this->sell_price_combo,
+            'quantity_combo'         => $this->quantity_combo,
+            'stock_id'               => $this->stock_id,
+            'id'                     => $this->id,
         ];
     }
 }

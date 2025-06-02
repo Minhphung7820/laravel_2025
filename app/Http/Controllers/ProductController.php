@@ -388,8 +388,8 @@ class ProductController extends Controller
                 'attribute_first_id'  => $item['attribute_first_id'],
                 'attribute_second_id' => $item['attribute_second_id'],
                 'parent_id'           => $item['parent_id'],
-                'combo_price'         => $item['combo_price'],
-                'combo_quantity'      => $item['combo_quantity']
+                'sell_price_combo'    => $item['sell_price_combo'],
+                'quantity_combo'      => $item['quantity_combo']
             ];
         }, $arrays);
     }
@@ -416,11 +416,11 @@ class ProductController extends Controller
             }
             StockProduct::where('product_type', 'combo')
                 ->where('product_id', $productId)
-                ->whereNotIn('id', array_merge($inserts, $updates))
+                ->whereNotIn('id', array_merge($inserts, array_column($updates, 'id')))
                 ->delete();
             return true;
         } catch (Exception $e) {
-            return false;
+            throw new Exception($e);
         }
     }
 
@@ -460,7 +460,7 @@ class ProductController extends Controller
                     'combo.parent',
                     'combo.parent.attributeFirst:id,title',
                     'combo.parent.attributeSecond:id,title',
-                    'combo.parent.product:id,type,status,image_cover',
+                    'combo.parent.product:id,type,status,image_cover,name,sku',
                     'combo.parent.product.stockData.stock:id,name',
                 ]));
 
@@ -535,7 +535,7 @@ class ProductController extends Controller
             $deletedIds = $request->input('deleted_gallery_ids', []);
 
             if (is_array($deletedIds) && count($deletedIds) > 0) {
-                $validIds = array_filter($deletedIds, fn ($id) => is_numeric($id));
+                $validIds = array_filter($deletedIds, fn($id) => is_numeric($id));
                 ProductImage::whereIn('id', $validIds)->delete();
             }
 
@@ -645,6 +645,15 @@ class ProductController extends Controller
                             ->where('product_type', 'variable')
                             ->whereNotIn('id', $canceledVariant)
                             ->delete();
+                    }
+                }
+                if ($data['type'] === 'combo') {
+                    $combos = json_decode($request['combo'], true) ?? [];
+                    $combosPrepare = $this->getPrepareCombo($product['id'], $combos);
+                    $syncCombo = $this->syncProductsCombo($product['id'], $combosPrepare);
+                    if (! $syncCombo) {
+                        DB::rollBack();
+                        return response()->json(['error' => 'Save Combo failed!'], 500);
                     }
                 }
             }

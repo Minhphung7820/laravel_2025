@@ -52,7 +52,7 @@ class StockProduct extends Model
                     "attribute_first_id", sp2.attribute_first_id,
                     "attribute_second_id", sp2.attribute_second_id,
                     "sell_price", sp2.sell_price,
-                    "purchase", sp2.purchase_price,
+                    "purchase_price", sp2.purchase_price,
                     "stock_name", s.name,
                     "attr1_title", attr1.title,
                     "attr2_title", attr2.title,

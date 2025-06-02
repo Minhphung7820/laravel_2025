@@ -74,7 +74,7 @@
                 type="number"
                 min="1"
                 class="border px-2 py-1 rounded w-20 text-center"
-                v-model.number="item.combo_quantity"
+                v-model.number="item.quantity_combo"
                 placeholder="1"
               />
             </td>
@@ -87,7 +87,7 @@
                   type="number"
                   min="0"
                   class="border px-2 py-1 rounded w-24 text-right"
-                  v-model.number="item.combo_price"
+                  v-model.number="item.sell_price_combo"
                   placeholder="0"
                 />
               </td>
@@ -159,7 +159,30 @@ export default {
       ]
     }
   },
+  mounted() {
+    this.refreshSelectedComboStock()
+  },
+  watch: {
+    comboItems: {
+      handler(items) {
+        items.forEach(item => {
+          if (item.stock_id) {
+            this.onSelectStock(item)
+          }
+        })
+      },
+      deep: true,
+      immediate: true
+    }
+  },
   methods: {
+    refreshSelectedComboStock() {
+      this.comboItems.forEach(item => {
+        if (item.stock_id) {
+          this.onSelectStock(item)
+        }
+      })
+    },
     onSelectStock(item) {
       if (item.product?.type === 'variable') {
         const selected = (item.related_variants || []).find(
@@ -214,8 +237,8 @@ export default {
         }
         item.parent_id = item.id
         item.id = null
-        item.combo_price = item.combo_price ?? 0
-        item.combo_quantity = item.combo_quantity ?? 1
+        item.sell_price_combo = item.sell_price_combo ?? 0
+        item.quantity_combo = item.quantity_combo ?? 1
       })
       const newItems = this.selectedProductItems.filter(item =>
         !this.comboItems.some(c => c.parent_id === item.parent_id)

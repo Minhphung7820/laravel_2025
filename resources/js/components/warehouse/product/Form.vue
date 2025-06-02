@@ -605,42 +605,50 @@ export default {
           name: stockDataObj[stockId].name || ''
         }))
         //
-        const variants = []
-        const trash = []
+        if(this.type === 'variable'){
+          const variants = []
+          const trash = []
 
-        data.stock_products.forEach(v => {
-          const variant = {
-            id: v.id,
-            stock_id: v.stock_id,
-            quantity: v.quantity,
-            sell_price: v.sell_price,
-            purchase_price: v.purchase_price,
-            sku: v.sku || '',
-            barcode: v.barcode || '',
-            is_sale: v.is_sale,
-            image: v.image_url || null,
-            attributes: v.attributes.map(attr => ({
-              attribute: {
-                id: attr.value.variant_id,
-                title: attr.attribute?.title || '',
-              },
-              value: {
-                id: attr.value.id,
-                title: attr.value.title,
-                variant_id: attr.value.variant_id,
-              }
-            }))
-          }
+          data.stock_products.forEach(v => {
+            const variant = {
+              id: v.id,
+              stock_id: v.stock_id,
+              quantity: v.quantity,
+              sell_price: v.sell_price,
+              purchase_price: v.purchase_price,
+              sku: v.sku || '',
+              barcode: v.barcode || '',
+              is_sale: v.is_sale,
+              image: v.image_url || null,
+              attributes: v.attributes.map(attr => ({
+                attribute: {
+                  id: attr.value.variant_id,
+                  title: attr.attribute?.title || '',
+                },
+                value: {
+                  id: attr.value.id,
+                  title: attr.value.title,
+                  variant_id: attr.value.variant_id,
+                }
+              }))
+            }
 
-          if (v.is_using === 1) {
-            variants.push(variant)
-          } else {
-            trash.push(variant)
-          }
-        })
+            if (v.is_using === 1) {
+              variants.push(variant)
+            } else {
+              trash.push(variant)
+            }
+          })
 
-        this.form.variants = variants
-        this.trashVariants = trash
+          this.form.variants = variants
+          this.trashVariants = trash
+        }
+        //
+        if(this.type === 'combo'){
+           this.$refs.comboGrid.comboItems = data.combo;
+           console.log(   this.$refs.comboGrid.comboItems);
+
+        }
         //
         if (this.form.has_variant) {
           this.isMappingVariantData = true

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\ProductAttributesResource;
+use App\Http\Resources\ProductComboResource;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ProductVariantImage;
@@ -10,7 +11,6 @@ use App\Models\StockProduct;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Search\StockProductSearchService;
 
 class ProductController extends Controller
 {
@@ -274,14 +274,12 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         DB::beginTransaction();
-
         try {
             // Ảnh bìa
             $coverPath = null;
             if ($request->hasFile('cover_image')) {
                 $coverPath = $request->file('cover_image')->store('products/cover', 'public');
             }
-
             // Tạo sản phẩm chính
             $product = Product::create([
                 'name'         => $request->input('name'),
@@ -298,7 +296,6 @@ class ProductController extends Controller
                 'image_cover'  => $coverPath ? '/storage/' . $coverPath : null,
                 'status'       => 'pending',
             ]);
-
             // Lưu ảnh chính (gallery_images) hàng loạt
             if ($request->hasFile('gallery_images')) {
                 $imagesData = [];
@@ -313,7 +310,6 @@ class ProductController extends Controller
                 }
                 ProductImage::insert($imagesData);
             }
-
             // Lưu stock_data hàng loạt
             $stockData = json_decode($request->input('stock_data'), true);
             if (is_array($stockData)) {
@@ -336,7 +332,6 @@ class ProductController extends Controller
                 }
                 StockProduct::insert($stockInsert);
             }
-
             // Lưu biến thể (dùng create do cần lấy ID)
             if ($request->has('variants')) {
                 foreach ($request->input('variants') as $i => $variant) {
@@ -354,12 +349,10 @@ class ProductController extends Controller
                         'is_product_variant'  => 1,
                         'product_type'        => 'variable'
                     ]);
-
                     // Lưu ảnh cho biến thể
                     if ($request->hasFile("variants.$i.image")) {
                         $file = $request->file("variants.$i.image");
                         $path = $file->store('products/variants', 'public');
-
                         ProductVariantImage::create([
                             'stock_product_id' => $variantStock->id,
                             'image'            => '/storage/' . $path,
@@ -367,13 +360,67 @@ class ProductController extends Controller
                     }
                 }
             }
-
+            if ($request->input('type') === 'combo') {
+                $combos = json_decode($request['combo'], true) ?? [];
+                $combosPrepare = $this->getPrepareCombo($product['id'], $combos);
+                $syncCombo = $this->syncProductsCombo($product['id'], $combosPrepare);
+                if (! $syncCombo) {
+                    DB::rollBack();
+                    return response()->json(['error' => 'Save Combo failed!'], 500);
+                }
+            }
             DB::commit();
-
             return response()->json(['message' => 'Thêm sản phẩm thành công!'], 201);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    private function getPrepareCombo($productId, $arrays = [])
+    {
+        return array_map(function ($item) use ($productId) {
+            return [
+                'id'                  => $item['id'],
+                'product_id'          => $productId,
+                'stock_id'            => $item['stock_id'],
+                'product_type'        => 'combo',
+                'attribute_first_id'  => $item['attribute_first_id'],
+                'attribute_second_id' => $item['attribute_second_id'],
+                'parent_id'           => $item['parent_id'],
+                'combo_price'         => $item['combo_price'],
+                'combo_quantity'      => $item['combo_quantity']
+            ];
+        }, $arrays);
+    }
+
+    private function syncProductsCombo($productId, $products = [])
+    {
+        try {
+            $inserts = [];
+            $updates = [];
+            foreach ($products as $key => $product) {
+                if (is_null($product['id'])) {
+                    unset($product['id']);
+                    $inserts[] = StockProduct::create($product)
+                        ->id;
+                } else {
+                    $updates[] = $product;
+                }
+            }
+            if (!empty($updates)) {
+                batch()->update(new StockProduct(), array_map(function ($item) {
+                    $item['updated_at'] = now();
+                    return $item;
+                }, $updates), 'id');
+            }
+            StockProduct::where('product_type', 'combo')
+                ->where('product_id', $productId)
+                ->whereNotIn('id', array_merge($inserts, $updates))
+                ->delete();
+            return true;
+        } catch (Exception $e) {
+            return false;
         }
     }
 
@@ -385,7 +432,6 @@ class ProductController extends Controller
         } while (StockProduct::where('sku', $sku)->when($id, function ($q) use ($id) {
             return $q->where('id', '!=', $id);
         })->exists());
-
         return $sku;
     }
     /**
@@ -393,18 +439,44 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        $product = Product::with([
-            'attributes.attributeFirst.variant',
-            'attributes.attributeSecond.variant',
-            'attributes.variantImages',
-            'galleryImages',
-            'stockData.stock'
-        ])->findOrFail($id);
+        $product = Product::findOrFail($id);
+        $baseRelations = ['galleryImages', 'stockData.stock'];
 
-        return [
-            'product'        => $product,
-            'stock_products' => ProductAttributesResource::collection($product->attributes ?? []),
-        ];
+        switch ($product->type) {
+            case 'variable':
+                $product->load(array_merge($baseRelations, [
+                    'attributes.attributeFirst.variant',
+                    'attributes.attributeSecond.variant',
+                    'attributes.variantImages',
+                ]));
+
+                return [
+                    'product'        => $product,
+                    'stock_products' => ProductAttributesResource::collection($product->attributes ?? []),
+                ];
+
+            case 'combo':
+                $product->load(array_merge($baseRelations, [
+                    'combo.parent',
+                    'combo.parent.attributeFirst:id,title',
+                    'combo.parent.attributeSecond:id,title',
+                    'combo.parent.product:id,type,status,image_cover',
+                    'combo.parent.product.stockData.stock:id,name',
+                ]));
+
+                return [
+                    'product' => $product,
+                    'combo'   => ProductComboResource::collection($product->combo ?? []),
+                ];
+
+            case 'single':
+            default:
+                $product->load($baseRelations);
+
+                return [
+                    'product' => $product,
+                ];
+        }
     }
 
     /**
@@ -463,7 +535,7 @@ class ProductController extends Controller
             $deletedIds = $request->input('deleted_gallery_ids', []);
 
             if (is_array($deletedIds) && count($deletedIds) > 0) {
-                $validIds = array_filter($deletedIds, fn($id) => is_numeric($id));
+                $validIds = array_filter($deletedIds, fn ($id) => is_numeric($id));
                 ProductImage::whereIn('id', $validIds)->delete();
             }
 

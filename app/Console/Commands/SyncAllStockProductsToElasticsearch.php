@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\SyncStockProductToElasticsearchJob;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use App\Jobs\SyncStockProductToElasticsearchJob;
 
 class SyncAllStockProductsToElasticsearch extends Command
 {

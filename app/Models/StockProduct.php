@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class StockProduct extends Model
 {
@@ -23,7 +24,10 @@ class StockProduct extends Model
         'max_discount_percent',
         'max_increase_percent',
         'auto_calc',
-        'is_using'
+        'is_using',
+        'quantity_combo',
+        'sell_price_combo',
+        'parent_id'
     ];
 
     public function stock()
@@ -35,6 +39,40 @@ class StockProduct extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    public function parent()
+    {
+        return $this->belongsTo(StockProduct::class, 'parent_id')
+            ->select('stock_products.*')
+            ->addSelect([
+                DB::raw('(
+                SELECT JSON_ARRAYAGG(JSON_OBJECT(
+                    "id", sp2.id,
+                    "product_id", sp2.product_id,
+                    "attribute_first_id", sp2.attribute_first_id,
+                    "attribute_second_id", sp2.attribute_second_id,
+                    "sell_price", sp2.sell_price,
+                    "purchase", sp2.purchase_price,
+                    "stock_name", s.name,
+                    "attr1_title", attr1.title,
+                    "attr2_title", attr2.title,
+                    "quantity", sp2.quantity,
+                    "stock_id", s.id,
+                    "is_stock_default", s.is_default,
+                    "sku", sp2.sku
+                ))
+                FROM stock_products sp2
+                JOIN stocks s ON sp2.stock_id = s.id
+                LEFT JOIN attributes attr1 ON sp2.attribute_first_id = attr1.id
+                LEFT JOIN attributes attr2 ON sp2.attribute_second_id = attr2.id
+                WHERE sp2.product_id = stock_products.product_id
+                  AND (sp2.attribute_first_id <=> stock_products.attribute_first_id)
+                  AND (sp2.attribute_second_id <=> stock_products.attribute_second_id)
+                  AND sp2.product_type = "variable"
+            ) AS related_variants')
+            ]);
+    }
+
 
     public function attributeFirst()
     {

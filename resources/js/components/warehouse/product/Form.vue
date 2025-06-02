@@ -141,6 +141,7 @@
     <!-- Lưới Combo -->
     <ComboGrid
      v-if="form.type === 'combo'"
+     ref="comboGrid"
      />
     <!-- Lưới biến thể -->
     <VariantGrid
@@ -789,6 +790,10 @@ export default {
             formData.append(`variants[${i}][attributes][${j}][value_id]`, attr.value.id)
           })
         })
+
+        if (this.form.type === 'combo') {
+          formData.append('combo', JSON.stringify(this.$refs.comboGrid.comboItems))
+        }
 
         const url = this.mode === 'update'
           ? `/api/warehouse/product/update/${this.id}`

@@ -181,7 +181,7 @@ export default {
       })
     },
     getStockName(stockId) {
-      const stock = this.stocks.find(s => s.id === stockId)
+      const stock = this.stocks.find(s => s.stock_id === stockId)
       return stock ? stock.name : '—'
     },
     onImageChange(e, index) {

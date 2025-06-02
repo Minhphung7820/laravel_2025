@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Services\ElasticsearchService;
+use Illuminate\Console\Command;
 
 class EsCreateStockProductIndex extends Command
 {

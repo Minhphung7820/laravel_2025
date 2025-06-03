@@ -13,23 +13,18 @@ class AuthController extends Controller
             'email'    => ['required', 'email'],
             'password' => ['required'],
         ]);
-
         if (!Auth::attempt($credentials)) {
-            return response()->json(['message' => 'Sai tài khoản hoặc mật khẩu'], 401);
+            return $this->responseError('Sai tài khoản hoặc mật khẩu', 401);
         }
-
         $request->session()->regenerate();
-
-        return response()->json(['message' => 'Đăng nhập thành công']);
+        return $this->responseSuccess(null, 'Đăng nhập thành công');
     }
 
     public function logout(Request $request)
     {
         Auth::guard('web')->logout();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
-        return response()->json(['message' => 'Đăng xuất thành công']);
+        return $this->responseSuccess(null, 'Đăng xuất thành công');
     }
 }

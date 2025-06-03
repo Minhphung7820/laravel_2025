@@ -80,7 +80,7 @@ export default {
     async getDetail() {
       try {
         const res = await window.axios.get(`/api/warehouse/category/detail/${this.id}`)
-        this.form = res.data
+        this.form = res.data.data
       } catch (e) {
         console.error('Lỗi khi load dữ liệu:', e)
       }

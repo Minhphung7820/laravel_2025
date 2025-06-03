@@ -33,7 +33,7 @@ export default {
   methods: {
     async fetch() {
       const res = await window.axios.get(`/api/warehouse/stock/detail/${this.id}`)
-      this.form = res.data
+      this.form = res.data.data
     },
     async submit() {
       const url = this.mode === 'create'

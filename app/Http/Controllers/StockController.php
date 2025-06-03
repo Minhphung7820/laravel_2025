@@ -7,37 +7,21 @@ use Illuminate\Http\Request;
 
 class StockController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         try {
-            $customers = Stock::when(
-                isset($request['keyword']) && $request['keyword'],
-                function ($query) use ($request) {
-                    return $query->where(function ($query) use ($request) {
-                        $query->where('name', 'like', '%' . $request['keyword'] . '%');
-                    });
-                }
-            )->orderBy('created_at', 'desc')->paginate($request['limit'] ?? 10);
-            return response()->json($customers);
+            $stocks = Stock::when($request->filled('keyword'), function ($query) use ($request) {
+                $query->where('name', 'like', '%' . $request['keyword'] . '%');
+            })
+                ->orderByDesc('created_at')
+                ->paginate($request->input('limit', 10));
+
+            return $this->responseSuccess($stocks);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return $this->responseError('Lỗi khi lấy danh sách kho', 500, $e->getMessage());
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -46,47 +30,38 @@ class StockController extends Controller
 
         $stock = Stock::create($validated);
 
-        return response()->json(['message' => 'Đã tạo kho', 'data' => $stock]);
+        return $this->responseSuccess($stock, 'Tạo kho thành công', 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
-        $stock = Stock::findOrFail($id);
-        return response()->json($stock);
+        try {
+            $stock = Stock::findOrFail($id);
+            return $this->responseSuccess($stock);
+        } catch (\Exception $e) {
+            return $this->responseError('Không tìm thấy kho', 404, $e->getMessage());
+        }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $id)
     {
-        $stock = Stock::findOrFail($id);
+        try {
+            $stock = Stock::findOrFail($id);
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255'
-        ]);
+            $validated = $request->validate([
+                'name' => 'required|string|max:255'
+            ]);
 
-        $stock->update($validated);
+            $stock->update($validated);
 
-        return response()->json(['message' => 'Đã cập nhật kho', 'data' => $stock]);
+            return $this->responseSuccess($stock, 'Cập nhật kho thành công');
+        } catch (\Exception $e) {
+            return $this->responseError('Lỗi khi cập nhật kho', 500, $e->getMessage());
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
-        //
+        return $this->responseError('Tính năng đang phát triển', 501);
     }
 }

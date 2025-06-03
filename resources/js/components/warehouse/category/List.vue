@@ -89,13 +89,13 @@ export default {
         const res = await window.axios.get('/api/warehouse/category/list', {
           params: { page, keyword: this.keyword }
         })
-        this.categories = res.data.data
+        this.categories = res.data.data.data
         this.pagination = {
-          current_page: res.data.current_page,
-          last_page: res.data.last_page,
-          from: res.data.from,
-          to: res.data.to,
-          total: res.data.total
+          current_page: res.data.data.current_page,
+          last_page: res.data.data.last_page,
+          from: res.data.data.from,
+          to: res.data.data.to,
+          total: res.data.data.total
         }
       } catch (e) {
         console.error('Lỗi khi lấy danh sách danh mục:', e)

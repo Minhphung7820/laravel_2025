@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\DB;
 class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Thống kê tỷ lệ người dùng tương tác theo từng ngày đăng ký
+     * (trong 30 ngày gần nhất)
      */
     public function index(Request $request)
     {
@@ -55,12 +56,16 @@ class UserController extends Controller
                 ->orderBy('day')
                 ->get();
 
-            return response()->json($engagementStats);
+            return $this->responseSuccess($engagementStats, 'Thống kê tương tác người dùng');
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return $this->responseError('Lỗi khi thống kê tương tác', 500, $e->getMessage());
         }
     }
 
+    /**
+     * Phân loại người dùng theo điểm hoạt động
+     * (30 ngày gần nhất, phân theo mức độ tương tác)
+     */
     public function advancedEngagement(Request $request)
     {
         try {
@@ -71,16 +76,16 @@ class UserController extends Controller
                     'users.id',
                     DB::raw('DATE(users.created_at) as register_day'),
                     DB::raw("
-                    SUM(
-                        CASE
-                            WHEN e.event_type = 'view_video' AND e.created_at <= users.created_at + INTERVAL 1 DAY THEN 1
-                            WHEN e.event_type = 'comment' AND e.created_at <= users.created_at + INTERVAL 2 DAY THEN 5
-                            WHEN e.event_type IN ('like', 'share') THEN 2
-                            WHEN e.event_type = 'login' AND e.created_at BETWEEN users.created_at + INTERVAL 2 DAY AND users.created_at + INTERVAL 7 DAY THEN 3
-                            ELSE 0
-                        END
-                    ) as total_score
-                ")
+                        SUM(
+                            CASE
+                                WHEN e.event_type = 'view_video' AND e.created_at <= users.created_at + INTERVAL 1 DAY THEN 1
+                                WHEN e.event_type = 'comment' AND e.created_at <= users.created_at + INTERVAL 2 DAY THEN 5
+                                WHEN e.event_type IN ('like', 'share') THEN 2
+                                WHEN e.event_type = 'login' AND e.created_at BETWEEN users.created_at + INTERVAL 2 DAY AND users.created_at + INTERVAL 7 DAY THEN 3
+                                ELSE 0
+                            END
+                        ) as total_score
+                    ")
                 )
                 ->groupBy('users.id', 'register_day');
 
@@ -97,57 +102,9 @@ class UserController extends Controller
                 ->orderBy('register_day')
                 ->get();
 
-            return response()->json($engagementStats);
+            return $this->responseSuccess($engagementStats, 'Phân loại người dùng theo mức độ tương tác');
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return $this->responseError('Lỗi khi tính điểm tương tác', 500, $e->getMessage());
         }
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

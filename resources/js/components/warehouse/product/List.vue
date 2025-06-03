@@ -139,8 +139,8 @@ export default {
       this.updateUrlQuery(page)
 
       window.axios.get('/api/warehouse/product/list', { params }).then(res => {
-        this.products = res.data.data
-        Object.assign(this.pagination, res.data)
+        this.products = res.data.data.data
+        Object.assign(this.pagination, res.data.data)
       })
     },
     onSearch(keyword) {

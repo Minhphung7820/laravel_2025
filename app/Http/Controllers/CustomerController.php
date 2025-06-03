@@ -8,38 +8,25 @@ use Illuminate\Support\Facades\Storage;
 
 class CustomerController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         try {
-            $customers = Customer::where('is_customer', 1)->when(
-                isset($request['keyword']) && $request['keyword'],
-                function ($query) use ($request) {
-                    return $query->where(function ($query) use ($request) {
-                        $query->where('name', 'like', '%' . $request['keyword'] . '%');
-                        $query->orWhere('email', 'like', '%' . $request['keyword'] . '%');
+            $customers = Customer::where('is_customer', 1)
+                ->when($request->filled('keyword'), function ($query) use ($request) {
+                    $query->where(function ($q) use ($request) {
+                        $q->where('name', 'like', '%' . $request['keyword'] . '%')
+                            ->orWhere('email', 'like', '%' . $request['keyword'] . '%');
                     });
-                }
-            )->orderBy('created_at', 'desc')->paginate($request['limit'] ?? 10);
-            return response()->json($customers);
+                })
+                ->orderByDesc('created_at')
+                ->paginate($request->input('limit', 10));
+
+            return $this->responseSuccess($customers);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return $this->responseError('Lỗi khi lấy danh sách khách hàng', 500, $e->getMessage());
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         if ($request->assigned_user_id === 'null') {
@@ -53,7 +40,7 @@ class CustomerController extends Controller
                 'string',
                 'max:20',
                 \Illuminate\Validation\Rule::unique('customers', 'phone')
-                    ->where(fn ($query) => $query->where('is_customer', 1)),
+                    ->where(fn($q) => $q->where('is_customer', 1)),
             ],
             'email'            => 'nullable|email|max:255',
             'birthday'         => 'nullable|date',
@@ -75,57 +62,39 @@ class CustomerController extends Controller
         $validated['total_spent'] = 0;
 
         if ($request->hasFile('avatar')) {
-            $path = $request->file('avatar')->store('avatars', 'public');
-            $validated['avatar'] = '/storage/' . $path;
+            $validated['avatar'] = $this->uploadFile($request->file('avatar'), 'avatars');
         }
+
         $customer = Customer::create($validated);
 
-        return response()->json([
-            'message' => 'Tạo khách hàng thành công',
-            'data'    => $customer
-        ], 201);
+        return $this->responseSuccess($customer, 'Tạo khách hàng thành công', 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         try {
-            $data = Customer::findOrFail($id);
-            return response()->json($data);
+            $customer = Customer::findOrFail($id);
+            return $this->responseSuccess($customer);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return $this->responseError('Không tìm thấy khách hàng', 404, $e->getMessage());
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         $customer = Customer::findOrFail($id);
+
         $validated = $request->validate([
             'name'  => 'required|string|max:255',
             'phone' => [
                 'required',
                 'string',
                 'max:20',
-                \Illuminate\Validation\Rule::unique('customers')
-                    ->where(function ($query) use ($request) {
-                        return $query->where('is_customer', 1);
-                    })
+                \Illuminate\Validation\Rule::unique('customers', 'phone')
+                    ->where(fn($q) => $q->where('is_customer', 1))
                     ->ignore($customer->id),
             ],
-            'email'            => 'nullable|email',
+            'email'            => 'nullable|email|max:255',
             'birthday'         => 'nullable|date',
             'gender'           => 'nullable|in:male,female,other,unknown',
             'address'          => 'nullable|string|max:255',
@@ -139,34 +108,24 @@ class CustomerController extends Controller
             'debt_amount'      => 'nullable|numeric|min:0',
             'credit_limit'     => 'nullable|numeric|min:0',
             'note'             => 'nullable|string',
-            'avatar'           => 'nullable|image|max:2048', // 2MB
+            'avatar'           => 'nullable|image|max:2048',
         ]);
 
-        // Nếu có file ảnh mới được gửi lên
         if ($request->hasFile('avatar')) {
-            // Xóa ảnh cũ nếu có
-            if ($customer->avatar && Storage::exists($customer->avatar)) {
-                Storage::delete($customer->avatar);
+            if ($customer->avatar && Storage::disk('public')->exists(str_replace('/storage/', '', $customer->avatar))) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $customer->avatar));
             }
 
-            // Lưu ảnh mới
-            $avatarPath = $request->file('avatar')->store('avatars', 'public');
-            $validated['avatar'] = '/storage/' . $avatarPath;
+            $validated['avatar'] = $this->uploadFile($request->file('avatar'), 'avatars');
         }
 
         $customer->update($validated);
 
-        return response()->json([
-            'message'  => 'Cập nhật thành công!',
-            'customer' => $customer
-        ]);
+        return $this->responseSuccess($customer, 'Cập nhật khách hàng thành công');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
-        //
+        return $this->responseError('Tính năng đang phát triển', 501);
     }
 }

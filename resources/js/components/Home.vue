@@ -24,7 +24,7 @@ export default {
     async getApi() {
       try {
         const response = await window.axios.get('/api/user/list');
-        this.engagements = response.data
+        this.engagements = response.data.data
       } catch (error) {
         console.log(error?.response?.data?.message);
       }

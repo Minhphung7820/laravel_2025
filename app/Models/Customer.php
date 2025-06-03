@@ -57,6 +57,6 @@ class Customer extends Model
 
     public function getAvatarUrlAttribute()
     {
-        return $this->avatar ? url($this->avatar) : null;
+        return $this->avatar ? url($this->avatar) : env('AVATAR_DEFAULT');
     }
 }

@@ -402,7 +402,7 @@ export default {
     async checkAndLoadVariants(isMappingData = false) {
       if (this.form.has_variant && this.form.category_id) {
         const res = await fetch(`/api/warehouse/category/${this.form.category_id}/attributes`)
-        this.variantAttributes = await res.json()
+        this.variantAttributes = await res.json().data
         if (!isMappingData) {
           this.selectedAttributes = []
           this.selectedAttributeValues = {}
@@ -532,14 +532,14 @@ export default {
           }
           return await res.json()
         }))
-        this.units = jsons[0]?.data || []
-        this.brands = jsons[1]?.data || []
-        this.categories = jsons[2]?.data || []
+        this.units = jsons[0]?.data.data || []
+        this.brands = jsons[1]?.data.data || []
+        this.categories = jsons[2]?.data.data || []
         if(isCreate){
-           this.stocks =(jsons[3]?.data || [])
+           this.stocks =(jsons[3]?.data.data || [])
         }
         this.suppliers = isNotCombo
-          ? (isCreate ? (jsons[4]?.data || []) : (jsons[3]?.data || []))
+          ? (isCreate ? (jsons[4]?.data.data || []) : (jsons[3]?.data.data || []))
           : []
       } catch (err) {
         console.error('Lỗi khi load dữ liệu:', err)
@@ -548,7 +548,9 @@ export default {
     async loadProduct() {
 
         const res = await fetch(`/api/warehouse/product/detail/${this.id}`)
-        const data = await res.json()
+        let data = await res.json()
+        data = data.data
+
         const product = data.product
 
         Object.assign(this.form, {

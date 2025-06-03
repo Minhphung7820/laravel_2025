@@ -7,89 +7,66 @@ use Illuminate\Http\Request;
 
 class UnitController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         try {
-            $customers = Unit::when(
-                isset($request['keyword']) && $request['keyword'],
-                function ($query) use ($request) {
-                    return $query->where(function ($query) use ($request) {
-                        $query->where('name', 'like', '%' . $request['keyword'] . '%');
-                        $query->orWhere('abbreviation', 'like', '%' . $request['keyword'] . '%');
-                    });
-                }
-            )->orderBy('created_at', 'desc')->paginate($request['limit'] ?? 10);
-            return response()->json($customers);
+            $units = Unit::when($request->filled('keyword'), function ($query) use ($request) {
+                $query->where(function ($q) use ($request) {
+                    $q->where('name', 'like', '%' . $request['keyword'] . '%')
+                        ->orWhere('abbreviation', 'like', '%' . $request['keyword'] . '%');
+                });
+            })
+                ->orderByDesc('created_at')
+                ->paginate($request->input('limit', 10));
+
+            return $this->responseSuccess($units);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return $this->responseError('Lỗi khi lấy danh sách đơn vị', 500, $e->getMessage());
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name'         => 'required|string|max:255',
-            'abbreviation' => 'nullable|string|max:50'
+            'abbreviation' => 'nullable|string|max:50',
         ]);
 
         $unit = Unit::create($validated);
 
-        return response()->json(['message' => 'Đã tạo đơn vị', 'data' => $unit]);
+        return $this->responseSuccess($unit, 'Tạo đơn vị thành công', 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
-        $unit = Unit::findOrFail($id);
-        return response()->json($unit);
+        try {
+            $unit = Unit::findOrFail($id);
+            return $this->responseSuccess($unit);
+        } catch (\Exception $e) {
+            return $this->responseError('Không tìm thấy đơn vị', 404, $e->getMessage());
+        }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $id)
     {
-        $unit = Unit::findOrFail($id);
+        try {
+            $unit = Unit::findOrFail($id);
 
-        $validated = $request->validate([
-            'name'         => 'required|string|max:255',
-            'abbreviation' => 'nullable|string|max:50'
-        ]);
+            $validated = $request->validate([
+                'name'         => 'required|string|max:255',
+                'abbreviation' => 'nullable|string|max:50',
+            ]);
 
-        $unit->update($validated);
+            $unit->update($validated);
 
-        return response()->json(['message' => 'Đã cập nhật đơn vị', 'data' => $unit]);
+            return $this->responseSuccess($unit, 'Cập nhật đơn vị thành công');
+        } catch (\Exception $e) {
+            return $this->responseError('Lỗi khi cập nhật đơn vị', 500, $e->getMessage());
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
-        //
+        return $this->responseError('Tính năng đang phát triển', 501);
     }
 }

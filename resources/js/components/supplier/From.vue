@@ -202,7 +202,8 @@ export default {
   async mounted() {
     if (this.mode === 'update' && this.supplierId) {
       try {
-        const { data } = await window.axios.get(`/api/supplier/detail/${this.supplierId}`)
+        const supplier = await window.axios.get(`/api/supplier/detail/${this.supplierId}`)
+        const { data } = supplier.data
         this.form = { ...this.form, ...data }
         this.form.avatar = null;
         this.form.birthday = data.birthday ? data.birthday.split('T')[0] : ''

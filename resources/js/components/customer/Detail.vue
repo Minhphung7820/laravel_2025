@@ -81,7 +81,7 @@ export default {
       const id = this.$route.params.id
       try {
         const res = await axios.get(`/api/customer/detail/${id}`)
-        this.customer = res.data
+        this.customer = res.data.data
       } catch (error) {
         console.error('Lỗi khi tải chi tiết khách hàng:', error)
       }

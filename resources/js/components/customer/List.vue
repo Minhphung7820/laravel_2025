@@ -132,7 +132,7 @@ export default {
       this.updateUrlQuery(page)
 
       window.axios.get('/api/customer/list', { params }).then(res => {
-        this.customers = res.data.data
+        this.customers = res.data.data.data
 
         const {
           current_page,
@@ -141,7 +141,7 @@ export default {
           to,
           per_page,
           total
-        } = res.data
+        } = res.data.data
 
         Object.assign(this.pagination, {
           current_page,

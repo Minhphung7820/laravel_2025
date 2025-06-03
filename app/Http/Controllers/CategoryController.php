@@ -10,37 +10,22 @@ use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         try {
-            $customers = Category::withCount('variants')->when(
-                isset($request['keyword']) && $request['keyword'],
-                function ($query) use ($request) {
-                    return $query->where(function ($query) use ($request) {
-                        $query->where('title', 'like', '%' . $request['keyword'] . '%');
-                    });
-                }
-            )->orderBy('created_at', 'desc')->paginate($request['limit'] ?? 10);
-            return response()->json($customers);
+            $categories = Category::withCount('variants')
+                ->when($request->filled('keyword'), function ($query) use ($request) {
+                    $query->where('title', 'like', '%' . $request->keyword . '%');
+                })
+                ->orderByDesc('created_at')
+                ->paginate($request->input('limit', 10));
+
+            return $this->responseSuccess($categories);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return $this->responseError('Lỗi truy vấn danh sách', 500, $e->getMessage());
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         DB::beginTransaction();
@@ -56,41 +41,26 @@ class CategoryController extends Controller
             }
 
             DB::commit();
-            return response()->json(['message' => 'Tạo danh mục thành công']);
+            return $this->responseSuccess($category, 'Tạo danh mục thành công');
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => $e->getMessage()], 500);
+            return $this->responseError('Tạo danh mục thất bại', 500, $e->getMessage());
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         try {
             $data = Category::with('variants.attributes')->findOrFail($id);
-            return response()->json($data);
+            return $this->responseSuccess($data);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return $this->responseError('Không tìm thấy danh mục', 404, $e->getMessage());
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         DB::beginTransaction();
-
         try {
             $category = Category::with('variants.attributes')->findOrFail($id);
             $category->update(['title' => $request->title]);
@@ -100,35 +70,30 @@ class CategoryController extends Controller
 
             foreach ($request->variants as $variantData) {
                 if (isset($variantData['id'])) {
-                    // UPDATE VARIANT
                     $variant = Variant::where('category_id', $category->id)->find($variantData['id']);
                     if ($variant) {
                         $variant->update(['title' => $variantData['title']]);
                         $newVariantIds[] = $variant->id;
 
-                        // Process attributes
-                        $existingAttributeIds = $variant->attributes->pluck('id')->toArray();
-                        $newAttributeIds = [];
+                        $existingAttrIds = $variant->attributes->pluck('id')->toArray();
+                        $newAttrIds = [];
 
                         foreach ($variantData['attributes'] as $attrData) {
                             if (isset($attrData['id'])) {
                                 $attribute = Attribute::where('variant_id', $variant->id)->find($attrData['id']);
                                 if ($attribute) {
                                     $attribute->update(['title' => $attrData['title']]);
-                                    $newAttributeIds[] = $attribute->id;
+                                    $newAttrIds[] = $attribute->id;
                                 }
                             } else {
                                 $newAttr = $variant->attributes()->create(['title' => $attrData['title']]);
-                                $newAttributeIds[] = $newAttr->id;
+                                $newAttrIds[] = $newAttr->id;
                             }
                         }
 
-                        // Delete attributes bị xoá
-                        $toDeleteAttrs = array_diff($existingAttributeIds, $newAttributeIds);
-                        Attribute::whereIn('id', $toDeleteAttrs)->delete();
+                        Attribute::whereIn('id', array_diff($existingAttrIds, $newAttrIds))->delete();
                     }
                 } else {
-                    // CREATE NEW VARIANT + ATTRIBUTES
                     $newVariant = $category->variants()->create(['title' => $variantData['title']]);
                     $newVariantIds[] = $newVariant->id;
 
@@ -138,34 +103,31 @@ class CategoryController extends Controller
                 }
             }
 
-            // Delete variants bị xoá
-            $toDeleteVariants = array_diff($existingVariantIds, $newVariantIds);
-            Variant::whereIn('id', $toDeleteVariants)->delete();
+            Variant::whereIn('id', array_diff($existingVariantIds, $newVariantIds))->delete();
 
             DB::commit();
-            return response()->json(['message' => 'Cập nhật danh mục thành công']);
+            return $this->responseSuccess($category, 'Cập nhật danh mục thành công');
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => $e->getMessage()], 500);
+            return $this->responseError('Cập nhật thất bại', 500, $e->getMessage());
         }
     }
 
     public function getAttributes(Request $request, $id)
     {
         try {
-            $attributes = Variant::with('attributes')
+            $variants = Variant::with('attributes')
                 ->where('category_id', $id)
                 ->get();
-            return response()->json($attributes);
+
+            return $this->responseSuccess($variants);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return $this->responseError('Lỗi khi lấy thuộc tính', 500, $e->getMessage());
         }
     }
-    /**
-     * Remove the specified resource from storage.
-     */
+
     public function destroy(string $id)
     {
-        //
+        return $this->responseError('Tính năng đang phát triển', 501);
     }
 }

@@ -58,10 +58,15 @@ export default {
   },
   methods: {
     async fetch() {
+    try {
       const res = await window.axios.get(`/api/warehouse/brand/detail/${this.id}`)
-      this.form.name = res.data.name
-      this.form.description = res.data.description
-      this.form.logo_url =  res.data.logo_url
+      this.form.name = res.data.data.name
+      this.form.description = res.data.data.description
+      this.form.logo_url =  res.data.data.logo_url
+    } catch (error) {
+      console.log(error);
+
+    }
     },
     handleFile(e) {
       const file = e.target.files[0]

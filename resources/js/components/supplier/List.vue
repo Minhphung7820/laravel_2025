@@ -131,7 +131,7 @@ export default {
       this.updateUrlQuery(page)
 
       window.axios.get('/api/supplier/list', { params }).then(res => {
-        this.suppliers = res.data.data
+        this.suppliers = res.data.data.data
 
         const {
           current_page,

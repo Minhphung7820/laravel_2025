@@ -85,14 +85,14 @@ export default {
       const res = await window.axios.get('/api/warehouse/stock/list', {
         params: { page, keyword: this.search }
       })
-      this.stocks = res.data.data
+      this.stocks = res.data.data.data
       this.pagination = {
-        current_page: res.data.current_page,
-        last_page: res.data.last_page,
-        from: res.data.from,
-        to: res.data.to,
-        total: res.data.total,
-        per_page: res.data.per_page
+        current_page: res.data.data.current_page,
+        last_page: res.data.data.last_page,
+        from: res.data.data.from,
+        to: res.data.data.to,
+        total: res.data.data.total,
+        per_page: res.data.data.per_page
       }
     },
     onSearch(keyword) {

@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
+    /**
+     * Top 10 khách hàng trong 30 ngày gần nhất:
+     * - Có ít nhất 2 đơn hàng
+     * - Tổng chi tiêu > 10 triệu
+     */
     public function topCustomers(Request $request)
     {
         try {
@@ -28,12 +33,15 @@ class ReportController extends Controller
                 ->limit(10)
                 ->get();
 
-            return response()->json($topCustomers);
+            return $this->responseSuccess($topCustomers, 'Top khách hàng theo chi tiêu');
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return $this->responseError('Lỗi khi thống kê top khách hàng', 500, $e->getMessage());
         }
     }
 
+    /**
+     * Top 10 sản phẩm bán chạy trong 30 ngày gần nhất
+     */
     public function topProducts(Request $request)
     {
         try {
@@ -43,10 +51,7 @@ class ReportController extends Controller
                 ->leftJoin('attributes as a1', 'order_items.attribute_first_id', '=', 'a1.id')
                 ->leftJoin('attributes as a2', 'order_items.attribute_second_id', '=', 'a2.id')
                 ->where('orders.status', 'completed')
-                ->whereBetween('orders.transaction_date', [
-                    now()->subDays(30),
-                    now()
-                ])
+                ->whereBetween('orders.transaction_date', [now()->subDays(30), now()])
                 ->groupBy(
                     'order_items.product_id',
                     'order_items.attribute_first_id',
@@ -66,9 +71,9 @@ class ReportController extends Controller
                 ->limit(10)
                 ->get();
 
-            return response()->json($topProducts);
+            return $this->responseSuccess($topProducts, 'Top sản phẩm bán chạy');
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return $this->responseError('Lỗi khi thống kê sản phẩm bán chạy', 500, $e->getMessage());
         }
     }
 }

@@ -287,8 +287,8 @@ export default {
             excepts_variable: this.exceptsVariable.join(',')
           }
         })
-        this.productList = res.data.data || []
-        Object.assign(this.pagination, res.data)
+        this.productList = res.data.data.data || []
+        Object.assign(this.pagination, res.data.data)
       } catch (error) {
         console.error('Lỗi khi fetch products:', error)
       }

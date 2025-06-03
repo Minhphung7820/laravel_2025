@@ -95,7 +95,7 @@ class ProductController extends Controller
 
         $results = $query->paginate($limit);
 
-        return response()->json($results);
+        return $this->responseSuccess($results);
     }
 
     public function getInitCombo(Request $request)
@@ -205,7 +205,7 @@ class ProductController extends Controller
                 ELSE products.created_at
             END DESC
         ");
-        return response()->json($query->paginate($limit));
+        return $this->responseSuccess($query->paginate($limit));
     }
 
     /**
@@ -255,9 +255,9 @@ class ProductController extends Controller
                 )
                 ->orderByDesc('recent_items.transaction_date')
                 ->get();
-            return response()->json($recommend);
+            return $this->responseSuccess($recommend);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return $this->responseError($e->getMessage(), 500);
         }
     }
     /**
@@ -278,7 +278,7 @@ class ProductController extends Controller
             // Ảnh bìa
             $coverPath = null;
             if ($request->hasFile('cover_image')) {
-                $coverPath = $request->file('cover_image')->store('products/cover', 'public');
+                $coverPath = $this->uploadFile($request->file('cover_image'), 'products/cover');
             }
             // Tạo sản phẩm chính
             $product = Product::create([
@@ -293,17 +293,17 @@ class ProductController extends Controller
                 'brand_id'     => $request->input('brand_id'),
                 'category_id'  => $request->input('category_id'),
                 'supplier_id'  => $request->input('supplier_id'),
-                'image_cover'  => $coverPath ? '/storage/' . $coverPath : null,
+                'image_cover'  => $coverPath ? $coverPath : null,
                 'status'       => 'pending',
             ]);
             // Lưu ảnh chính (gallery_images) hàng loạt
             if ($request->hasFile('gallery_images')) {
                 $imagesData = [];
                 foreach ($request->file('gallery_images') as $file) {
-                    $path = $file->store('products/gallery', 'public');
+                    $path = $this->uploadFile($file, 'products/gallery');
                     $imagesData[] = [
                         'product_id' => $product->id,
-                        'image'      => '/storage/' . $path,
+                        'image'      => $path,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
@@ -352,10 +352,10 @@ class ProductController extends Controller
                     // Lưu ảnh cho biến thể
                     if ($request->hasFile("variants.$i.image")) {
                         $file = $request->file("variants.$i.image");
-                        $path = $file->store('products/variants', 'public');
+                        $path = $this->uploadFile($file, 'products/variants');
                         ProductVariantImage::create([
                             'stock_product_id' => $variantStock->id,
-                            'image'            => '/storage/' . $path,
+                            'image'            => $path,
                         ]);
                     }
                 }
@@ -366,14 +366,14 @@ class ProductController extends Controller
                 $syncCombo = $this->syncProductsCombo($product['id'], $combosPrepare);
                 if (! $syncCombo) {
                     DB::rollBack();
-                    return response()->json(['error' => 'Save Combo failed!'], 500);
+                    return $this->responseError('Save Combo failed!', 500);
                 }
             }
             DB::commit();
-            return response()->json(['message' => 'Thêm sản phẩm thành công!'], 201);
+            return $this->responseSuccess(true, 'Thêm sản phẩm thành công!', 201);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => $e->getMessage()], 500);
+            return $this->responseError($e->getMessage(), 500);
         }
     }
 
@@ -439,44 +439,48 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        $product = Product::findOrFail($id);
-        $baseRelations = ['galleryImages', 'stockData.stock'];
+        try {
+            $product = Product::findOrFail($id);
+            $baseRelations = ['galleryImages', 'stockData.stock'];
 
-        switch ($product->type) {
-            case 'variable':
-                $product->load(array_merge($baseRelations, [
-                    'attributes.attributeFirst.variant',
-                    'attributes.attributeSecond.variant',
-                    'attributes.variantImages',
-                ]));
+            switch ($product->type) {
+                case 'variable':
+                    $product->load(array_merge($baseRelations, [
+                        'attributes.attributeFirst.variant',
+                        'attributes.attributeSecond.variant',
+                        'attributes.variantImages',
+                    ]));
 
-                return [
-                    'product'        => $product,
-                    'stock_products' => ProductAttributesResource::collection($product->attributes ?? []),
-                ];
+                    return $this->responseSuccess([
+                        'product'        => $product,
+                        'stock_products' => ProductAttributesResource::collection($product->attributes ?? []),
+                    ]);
 
-            case 'combo':
-                $product->load(array_merge($baseRelations, [
-                    'combo.parent',
-                    'combo.parent.attributeFirst:id,title',
-                    'combo.parent.attributeSecond:id,title',
-                    'combo.parent.product.stockData.stock:id,name',
-                    'combo.parent.variantImages:id,stock_product_id,image',
-                    'combo.parent.product:id,type,status,image_cover,name,sku',
-                ]));
+                case 'combo':
+                    $product->load(array_merge($baseRelations, [
+                        'combo.parent',
+                        'combo.parent.attributeFirst:id,title',
+                        'combo.parent.attributeSecond:id,title',
+                        'combo.parent.product.stockData.stock:id,name',
+                        'combo.parent.variantImages:id,stock_product_id,image',
+                        'combo.parent.product:id,type,status,image_cover,name,sku',
+                    ]));
 
-                return [
-                    'product' => $product,
-                    'combo'   => ProductComboResource::collection($product->combo ?? []),
-                ];
+                    return $this->responseSuccess([
+                        'product' => $product,
+                        'combo'   => ProductComboResource::collection($product->combo ?? []),
+                    ]);
 
-            case 'single':
-            default:
-                $product->load($baseRelations);
+                case 'single':
+                default:
+                    $product->load($baseRelations);
 
-                return [
-                    'product' => $product,
-                ];
+                    return $this->responseSuccess([
+                        'product' => $product,
+                    ]);
+            }
+        } catch (\Exception $e) {
+            return $this->responseError('Không tìm thấy sản phẩm', 404, $e->getMessage());
         }
     }
 
@@ -497,7 +501,7 @@ class ProductController extends Controller
         try {
             $coverPath = null;
             if ($request->hasFile('cover_image')) {
-                $coverPath = $request->file('cover_image')->store('products/cover', 'public');
+                $coverPath = $this->uploadFile($request->file('cover_image'), 'products/cover');
             }
             $data = [
                 'name'        => $request['name'],
@@ -515,7 +519,7 @@ class ProductController extends Controller
                 'status'      => 'pending'
             ];
             if ($coverPath) {
-                $data['image_cover'] = '/storage/' . $coverPath;
+                $data['image_cover'] =  $coverPath;
             }
             if ($data['type'] === 'variable') {
                 $attributes = $request['variants'] ?? [];
@@ -543,10 +547,10 @@ class ProductController extends Controller
             if ($request->hasFile('gallery_images')) {
                 $imagesData = [];
                 foreach ($request->file('gallery_images') as $file) {
-                    $path = $file->store('products/gallery', 'public');
+                    $path = $this->uploadFile($file, 'products/gallery');
                     $imagesData[] = [
                         'product_id' => $product->id,
-                        'image'      => '/storage/' . $path,
+                        'image'      => $path,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
@@ -592,7 +596,8 @@ class ProductController extends Controller
                     ->delete();
 
                 if ($data['type'] === 'variable') {
-                    $canceledVariant = [];
+                    $canceledVariant      = [];
+                    $canceledImageVariant = [];
                     foreach ($attributes as $key => $attribute) {
                         // Xử lý SKU
                         $sku = $attribute['sku'] ?: $this->generateUniqueSku($request->input('sku') ?? 'SP', $attribute['id'] ?? null);
@@ -625,21 +630,28 @@ class ProductController extends Controller
                         if (!$attributeModel) {
                             throw new \Exception("Lỗi khi thêm biến thể!");
                         }
-
                         $canceledVariant[] = $attributeModel->id;
-
                         // Xử lý ảnh nếu có
                         if ($request->hasFile("variants.$key.image")) {
                             $file = $request->file("variants.$key.image");
-                            $path = $file->store('products/variants', 'public');
-
-                            ProductVariantImage::create([
+                            $path = $this->uploadFile($file, 'products/variants');
+                            $newImageAttr = ProductVariantImage::create([
                                 'stock_product_id' => $attributeModel->id,
-                                'image'            => '/storage/' . $path,
+                                'image'            => $path,
                             ]);
+                            if ($newImageAttr) {
+                                $canceledImageVariant[]  = [
+                                    'id'                 => $newImageAttr['id'],
+                                    'stock_product_id'   => $attributeModel->id
+                                ];
+                            }
                         }
                     }
-
+                    if (!empty($canceledImageVariant)) {
+                        ProductVariantImage::whereIn('stock_product_id', array_column($canceledImageVariant, 'stock_product_id'))
+                            ->whereNotIn('id', array_column($canceledImageVariant, 'id'))
+                            ->delete();
+                    }
                     // Xóa các biến thể không còn sử dụng
                     if (!empty($canceledVariant)) {
                         StockProduct::where('product_id', $id)
@@ -654,16 +666,16 @@ class ProductController extends Controller
                     $syncCombo = $this->syncProductsCombo($product['id'], $combosPrepare);
                     if (! $syncCombo) {
                         DB::rollBack();
-                        return response()->json(['error' => 'Save Combo failed!'], 500);
+                        return $this->responseError('Save Combo failed!');
                     }
                 }
             }
 
             DB::commit();
-            return response()->json(['message' => 'Chỉnh sửa sản phẩm thành công!'], 201);
+            return $this->responseSuccess(true, 'Chỉnh sửa sản phẩm thành công!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => $e->getMessage()], 500);
+            return $this->responseError($e->getMessage());
         }
     }
 

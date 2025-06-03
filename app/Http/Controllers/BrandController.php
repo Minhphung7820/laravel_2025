@@ -9,35 +9,27 @@ use Illuminate\Support\Facades\Storage;
 class BrandController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Hiển thị danh sách thương hiệu có tìm kiếm.
      */
     public function index(Request $request)
     {
         try {
-            $customers = Brand::when(
-                isset($request['keyword']) && $request['keyword'],
+            $brands = Brand::when(
+                $request->filled('keyword'),
                 function ($query) use ($request) {
-                    return $query->where(function ($query) use ($request) {
-                        $query->where('name', 'like', '%' . $request['keyword'] . '%');
-                    });
+                    $query->where('name', 'like', '%' . $request->keyword . '%');
                 }
-            )->orderBy('created_at', 'desc')->paginate($request['limit'] ?? 10);
-            return response()->json($customers);
+            )->orderByDesc('created_at')
+                ->paginate($request->input('limit', 10));
+
+            return $this->responseSuccess($brands);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return $this->responseError('Lỗi truy vấn', 500, $e->getMessage());
         }
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Tạo mới thương hiệu.
      */
     public function store(Request $request)
     {
@@ -48,36 +40,25 @@ class BrandController extends Controller
         ]);
 
         if ($request->hasFile('logo')) {
-
-            $path = $request->file('logo')->store('brands', 'public');
-            $validated['logo'] = '/storage/' . $path;
+            $validated['logo'] = $this->uploadFile($request->file('logo'), 'brands');
         }
 
         $brand = Brand::create($validated);
 
-        return response()->json(['message' => 'Đã tạo thương hiệu', 'data' => $brand]);
+        return $this->responseSuccess($brand, 'Đã tạo thương hiệu');
     }
 
     /**
-     * Display the specified resource.
+     * Xem chi tiết thương hiệu.
      */
     public function show($id)
     {
         $brand = Brand::findOrFail($id);
-
-        return response()->json($brand);
+        return $this->responseSuccess($brand);
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
+     * Cập nhật thương hiệu.
      */
     public function update(Request $request, $id)
     {
@@ -90,32 +71,32 @@ class BrandController extends Controller
             'remove_logo' => 'nullable|boolean',
         ]);
 
+        // Xóa logo cũ nếu được yêu cầu
         if ($request->boolean('remove_logo')) {
-            if ($brand->logo && Storage::disk('public')->exists($brand->logo)) {
-                Storage::disk('public')->delete($brand->logo);
+            if ($brand->logo && Storage::disk('public')->exists(str_replace('/storage/', '', $brand->logo))) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $brand->logo));
             }
             $validated['logo'] = null;
         }
 
+        // Cập nhật logo mới
         if ($request->hasFile('logo')) {
-            if ($brand->logo && Storage::disk('public')->exists($brand->logo)) {
-                Storage::disk('public')->delete($brand->logo);
+            if ($brand->logo && Storage::disk('public')->exists(str_replace('/storage/', '', $brand->logo))) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $brand->logo));
             }
-
-            $logoPath = $request->file('logo')->store('avatars', 'public');
-            $validated['logo'] = '/storage/' . $logoPath;
+            $validated['logo'] = $this->uploadFile($request->file('logo'), 'brands');
         }
 
         $brand->update($validated);
 
-        return response()->json(['message' => 'Đã cập nhật thương hiệu', 'data' => $brand]);
+        return $this->responseSuccess($brand, 'Đã cập nhật thương hiệu');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Xóa thương hiệu (chưa làm).
      */
     public function destroy(string $id)
     {
-        //
+        return $this->responseError('Chức năng đang phát triển', 501);
     }
 }

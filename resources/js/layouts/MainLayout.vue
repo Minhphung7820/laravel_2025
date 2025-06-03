@@ -7,65 +7,50 @@
         showSidebar ? 'w-64 px-4' : 'w-16'
       ]"
     >
-      <div v-if="showSidebar" class="font-bold text-lg mb-4 text-left w-full">
-        {{ activeModule.name }}
+      <div v-if="showSidebar && activeModule?.name" class="font-bold text-lg mb-4 text-left w-full">
+        {{ $t(activeModule.name) }}
       </div>
-      <ul class="w-full">
+      <ul class="w-full" v-if="activeModule?.epics?.length">
         <li
           v-for="item in activeModule.epics"
           :key="item.name"
           class="mb-2"
         >
-        <router-link
-          :to="item.path"
-          class="group flex items-center rounded hover:bg-blue-600 transition relative w-full"
-          :class="[
-            showSidebar ? 'px-3 py-2 justify-start' : 'w-10 h-10 mx-auto justify-center',
-            $route.path.startsWith(item.path) ? 'bg-blue-700' : ''
-          ]"
-        >
-          <template v-if="showSidebar">
-            {{ item.name }}
-          </template>
-          <template v-else>
-            <div class="w-full flex justify-center items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-            <span
-              class="absolute left-full ml-2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-50"
-            >
-              {{ item.name }}
-            </span>
-          </template>
-        </router-link>
+          <router-link
+            :to="item.path"
+            class="group flex items-center rounded hover:bg-blue-600 transition relative w-full"
+            :class="[
+              showSidebar ? 'px-3 py-2 justify-start' : 'w-10 h-10 mx-auto justify-center',
+              $route.path.startsWith(item.path) ? 'bg-blue-700' : ''
+            ]"
+          >
+            <template v-if="showSidebar && item?.name">
+              {{ $t(item.name) }}
+            </template>
+            <template v-else>
+              <div class="w-full flex justify-center items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+              <span
+                class="absolute left-full ml-2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-50"
+              >
+                {{ item?.name ? $t(item.name) : '' }}
+              </span>
+            </template>
+          </router-link>
         </li>
       </ul>
     </aside>
 
     <!-- Main content -->
-    <div
-      class="flex-1 flex flex-col overflow-hidden transition-all duration-300"
-      :class="showSidebar ? 'ml-0' : 'ml-0'"
-    >
+    <div class="flex-1 flex flex-col overflow-hidden">
       <!-- Top Nav -->
       <header class="bg-[#0f172a] text-white flex items-center justify-between px-6 py-3 shadow z-10">
         <div class="flex items-center gap-4">
-          <button
-            @click="toggleSidebar"
-            class="text-white hover:text-blue-400 focus:outline-none"
-            title="Thu gọn sidebar"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
+          <button @click="toggleSidebar" class="text-white hover:text-blue-400 focus:outline-none" title="Thu gọn sidebar">
+            <!-- SVG menu icon -->
           </button>
 
           <nav class="flex gap-3">
@@ -76,21 +61,33 @@
               class="px-3 py-1 rounded hover:bg-blue-600"
               :class="{ 'bg-blue-700': activeModule.name === module.name }"
             >
-              {{ module.name }}
+              {{ module?.name ? $t(module.name) : '' }}
             </button>
           </nav>
         </div>
 
-        <button
-          v-if="isLoggedIn"
-          @click="handleLogout"
-          class="text-white hover:text-red-400 font-bold"
-        >
-          Đăng xuất
-        </button>
+        <!-- Language + Logout -->
+        <div class="flex items-center gap-4">
+          <div class="relative">
+            <select
+              v-model="selectedLang"
+              @change="changeLanguage"
+              class="appearance-none bg-[#1e293b] text-white border border-white rounded px-2 py-1 pr-8"
+            >
+              <option value="vi">🇻🇳 Tiếng Việt</option>
+              <option value="en">🇺🇸 English</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-white">
+              ▼
+            </div>
+          </div>
+
+          <button v-if="isLoggedIn" @click="handleLogout" class="text-white hover:text-red-400 font-bold">
+            {{ $t('app.logout') }}
+          </button>
+        </div>
       </header>
 
-      <!-- Router View -->
       <main class="p-6 overflow-y-auto flex-1 bg-gray-50 transition-all duration-300">
         <router-view />
       </main>
@@ -104,58 +101,61 @@ import { mapGetters, mapActions } from 'vuex'
 export default {
   data() {
     return {
+      selectedLang: localStorage.getItem('lang') || 'vi',
       showSidebar: true,
       modules: [
         {
-          name: 'Trang chủ',
+          name: 'menu.home',
           path: '/',
+          epics: []
+        },
+        {
+          name: 'menu.sale',
           epics: [
+            { name: 'menu.customer', path: '/sale/customer' },
+            { name: 'menu.quote', path: '/quotes' },
+            { name: 'menu.order', path: '/orders' },
+            { name: 'menu.return', path: '/returns' }
           ]
         },
         {
-          name: 'Bán hàng',
+          name: 'menu.purchase',
           epics: [
-            { name: 'Quản lý khách hàng', path: '/sale/customer' },
-            { name: 'Báo giá', path: '/quotes' },
-            { name: 'Đơn bán hàng', path: '/orders' },
-            { name: 'Trả hàng bán', path: '/returns' }
+            { name: 'menu.supplier', path: '/purchase/supplier' },
+            { name: 'menu.purchase_request', path: '/quotes' },
+            { name: 'menu.purchase_order', path: '/orders' },
+            { name: 'menu.purchase_return', path: '/returns' }
           ]
         },
         {
-          name: 'Mua hàng',
+          name: 'menu.warehouse',
           epics: [
-            { name: 'Quản lý nhà cung cấp', path: '/purchase/supplier' },
-            { name: 'Yêu cầu mua hàng', path: '/quotes' },
-            { name: 'Đơn mua hàng', path: '/orders' },
-            { name: 'Trả hàng mua', path: '/returns' }
+            { name: 'menu.product', path: '/warehouse/product' },
+            { name: 'menu.category', path: '/warehouse/category' },
+            { name: 'menu.brand', path: '/warehouse/brand' },
+            { name: 'menu.unit', path: '/warehouse/unit' },
+            { name: 'menu.stock', path: '/warehouse/stock' }
           ]
         },
         {
-          name: 'Kho',
+          name: 'menu.support',
           epics: [
-            { name: 'Sản phẩm', path: '/warehouse/product' },
-            { name: 'Danh mục', path: '/warehouse/category' },
-            { name: 'Nhãn hiệu', path: '/warehouse/brand' },
-            { name: 'Đơn vị', path: '/warehouse/unit' },
-            { name: 'Kho', path: '/warehouse/stock' }
+            { name: 'menu.complaint', path: '/support/complaints' },
+            { name: 'menu.feedback', path: '/support/feedbacks' }
           ]
         },
         {
-          name: 'CSKH',
+          name: 'menu.marketing',
           epics: [
-            { name: 'Khiếu nại', path: '/support/complaints' },
-            { name: 'Phản hồi', path: '/support/feedbacks' }
-          ]
-        },
-        {
-          name: 'Marketing',
-          epics: [
-            { name: 'Chiến dịch', path: '/marketing/campaigns' },
-            { name: 'Khuyến mãi', path: '/marketing/promotions' }
+            { name: 'menu.campaign', path: '/marketing/campaigns' },
+            { name: 'menu.promotion', path: '/marketing/promotions' }
           ]
         }
       ],
-      activeModule: {}
+      activeModule: {
+        name: '',
+        epics: []
+      }
     }
   },
   computed: {
@@ -175,6 +175,12 @@ export default {
     }
   },
   methods: {
+    changeLanguage() {
+      localStorage.setItem('lang', this.selectedLang)
+      this.$i18n.locale = this.selectedLang
+      window.axios.defaults.headers.common['Accept-Language'] = this.selectedLang
+      location.reload()
+    },
     ...mapActions('auth', ['logout']),
     async handleLogout() {
       await this.logout()
@@ -197,9 +203,7 @@ export default {
       const found = this.modules.find(mod => {
         return mod.epics?.some(epic => currentPath.startsWith(epic.path)) || mod.path === currentPath
       })
-      if (found) {
-        this.activeModule = found
-      }
+      this.activeModule = found || { name: '', epics: [] }
     }
   }
 }

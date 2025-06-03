@@ -1,0 +1,31 @@
+{
+    "app": {
+        "logout": "Đăng xuất",
+        "welcome": "Chào mừng"
+    },
+    "menu": {
+        "home": "Trang chủ",
+        "sale": "Bán hàng",
+        "purchase": "Mua hàng",
+        "warehouse": "Kho",
+        "support": "CSKH",
+        "marketing": "Marketing",
+        "customer": "Khách hàng",
+        "quote": "Báo giá",
+        "order": "Đơn hàng",
+        "return": "Trả hàng",
+        "supplier": "Nhà cung cấp",
+        "purchase_request": "Yêu cầu mua",
+        "purchase_order": "Đơn mua hàng",
+        "purchase_return": "Trả hàng mua",
+        "product": "Sản phẩm",
+        "category": "Danh mục",
+        "brand": "Nhãn hiệu",
+        "unit": "Đơn vị",
+        "stock": "Kho",
+        "complaint": "Khiếu nại",
+        "feedback": "Phản hồi",
+        "campaign": "Chiến dịch",
+        "promotion": "Khuyến mãi"
+    }
+}

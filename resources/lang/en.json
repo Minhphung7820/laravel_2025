@@ -1,0 +1,31 @@
+{
+    "app": {
+        "logout": "Logout",
+        "welcome": "Welcome"
+    },
+    "menu": {
+        "home": "Home",
+        "sale": "Sales",
+        "purchase": "Purchasing",
+        "warehouse": "Warehouse",
+        "support": "Support",
+        "marketing": "Marketing",
+        "customer": "Customer",
+        "quote": "Quotation",
+        "order": "Order",
+        "return": "Return",
+        "supplier": "Supplier",
+        "purchase_request": "Purchase Request",
+        "purchase_order": "Purchase Order",
+        "purchase_return": "Return Purchase",
+        "product": "Product",
+        "category": "Category",
+        "brand": "Brand",
+        "unit": "Unit",
+        "stock": "Stock",
+        "complaint": "Complaint",
+        "feedback": "Feedback",
+        "campaign": "Campaign",
+        "promotion": "Promotion"
+    }
+}

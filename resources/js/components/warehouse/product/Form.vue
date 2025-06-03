@@ -548,8 +548,8 @@ export default {
     async loadProduct() {
 
         const res = await fetch(`/api/warehouse/product/detail/${this.id}`)
-        let data = await res.json()
-        data = data.data
+        let dataJson = await res.json()
+        const data = dataJson.data
 
         const product = data.product
 

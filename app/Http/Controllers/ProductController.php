@@ -460,8 +460,9 @@ class ProductController extends Controller
                     'combo.parent',
                     'combo.parent.attributeFirst:id,title',
                     'combo.parent.attributeSecond:id,title',
-                    'combo.parent.product:id,type,status,image_cover,name,sku',
                     'combo.parent.product.stockData.stock:id,name',
+                    'combo.parent.variantImages:id,stock_product_id,image',
+                    'combo.parent.product:id,type,status,image_cover,name,sku',
                 ]));
 
                 return [

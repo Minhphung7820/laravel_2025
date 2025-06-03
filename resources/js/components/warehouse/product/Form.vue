@@ -106,7 +106,7 @@
       </div>
     </div>
     <!-- Biến thể -->
-    <div v-if="showVariantCheckbox || (mode === 'create' && form.type !== 'combo') || mode !== 'create'">
+    <div v-if="showVariantCheckbox || (mode === 'create' && form.type !== 'combo') || (mode === 'update' && form.type !== 'combo')">
       <label class="inline-flex items-center">
       <input
         type="checkbox"

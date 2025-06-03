@@ -24,7 +24,7 @@ class ProductComboResource extends JsonResource
             'product_name'           => $parent['product']['name'] ?? '',
             'product_type_text'      => $parent['product']['type_text'] ?? '',
             'status_text'            => $parent['product']['status_text'] ?? '',
-            'image'                  => $parent['product']['image_cover_url'] ?? '',
+            'image'                  => $parent['product_type'] === 'variable' ? (isset($parent['variant_images'][0]) ? $parent['variant_images'][0]['image_url'] :  env('IMAGE_DEFAULT')) : ($parent['product']['image_cover_url'] ?? env('IMAGE_DEFAULT')),
             'sku'                    => $parent['product_type'] === 'variable' ? $parent['sku'] : ($parent['product']['sku'] ?? ''),
             'parent_id'              => $parent['id'],
             'sell_price_combo'       => $this->sell_price_combo,

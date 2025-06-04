@@ -3,6 +3,7 @@ import vi from './../lang/vi.json'
 import en from './../lang/en.json'
 import ja from './../lang/ja.json'
 import ko from './../lang/ko.json'
+import zh from './../lang/zh.json'
 
 const locale = localStorage.getItem('lang') || 'vi'
 
@@ -11,7 +12,7 @@ const i18n = createI18n({
     globalInjection: true,
     locale,
     fallbackLocale: 'vi',
-    messages: { vi, en, ja, ko }
+    messages: { vi, en, ja, ko, zh }
 })
 
 export default i18n

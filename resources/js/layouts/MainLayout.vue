@@ -11,11 +11,7 @@
         {{ $t(activeModule.name) }}
       </div>
       <ul class="w-full" v-if="activeModule?.epics?.length">
-        <li
-          v-for="item in activeModule.epics"
-          :key="item.name"
-          class="mb-2"
-        >
+        <li v-for="item in activeModule.epics" :key="item.name" class="mb-2">
           <router-link
             :to="item.path"
             class="group flex items-center rounded hover:bg-blue-600 transition relative w-full"
@@ -28,16 +24,18 @@
               {{ $t(item.name) }}
             </template>
             <template v-else>
-              <div class="w-full flex justify-center items-center">
+              <div class="w-full flex justify-center items-center relative group">
+                <!-- Mũi tên > -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
+                <!-- Tooltip -->
+                <span
+                  class="absolute left-full ml-2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-50"
+                >
+                  {{ item?.name ? $t(item.name) : '' }}
+                </span>
               </div>
-              <span
-                class="absolute left-full ml-2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-50"
-              >
-                {{ item?.name ? $t(item.name) : '' }}
-              </span>
             </template>
           </router-link>
         </li>
@@ -49,10 +47,14 @@
       <!-- Top Nav -->
       <header class="bg-[#0f172a] text-white flex items-center justify-between px-6 py-3 shadow z-10">
         <div class="flex items-center gap-4">
-          <button @click="toggleSidebar" class="text-white hover:text-blue-400 focus:outline-none" title="Thu gọn sidebar">
-            <!-- SVG menu icon -->
+          <!-- Nút toggle 3 gạch -->
+          <button @click="toggleSidebar" class="text-white hover:text-blue-400 focus:outline-none" title="Thu gọn/mở sidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
           </button>
 
+          <!-- Modules -->
           <nav class="flex gap-3">
             <button
               v-for="module in modules"
@@ -78,6 +80,7 @@
               <option value="en">🇺🇸 English</option>
               <option value="ja">🇯🇵 日本語</option>
               <option value="ko">🇰🇷 한국어</option>
+              <option value="zh">🇨🇳 中文（简体）</option>
             </select>
             <div class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-white">
               ▼
@@ -90,6 +93,7 @@
         </div>
       </header>
 
+      <!-- Content -->
       <main class="p-6 overflow-y-auto flex-1 bg-gray-50 transition-all duration-300">
         <router-view />
       </main>

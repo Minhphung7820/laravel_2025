@@ -3,8 +3,8 @@
     <!-- Sidebar -->
     <aside
       :class="[
-        'bg-[#1e293b] text-white transition-all duration-100 shadow-lg z-20 flex-shrink-0 overflow-y-auto flex flex-col items-center pt-4',
-        showSidebar ? 'w-64 px-4' : 'w-16'
+          'bg-[#2c2f36] text-white transition-all duration-100 shadow-lg z-20 flex-shrink-0 overflow-y-auto flex flex-col items-center pt-4',
+          showSidebar ? 'w-64 px-4' : 'w-16'
       ]"
     >
       <div v-if="showSidebar && activeModule?.name" class="font-bold text-lg mb-4 text-left w-full">
@@ -30,9 +30,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
                 <!-- Tooltip -->
-                <span
-                  class="absolute left-full ml-2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-50"
-                >
+                <span class="absolute left-full ml-2 bg-[#111827] text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-50">
                   {{ item?.name ? $t(item.name) : '' }}
                 </span>
               </div>
@@ -45,7 +43,7 @@
     <!-- Main content -->
     <div class="flex-1 flex flex-col overflow-hidden">
       <!-- Top Nav -->
-      <header class="bg-[#0f172a] text-white flex items-center justify-between px-6 py-3 shadow z-10">
+      <header class="bg-[#1f2937] text-white flex items-center justify-between px-6 py-3 shadow z-10">
         <div class="flex items-center gap-4">
           <!-- Nút toggle 3 gạch -->
           <button @click="toggleSidebar" class="text-white hover:text-blue-400 focus:outline-none" title="Thu gọn/mở sidebar">
@@ -60,8 +58,8 @@
               v-for="module in modules"
               :key="module.name"
               @click="selectModule(module)"
-              class="px-3 py-1 rounded hover:bg-blue-600"
-              :class="{ 'bg-blue-700': activeModule.name === module.name }"
+              class="px-3 py-1 rounded hover:bg-[#3b82f6]"
+              :class="{ 'bg-[#2563eb]': activeModule.name === module.name }"
             >
               {{ module?.name ? $t(module.name) : '' }}
             </button>
@@ -74,7 +72,7 @@
             <select
               v-model="selectedLang"
               @change="changeLanguage"
-              class="appearance-none bg-[#1e293b] text-white border border-white rounded px-2 py-1 pr-8"
+              class="appearance-none bg-[#374151] text-white border border-gray-500 rounded px-2 py-1 pr-8"
             >
               <option value="vi">🇻🇳 Tiếng Việt</option>
               <option value="en">🇺🇸 English</option>

@@ -150,7 +150,6 @@ class ProductController extends Controller
                     "attribute_second_id", sp2.attribute_second_id,
                     "sell_price", sp2.sell_price,
                     "purchase", sp2.sell_price,
-                    "sell_price", sp2.sell_price,
                     "stock_name", s.name,
                     "attr1_title", attr1.title,
                     "attr2_title", attr2.title,
@@ -158,16 +157,22 @@ class ProductController extends Controller
                     "stock_id", s.id,
                     "is_stock_default", s.is_default,
                     "sku", sp2.sku
-                    ))
-                    FROM stock_products sp2
-                    JOIN stocks as s ON sp2.stock_id = s.id
-                    LEFT JOIN attributes as attr1 ON sp2.attribute_first_id = attr1.id
-                    LEFT JOIN attributes as attr2 ON sp2.attribute_second_id = attr2.id
-                    WHERE sp2.product_id = stock_products.product_id
-                    AND sp2.attribute_first_id = stock_products.attribute_first_id
-                    AND sp2.attribute_second_id = stock_products.attribute_second_id
-                    AND sp2.product_type = "variable"
-                    ) AS related_variants')
+                ))
+                FROM stock_products sp2
+                JOIN stocks as s ON sp2.stock_id = s.id
+                LEFT JOIN attributes as attr1 ON sp2.attribute_first_id = attr1.id
+                LEFT JOIN attributes as attr2 ON sp2.attribute_second_id = attr2.id
+                WHERE sp2.product_id = stock_products.product_id
+                AND (
+                    (sp2.attribute_first_id IS NULL AND stock_products.attribute_first_id IS NULL)
+                    OR sp2.attribute_first_id = stock_products.attribute_first_id
+                )
+                AND (
+                    (sp2.attribute_second_id IS NULL AND stock_products.attribute_second_id IS NULL)
+                    OR sp2.attribute_second_id = stock_products.attribute_second_id
+                )
+                AND sp2.product_type = "variable"
+                ) AS related_variants')
             ])
             ->join('products', 'stock_products.product_id', '=', 'products.id')
             ->join('stocks', function ($join) {

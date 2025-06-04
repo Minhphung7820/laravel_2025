@@ -73,7 +73,6 @@ class StockProduct extends Model
             ]);
     }
 
-
     public function attributeFirst()
     {
         return $this->belongsTo(Attribute::class, 'attribute_first_id');

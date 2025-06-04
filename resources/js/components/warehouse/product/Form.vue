@@ -7,15 +7,15 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div>
         <label class="block font-semibold">{{ $t('product.name') }} *</label>
-        <input v-model="form.name" type="text" placeholder="Vui lòng nhập" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <input v-model="form.name" type="text" :placeholder="$t('common.please_enter')" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
       </div>
       <div>
         <label class="block font-semibold">{{ $t('product.sku') }}</label>
-        <input v-model="form.sku" type="text" placeholder="Vui lòng nhập" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <input v-model="form.sku" type="text" :placeholder="$t('common.please_enter')" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
       </div>
       <div>
         <label class="block font-semibold">{{ $t('product.barcode') }}</label>
-        <input v-model="form.barcode" type="text" placeholder="Vui lòng nhập" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <input v-model="form.barcode" type="text" :placeholder="$t('common.please_enter')" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
       </div>
     </div>
     <div>
@@ -30,13 +30,13 @@
         v-model="form.warranty"
         class="w-full mt-2 px-4 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
-        <option value="">-- Chọn bảo hành --</option>
-        <option value="6_months">6 tháng</option>
-        <option value="12_months">12 tháng</option>
-        <option value="1_year">1 năm</option>
-        <option value="5_years">5 năm</option>
-        <option value="10_years">10 năm</option>
-        <option value="21_years">21 năm</option>
+        <option value="">-- {{ $t('common.please_select') }} --</option>
+        <option value="6_months">6 {{ $t('common.months') }}</option>
+        <option value="12_months">12 {{ $t('common.months') }}</option>
+        <option value="1_year">1 {{ $t('common.year') }}</option>
+        <option value="5_years">5 {{ $t('common.years') }}</option>
+        <option value="10_years">10 {{ $t('common.years') }}</option>
+        <option value="21_years">21 {{ $t('common.years') }}</option>
       </select>
     </div>
     <!-- Phân loại -->
@@ -44,21 +44,21 @@
       <div>
         <label class="block font-semibold">{{ $t('product.unit') }}</label>
         <select v-model="form.unit_id" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm">
-          <option value="">Vui lòng chọn</option>
+          <option value="">{{ $t('common.please_select') }}</option>
           <option v-for="unit in units" :key="unit.id" :value="unit.id">{{ unit.name }}</option>
         </select>
       </div>
       <div>
         <label class="block font-semibold">{{ $t('product.brand') }}</label>
         <select v-model="form.brand_id" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm">
-          <option value="">Vui lòng chọn</option>
+          <option value="">{{ $t('common.please_select') }}</option>
           <option v-for="brand in brands" :key="brand.id" :value="brand.id">{{ brand.name }}</option>
         </select>
       </div>
       <div>
         <label class="block font-semibold">{{ $t('product.category') }}</label>
         <select @change="onCategoryChange" v-model="form.category_id" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm">
-          <option value="">Vui lòng chọn</option>
+          <option value="">{{ $t('common.please_select') }}</option>
           <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.title }}</option>
         </select>
       </div>
@@ -67,7 +67,7 @@
       <div>
         <label class="block font-semibold">{{ $t('product.supplier') }} *</label>
         <select v-model="form.supplier_id" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm">
-          <option value="">Vui lòng chọn</option>
+          <option value="">{{ $t('common.please_select') }}</option>
           <option v-for="sup in suppliers" :key="sup.id" :value="sup.id">{{ sup.name }}</option>
         </select>
       </div>

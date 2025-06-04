@@ -36,7 +36,7 @@
                 :disabled="index > 0 && !restoringAttributes[index - 1]"
                 @change="onRestoreAttrChange(index)"
               >
-                <option value="">Chọn</option>
+                <option value="">{{$t('common.please_select')}}</option>
                 <option
                   v-for="opt in getDeletedAttributeOptions(index)"
                   :key="opt.valueId"
@@ -51,7 +51,7 @@
             </td>
             <td class="px-4 py-2">
               <select v-model="restoringStock" class="w-32 px-2 py-1 border rounded">
-                <option value="">Chọn kho</option>
+                <option value="">{{ $t('variant_grid.choose_warehouse') }}</option>
                 <option
                   v-for="stock in restoringStockOptions"
                   :key="stock"

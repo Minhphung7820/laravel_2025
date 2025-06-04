@@ -89,7 +89,8 @@
         "barcode": "Barcode",
         "is_sale": "Mở bán",
         "action": "Thao tác",
-        "disable_field_add_msg": "Các trường khác bị vô hiệu hóa"
+        "disable_field_add_msg": "Các trường khác bị vô hiệu hóa",
+        "choose_warehouse": "Chọn kho"
     },
     "combo_grid": {
         "title": "Danh sách sản phẩm combo",
@@ -112,7 +113,13 @@
         "save": "Lưu"
     },
     "common": {
-        "unnamed": "Không tên"
+        "unnamed": "Không tên",
+        "please_enter": "Vui lòng nhập",
+        "please_select": "Vui lòng chọn",
+        "please_select_warranty": "-- Chọn bảo hành --",
+        "months": "tháng",
+        "year": "năm",
+        "years": "năm"
     },
     "product_list": {
         "title": "Danh sách sản phẩm",

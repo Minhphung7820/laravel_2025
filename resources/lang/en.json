@@ -89,7 +89,8 @@
         "barcode": "Barcode",
         "is_sale": "Available for Sale",
         "action": "Action",
-        "disable_field_add_msg": "Other fields disabled"
+        "disable_field_add_msg": "Other fields disabled",
+        "choose_warehouse": "Choose warehouse"
     },
     "combo_grid": {
         "title": "Combo Product List",
@@ -112,7 +113,13 @@
         "save": "Save"
     },
     "common": {
-        "unnamed": "Unnamed"
+        "unnamed": "Unnamed",
+        "please_enter": "Please enter",
+        "please_select": "Please select",
+        "please_select_warranty": "-- Select warranty --",
+        "months": "months",
+        "year": "year",
+        "years": "years"
     },
     "product_list": {
         "title": "Product List",

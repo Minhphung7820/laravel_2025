@@ -54,7 +54,7 @@
             <input type="checkbox" v-model="localData[stock.stock_id].auto_calc" />
           </td>
           <td class="border px-2 py-1 text-center">
-            <button @click="calcSalePrice(stock.stock_id)" class="bg-green-100 text-green-800 rounded px-2 py-1 text-xs font-semibold">Tính</button>
+            <button @click="calcSalePrice(stock.stock_id)" class="bg-green-100 text-green-800 rounded px-2 py-1 text-xs font-semibold">{{ $t('stock_table.calc') }}</button>
           </td>
         </tr>
       </tbody>

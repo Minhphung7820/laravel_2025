@@ -1,17 +1,17 @@
 <template>
   <div>
-    <h2 class="text-lg font-semibold mb-2">Kho hàng</h2>
+    <h2 class="text-lg font-semibold mb-2">{{ $t('stock_table.title') }}</h2>
     <table class="w-full text-sm border border-gray-300">
       <thead class="bg-blue-50 text-left">
         <tr>
-          <th class="border px-3 py-2">Chi nhánh (Kho)</th>
-          <th class="border px-3 py-2 text-center">Tồn kho ban đầu</th>
-          <th class="border px-3 py-2 text-center">Giá mua (₫)</th>
-          <th class="border px-3 py-2 text-center">Giá bán (₫)</th>
-          <th class="border px-3 py-2 text-center">% giảm tối đa</th>
-          <th class="border px-3 py-2 text-center">% tăng tối đa</th>
-          <th class="border px-3 py-2 text-center">Tự động tính</th>
-          <th class="border px-3 py-2 text-center">Tính</th>
+          <th class="border px-3 py-2">{{ $t('stock_table.branch') }}</th>
+          <th class="border px-3 py-2 text-center">{{ $t('stock_table.initial_quantity') }}</th>
+          <th class="border px-3 py-2 text-center">{{ $t('stock_table.purchase_price') }}</th>
+          <th class="border px-3 py-2 text-center">{{ $t('stock_table.sell_price') }}</th>
+          <th class="border px-3 py-2 text-center">{{ $t('stock_table.max_discount') }}</th>
+          <th class="border px-3 py-2 text-center">{{ $t('stock_table.max_increase') }}</th>
+          <th class="border px-3 py-2 text-center">{{ $t('stock_table.auto_calc') }}</th>
+          <th class="border px-3 py-2 text-center">{{ $t('stock_table.calc') }}</th>
         </tr>
       </thead>
       <tbody>

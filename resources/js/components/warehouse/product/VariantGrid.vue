@@ -1,10 +1,10 @@
 <template>
   <div class="mt-6 space-y-4">
-    <h2 class="text-xl font-semibold text-blue-600">Lưới biến thể sản phẩm</h2>
+    <h2 class="text-xl font-semibold text-blue-600">{{ $t('variant_grid.title') }}</h2>
 
     <div v-if="trashVariants.length" class="flex justify-end items-center gap-2 mb-2">
       <button @click="handleAddRestore" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
-        + Thêm thuộc tính
+        {{ $t('variant_grid.add_restore') }}
       </button>
       <span class="text-sm text-gray-500">({{ trashVariants.length }})</span>
     </div>
@@ -16,15 +16,15 @@
             <th v-for="(attrName, index) in previewAttributes" :key="index" class="px-4 py-2 text-left font-semibold">
               {{ attrName }}
             </th>
-            <th class="px-4 py-2 font-semibold">Ảnh</th>
-            <th class="px-4 py-2 font-semibold">Kho</th>
-            <th class="px-4 py-2 font-semibold">Số lượng</th>
-            <th class="px-4 py-2 font-semibold">Giá mua</th>
-            <th class="px-4 py-2 font-semibold">Giá bán</th>
-            <th class="px-4 py-2 font-semibold">SKU</th>
-            <th class="px-4 py-2 font-semibold">Barcode</th>
-            <th class="px-4 py-2 font-semibold">Mở bán</th>
-            <th class="px-4 py-2 font-semibold text-center">Thao tác</th>
+            <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.image') }}</th>
+            <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.stock') }}</th>
+            <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.quantity') }}</th>
+            <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.purchase_price') }}</th>
+            <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.sell_price') }}</th>
+            <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.sku') }}</th>
+            <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.barcode') }}</th>
+            <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.is_sale') }}</th>
+            <th class="px-4 py-2 font-semibold text-center">{{ $t('variant_grid.action') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -61,7 +61,7 @@
                 </option>
               </select>
             </td>
-            <td colspan="6" class="px-4 py-2 text-center text-gray-400">(Các trường khác bị vô hiệu hóa)</td>
+            <td colspan="6" class="px-4 py-2 text-center text-gray-400">({{$t('variant_grid.disable_field_add_msg')}})</td>
             <td class="px-4 py-2 text-center space-x-2">
               <button @click="confirmRestore" class="text-green-600 hover:text-green-800 font-bold text-xl leading-none">✔</button>
               <button @click="cancelRestore" class="text-gray-500 hover:text-gray-700 font-bold text-xl leading-none">×</button>

@@ -5,7 +5,7 @@
         v-model="search"
         @input="$emit('search', search)"
         type="text"
-        :placeholder="placeholder"
+        :placeholder="$t('table.search_placeholder')"
         class="w-full md:w-[400px] px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
       />
       <slot name="buttons"></slot>
@@ -48,7 +48,7 @@
     </div>
 
     <div v-if="pagination.total > pagination.per_page" class="mt-2 text-sm text-gray-500">
-      Hiển thị {{ pagination.from }}–{{ pagination.to }} / {{ pagination.total }} dòng
+      {{ $t('table.showing_rows', { from: pagination.from, to: pagination.to, total: pagination.total }) }}
     </div>
 
     <div v-if="pagination.total > pagination.per_page" class="flex flex-wrap gap-2 items-center justify-center md:justify-end">
@@ -57,14 +57,14 @@
         :disabled="pagination.current_page === 1"
         class="px-3 py-1 border rounded bg-white hover:bg-gray-100 disabled:opacity-40 cursor-pointer"
       >
-        « Đầu
+        « {{ $t('table.first') }}
       </button>
       <button
         @click="$emit('page-change', pagination.current_page - 1)"
         :disabled="pagination.current_page === 1"
         class="px-3 py-1 border rounded bg-white hover:bg-gray-100 disabled:opacity-40 cursor-pointer"
       >
-        ← Trước
+        ← {{ $t('table.prev') }}
       </button>
 
       <button
@@ -88,14 +88,14 @@
         :disabled="pagination.current_page === pagination.last_page"
         class="px-3 py-1 border rounded bg-white hover:bg-gray-100 disabled:opacity-40 cursor-pointer"
       >
-        Sau →
+        {{ $t('table.next') }} →
       </button>
       <button
         @click="$emit('page-change', pagination.last_page)"
         :disabled="pagination.current_page === pagination.last_page"
         class="px-3 py-1 border rounded bg-white hover:bg-gray-100 disabled:opacity-40 cursor-pointer"
       >
-        Cuối »
+        {{ $t('table.last') }} »
       </button>
     </div>
   </div>

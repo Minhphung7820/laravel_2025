@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="text-2xl font-bold mb-4">Danh sách sản phẩm</h1>
+    <h1 class="text-2xl font-bold mb-4">{{ $t('product_list.title') }}</h1>
 
     <CommonTable
       :columns="columns"
@@ -8,7 +8,7 @@
       :pagination="pagination"
       @search="onSearch"
       @page-change="onPageChange"
-      :placeholder="'🔍 Tìm kiếm sản phẩm...'"
+      :placeholder="$t('product_list.search_placeholder')"
     >
       <template #buttons>
         <div class="flex gap-2 justify-end">
@@ -16,13 +16,13 @@
             class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 shadow font-semibold cursor-pointer"
             @click="$router.push('/warehouse/product/create/variable')"
           >
-            + Thêm sản phẩm
+            {{ $t('product_list.add_product') }}
           </button>
           <button
             class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 shadow font-semibold cursor-pointer"
             @click="$router.push('/warehouse/product/create/combo')"
           >
-            + Thêm sản phẩm Combo
+            {{ $t('product_list.add_combo_product') }}
           </button>
         </div>
       </template>
@@ -39,9 +39,9 @@
             class="absolute right-0 mt-2 bg-white border rounded shadow z-50 whitespace-nowrap px-2 py-1 min-w-[100px]"
           >
             <ul class="text-sm text-gray-700">
-              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer" @click="onView(item)">👁 Xem</li>
-              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer" @click="onEdit(item)">✏️ Sửa</li>
-              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer text-red-500" @click="onDelete(item)">🗑 Xóa</li>
+              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer" @click="onView(item)">👁 {{ $t('actions.view') }}</li>
+              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer" @click="onEdit(item)">✏️ {{ $t('actions.edit') }}</li>
+              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer text-red-500" @click="onDelete(item)">🗑 {{ $t('actions.delete') }}</li>
             </ul>
           </div>
         </div>
@@ -71,16 +71,16 @@ export default {
       searchKeyword: '',
       dropdownId: null,
       columns: [
-        { label: 'Tên sản phẩm', key: 'product_name' },
-        { label: 'Ảnh', key: 'image', type: 'image_file' },
-        { label: 'SKU', key: 'sku' },
-        { label: 'Kho', key: 'stock_name' },
-        { label: 'Loại', key: 'product_type_text' },
-        { label: 'Giá nhập', key: 'purchase_price' },
-        { label: 'Giá bán', key: 'sell_price' },
-        { label: 'Tồn kho', key: 'quantity' },
-        { label: 'Đơn vị', key: 'unit_name' },
-        { label: 'Trạng thái', key: 'status_text' },
+        { label: this.$t('product_list.product_name'), key: 'product_name' },
+        { label: this.$t('product_list.image'), key: 'image', type: 'image_file' },
+        { label: this.$t('product_list.sku'), key: 'sku' },
+        { label: this.$t('product_list.stock'), key: 'stock_name' },
+        { label: this.$t('product_list.type'), key: 'product_type_text' },
+        { label: this.$t('product_list.purchase_price'), key: 'purchase_price' },
+        { label: this.$t('product_list.sell_price'), key: 'sell_price' },
+        { label: this.$t('product_list.quantity'), key: 'quantity' },
+        { label: this.$t('product_list.unit'), key: 'unit_name' },
+        { label: this.$t('product_list.status'), key: 'status_text' }
       ]
     }
   },
@@ -113,8 +113,8 @@ export default {
       this.$router.push(`/warehouse/product/edit/${item.product_id}/${item.product_type}`)
     },
     onDelete(item) {
-      if (confirm(`Xoá sản phẩm ${item.product_name}?`)) {
-        alert('Đã xóa!')
+      if (confirm(`${this.$t('actions.confirm_delete')} ${item.product_name}?`)) {
+        alert(this.$t('actions.deleted'))
       }
     },
     updateUrlQuery(page = 1) {

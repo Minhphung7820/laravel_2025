@@ -1,31 +1,31 @@
 <template>
   <div class="space-y-6 p-4 bg-white rounded-xl shadow-md">
     <h1 class="text-2xl font-bold">
-      {{ mode === 'update' ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm mới' }}
+      {{ mode === 'update' ? $t('product.update_title') : $t('product.create_title') }}
     </h1>
     <!-- Thông tin chung -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div>
-        <label class="block font-semibold">Tên sản phẩm *</label>
+        <label class="block font-semibold">{{ $t('product.name') }} *</label>
         <input v-model="form.name" type="text" placeholder="Vui lòng nhập" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
       </div>
       <div>
-        <label class="block font-semibold">SKU</label>
+        <label class="block font-semibold">{{ $t('product.sku') }}</label>
         <input v-model="form.sku" type="text" placeholder="Vui lòng nhập" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
       </div>
       <div>
-        <label class="block font-semibold">Mã vạch / Barcode</label>
+        <label class="block font-semibold">{{ $t('product.barcode') }}</label>
         <input v-model="form.barcode" type="text" placeholder="Vui lòng nhập" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
       </div>
     </div>
     <div>
       <label class="inline-flex items-center">
         <input type="checkbox" v-model="form.has_serial" class="mr-2" />
-        Sản phẩm có mã serial Serial/IMEL
+        {{ $t('product.has_serial') }}
       </label>
     </div>
     <div>
-      <label class="block font-semibold">Hình thức bảo hành</label>
+      <label class="block font-semibold">{{ $t('product.warranty') }}</label>
       <select
         v-model="form.warranty"
         class="w-full mt-2 px-4 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -42,21 +42,21 @@
     <!-- Phân loại -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div>
-        <label class="block font-semibold">Đơn vị</label>
+        <label class="block font-semibold">{{ $t('product.unit') }}</label>
         <select v-model="form.unit_id" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm">
           <option value="">Vui lòng chọn</option>
           <option v-for="unit in units" :key="unit.id" :value="unit.id">{{ unit.name }}</option>
         </select>
       </div>
       <div>
-        <label class="block font-semibold">Nhãn hiệu</label>
+        <label class="block font-semibold">{{ $t('product.brand') }}</label>
         <select v-model="form.brand_id" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm">
           <option value="">Vui lòng chọn</option>
           <option v-for="brand in brands" :key="brand.id" :value="brand.id">{{ brand.name }}</option>
         </select>
       </div>
       <div>
-        <label class="block font-semibold">Danh mục</label>
+        <label class="block font-semibold">{{ $t('product.category') }}</label>
         <select @change="onCategoryChange" v-model="form.category_id" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm">
           <option value="">Vui lòng chọn</option>
           <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.title }}</option>
@@ -65,7 +65,7 @@
     </div>
     <div v-if="type !== 'combo'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <label class="block font-semibold">Nhà cung cấp *</label>
+        <label class="block font-semibold">{{ $t('product.supplier') }} *</label>
         <select v-model="form.supplier_id" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm">
           <option value="">Vui lòng chọn</option>
           <option v-for="sup in suppliers" :key="sup.id" :value="sup.id">{{ sup.name }}</option>
@@ -81,13 +81,13 @@
     />
     <!-- Mô tả -->
     <div>
-      <label class="block font-semibold">Mô tả</label>
+      <label class="block font-semibold">{{ $t('product.description') }}</label>
       <textarea v-model="form.description" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm min-h-[100px] focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
     </div>
     <!-- Ảnh -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <label class="block font-semibold">Ảnh bìa</label>
+        <label class="block font-semibold">{{ $t('product.cover_image') }}</label>
         <input type="file" @change="handleCoverImage" accept="image/*" class="w-full border border-gray-300 px-4 py-2 rounded" />
         <div v-if="form.cover_image" class="mt-2 relative w-max">
           <img v-if="coverImagePreview" :src="coverImagePreview" class="w-24 h-24 object-cover rounded border" />
@@ -95,7 +95,7 @@
         </div>
       </div>
       <div>
-        <label class="block font-semibold">Ảnh chính</label>
+        <label class="block font-semibold">{{ $t('product.gallery_images') }}</label>
         <input type="file" multiple @change="handleGalleryImages" accept="image/*" class="w-full border border-gray-300 px-4 py-2 rounded" />
         <div class="flex flex-wrap gap-2 mt-2">
           <div v-for="(src, index) in galleryImagePreviews" :key="index" class="relative w-max">
@@ -112,13 +112,13 @@
         type="checkbox"
         v-model="form.has_variant"
         @change="onVariantCheckboxChange"
-      />
-      Sản phẩm có biến thể
+       class="mr-2"/>
+      {{ $t('product.has_variant') }}
       </label>
     </div>
     <!-- Chọn thuộc tính và giá trị con -->
     <div v-if="form.has_variant && variantAttributes.length" class="space-y-4">
-      <h2 class="font-semibold text-blue-600">Chọn thuộc tính biến thể (tối đa 2)</h2>
+      <h2 class="font-semibold text-blue-600">{{ $t('product.msg_max_attr') }}</h2>
       <div v-for="(attr, index) in variantAttributes" :key="attr.id" class="border p-3 rounded shadow-sm">
         <label>
           <input
@@ -159,7 +159,7 @@
     />
     <!-- Submit -->
     <button @click="handleSubmit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded shadow">
-      {{ mode === 'update' ? 'Cập nhật' : 'Tạo mới' }}
+      {{ mode === 'update' ? $t('product.submit_update') : $t('product.submit_create') }}
     </button>
   </div>
 </template>
@@ -402,7 +402,8 @@ export default {
     async checkAndLoadVariants(isMappingData = false) {
       if (this.form.has_variant && this.form.category_id) {
         const res = await fetch(`/api/warehouse/category/${this.form.category_id}/attributes`)
-        this.variantAttributes = await res.json().data
+        const dataJson = await res.json()
+        this.variantAttributes = dataJson.data
         if (!isMappingData) {
           this.selectedAttributes = []
           this.selectedAttributeValues = {}
@@ -648,8 +649,6 @@ export default {
         //
         if(this.type === 'combo'){
            this.$refs.comboGrid.comboItems = data.combo;
-           console.log(   this.$refs.comboGrid.comboItems);
-
         }
         //
         if (this.form.has_variant) {

@@ -46,7 +46,10 @@
         "has_variant": "This product has variants",
         "submit_create": "Create",
         "submit_update": "Update",
-        "msg_max_attr": "Select variant attributes (up to 2)"
+        "msg_max_attr": "Select variant attributes (up to 2)",
+        "select_file": "Choose file",
+        "no_file": "No file selected",
+        "total_files": "{count} file(s) selected"
     },
     "stock_table": {
         "title": "Inventory",
@@ -75,7 +78,8 @@
         "combo_price": "Combo Price",
         "action": "Action",
         "save": "Save",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "barcode": "Barcode"
     },
     "variant_grid": {
         "title": "Product Variant Grid",
@@ -91,26 +95,6 @@
         "action": "Action",
         "disable_field_add_msg": "Other fields disabled",
         "choose_warehouse": "Choose warehouse"
-    },
-    "combo_grid": {
-        "title": "Combo Product List",
-        "add_quick": "+ Add Quick Product",
-        "image": "Image",
-        "product_name": "Product Name",
-        "stock": "Branch (Stock)",
-        "type": "Product Type",
-        "sku": "SKU",
-        "quantity": "Quantity",
-        "available_stock": "Available Stock",
-        "unit": "Unit",
-        "barcode": "Barcode",
-        "sell_price": "Sell Price",
-        "purchase_price": "Purchase Price",
-        "combo_price": "Combo Price",
-        "action": "Actions",
-        "search_placeholder": "Search product by name or SKU...",
-        "cancel": "Cancel",
-        "save": "Save"
     },
     "common": {
         "unnamed": "Unnamed",

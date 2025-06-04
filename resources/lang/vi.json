@@ -46,7 +46,10 @@
         "has_variant": "Sản phẩm có biến thể",
         "submit_create": "Tạo mới",
         "submit_update": "Cập nhật",
-        "msg_max_attr": "Chọn thuộc tính biến thể (tối đa 2)"
+        "msg_max_attr": "Chọn thuộc tính biến thể (tối đa 2)",
+        "select_file": "Chọn tệp",
+        "no_file": "Không có tệp nào được chọn",
+        "total_files": "{count} tệp đã chọn"
     },
     "stock_table": {
         "title": "Kho hàng",
@@ -75,7 +78,8 @@
         "combo_price": "Giá combo",
         "action": "Thao tác",
         "save": "Lưu",
-        "cancel": "Hủy"
+        "cancel": "Hủy",
+        "barcode": "Mã vạch"
     },
     "variant_grid": {
         "title": "Lưới biến thể sản phẩm",
@@ -91,26 +95,6 @@
         "action": "Thao tác",
         "disable_field_add_msg": "Các trường khác bị vô hiệu hóa",
         "choose_warehouse": "Chọn kho"
-    },
-    "combo_grid": {
-        "title": "Danh sách sản phẩm combo",
-        "add_quick": "+ Thêm nhanh sản phẩm",
-        "image": "Hình ảnh",
-        "product_name": "Tên sản phẩm",
-        "stock": "Chi nhánh",
-        "type": "Loại SP",
-        "sku": "SKU",
-        "quantity": "Số lượng",
-        "available_stock": "Tồn kho",
-        "unit": "Đơn vị",
-        "barcode": "Mã vạch",
-        "sell_price": "Giá bán",
-        "purchase_price": "Giá mua",
-        "combo_price": "Giá combo",
-        "action": "Thao tác",
-        "search_placeholder": "Tìm sản phẩm theo tên, mã SKU...",
-        "cancel": "Hủy",
-        "save": "Lưu"
     },
     "common": {
         "unnamed": "Không tên",

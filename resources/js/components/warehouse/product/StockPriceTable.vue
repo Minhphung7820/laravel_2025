@@ -1,6 +1,15 @@
 <template>
   <div>
-    <h2 class="text-lg font-semibold mb-2">{{ $t('stock_table.title') }}</h2>
+
+    <div class="flex justify-between items-center mb-2">
+      <h2 class="text-lg font-semibold mb-2">{{ $t('stock_table.title') }}</h2>
+      <button
+        @click="$emit('open-add-stock-modal')"
+        class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm"
+      >
+        + Thêm kho
+      </button>
+    </div>
     <table class="w-full text-sm border border-gray-300">
       <thead class="bg-blue-50 text-left">
         <tr>
@@ -12,11 +21,20 @@
           <th class="border px-3 py-2 text-center">{{ $t('stock_table.max_increase') }}</th>
           <th class="border px-3 py-2 text-center">{{ $t('stock_table.auto_calc') }}</th>
           <th class="border px-3 py-2 text-center">{{ $t('stock_table.calc') }}</th>
+          <th class="border px-3 py-2 text-center">Xoá</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="stock in filteredStocks" :key="stock.stock_id">
-          <td class="border px-3 py-2">{{ stock.name }}</td>
+          <td class="border px-3 py-2">
+            <span>{{ stock.name }}</span>
+            <span
+              v-if="localData[stock.stock_id]?.is_default === 1"
+              class="ml-2 inline-block bg-blue-100 text-blue-700 text-[12px] font-medium px-2 py-[1px] rounded-full"
+            >
+              Mặc định
+            </span>
+          </td>
           <td class="border px-2 py-1 text-center">
             <input
               type="number"
@@ -56,6 +74,15 @@
           <td class="border px-2 py-1 text-center">
             <button @click="calcSalePrice(stock.stock_id)" class="bg-green-100 text-green-800 rounded px-2 py-1 text-xs font-semibold">{{ $t('stock_table.calc') }}</button>
           </td>
+          <td class="border px-2 py-1 text-center">
+            <button
+              v-if="!localData[stock.stock_id].is_default"
+              @click="removeStock(stock.stock_id)"
+              class="text-red-500 hover:text-red-700 text-sm font-bold"
+            >
+              ×
+            </button>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -71,7 +98,7 @@ export default {
     isVariableProduct: Boolean,
     variantStockTotals: Object
   },
-  emits: ['update:modelValue'],
+    emits: ['update:modelValue', 'remove-stock', 'open-add-stock-modal'],
   data() {
     return {
       localData: {},
@@ -97,6 +124,7 @@ export default {
           max_discount_percent: existing.max_discount_percent ?? 0,
           max_increase_percent: existing.max_increase_percent ?? 0,
           auto_calc: existing.auto_calc ?? false,
+          is_default: existing.is_default ?? 0,
         }
        })
      }
@@ -109,6 +137,15 @@ export default {
     }
   },
   methods: {
+    removeStock(stockId) {
+      const stock = this.localData[stockId]
+      if (stock?.is_default) {
+        return
+      }
+
+      delete this.localData[stockId]
+      this.$emit('remove-stock', stockId)
+    },
     calcSalePrice(stockId) {
       const row = this.localData[stockId]
       if (row.auto_calc && row.purchase_price > 0) {

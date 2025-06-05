@@ -15,11 +15,17 @@
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-100 sticky top-0 z-10">
           <tr>
-            <th v-if="withCheckbox" class="px-4 py-3"><input type="checkbox" @change="toggleAll" :checked="allSelected" /></th>
-            <th v-for="col in columns" :key="col.key" class="px-4 py-3 text-left font-semibold text-sm text-gray-700 uppercase tracking-wider">
+            <th v-if="withCheckbox" class="w-12 px-4 py-3">
+              <input type="checkbox" @change="toggleAll" :checked="allSelected" />
+            </th>
+            <th
+              v-for="col in columns"
+              :key="col.key"
+              class="px-4 py-3 text-left font-semibold text-sm text-gray-700 uppercase tracking-wider"
+            >
               {{ col.label }}
             </th>
-            <th class="px-4 py-3"></th>
+            <th v-if="hasActions" class="px-4 py-3"></th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 bg-white">
@@ -28,10 +34,14 @@
             :key="item.id"
             class="hover:bg-blue-50 transition-all duration-200"
           >
-            <td v-if="withCheckbox" class="px-4 py-2">
+            <td v-if="withCheckbox" class="w-12 px-4 py-2">
               <input type="checkbox" :value="item" v-model="selected" @change="$emit('selection-change', selected)" />
             </td>
-            <td v-for="col in columns" :key="col.key" class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap">
+            <td
+              v-for="col in columns"
+              :key="col.key"
+              class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap"
+            >
               <template v-if="col.type === 'image_file' && item[col.key]">
                 <img :src="item[col.key]" class="w-10 h-10 rounded-full object-cover border" />
               </template>
@@ -39,7 +49,7 @@
                 {{ item[col.key] }}
               </template>
             </td>
-            <td class="px-4 py-2 text-center">
+            <td v-if="hasActions" class="px-4 py-2 text-center">
               <slot name="actions" :item="item" />
             </td>
           </tr>
@@ -122,7 +132,9 @@ export default {
       type: String,
       default: 'Nhập nội dung...'
     },
-    withCheckbox: { type: Boolean, default: false }
+    withCheckbox: { type: Boolean, default: false },
+    withCheckbox: { type: Boolean, default: false },
+    hasActions: { type: Boolean, default: false }
   },
   data() {
     return {

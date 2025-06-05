@@ -12,6 +12,10 @@ class StockController extends Controller
         try {
             $stocks = Stock::when($request->filled('keyword'), function ($query) use ($request) {
                 $query->where('name', 'like', '%' . $request['keyword'] . '%');
+            })->when(isset($request['except_ids']) && $request['except_ids'], function ($query) use ($request) {
+                return $query->whereNotIn('id', explode(",", $request['except_ids']));
+            })->when(isset($request['is_default']), function ($query) use ($request) {
+                return $query->where('is_default', $request['is_default']);
             })
                 ->orderByDesc('created_at')
                 ->paginate($request->input('limit', 10));

@@ -78,6 +78,8 @@
       :stocks="stocks"
       :is-variable-product="form.type === 'variable'"
       :variant-stock-totals="variantStockTotals"
+      @remove-stock="onRemoveStock"
+      @open-add-stock-modal="showAddStockModal = true"
     />
     <!-- Mô tả -->
     <div>
@@ -193,6 +195,12 @@
       {{ mode === 'update' ? $t('product.submit_update') : $t('product.submit_create') }}
     </button>
   </div>
+      <AddStockModal
+      :visible="showAddStockModal"
+      :except-ids="stocks.map(s => s.stock_id)"
+      @close="showAddStockModal = false"
+      @add-stocks="handleAddStocks"
+    />
 </template>
 
 <script>
@@ -200,10 +208,11 @@ import VariantGrid from './VariantGrid.vue'
 import ComboGrid from './ComboGrid.vue'
 import StockPriceTable from './StockPriceTable.vue'
 import Swal from 'sweetalert2'
+import AddStockModal from '@/components/common/AddStockModal.vue'
 
 export default {
   name: 'ProductForm',
-  components: { VariantGrid, ComboGrid, StockPriceTable },
+  components: { VariantGrid, ComboGrid, StockPriceTable,AddStockModal },
   props: {
     type: { type: String, default: 'single' },
     mode: { type: String, default: 'create' },
@@ -270,7 +279,8 @@ export default {
       isMappingVariantData: true,
       trashVariants: [],
       restoringVariant: null,
-      hasVariantInitial: false
+      hasVariantInitial: false,
+      showAddStockModal: false
     }
   },
   watch: {
@@ -300,6 +310,36 @@ export default {
     await Promise.all(promises)
   },
   methods: {
+    onRemoveStock(stockId) {
+      const stock = this.form.stock_data[stockId]
+      // Nếu là kho mặc định thì không cho xóa
+      if (stock?.is_default === 1) {
+        return
+      }
+
+      this.stocks = this.stocks.filter(s => s.stock_id !== stockId)
+      delete this.form.stock_data[stockId]
+    },
+    handleAddStocks(newStocks) {
+      newStocks.forEach(stock => {
+        const stockId = stock.id
+        if (!this.stocks.find(s => s.stock_id === stockId)) {
+          this.$set(this.form.stock_data, stockId, {
+            id: null,
+            stock_id: stockId,
+            qty: 0,
+            purchase_price: 0,
+            sell_price: 0,
+            max_discount_percent: 0,
+            max_increase_percent: 0,
+            auto_calc: false,
+            name: stock.name,
+            is_default: 0
+          })
+          this.stocks.push({ stock_id: stockId, name: stock.name })
+        }
+      })
+    },
     onVariantImageChange({ index, file }) {
       if (this.form.variants[index]) {
         this.form.variants[index].image = file
@@ -623,7 +663,8 @@ export default {
             max_discount_percent: item.max_discount_percent ?? 0,
             max_increase_percent: item.max_increase_percent ?? 0,
             auto_calc: item.auto_calc === 1,
-            name: item.stock?.name || ''
+            name: item.stock?.name || '',
+            is_default: item.stock?.is_default
           }
         })
         this.form.stock_data = stockDataObj
@@ -636,7 +677,8 @@ export default {
           max_discount_percent: stockDataObj[stockId].max_discount_percent ?? 0,
           max_increase_percent: stockDataObj[stockId].max_increase_percent ?? 0,
           auto_calc: stockDataObj[stockId].auto_calc === 1,
-          name: stockDataObj[stockId].name || ''
+          name: stockDataObj[stockId].name || '',
+          is_default: stockDataObj[stockId].is_default
         }))
         //
         if(this.type === 'variable'){

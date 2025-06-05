@@ -333,7 +333,7 @@ export default {
           })
 
           tempStockData[stockId] = {
-            id: stockId,
+            id: null,
             stock_id: stockId,
             quantity: 0,
             purchase_price: 0,

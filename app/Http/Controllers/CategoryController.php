@@ -91,7 +91,8 @@ class CategoryController extends Controller
                             }
                         }
 
-                        Attribute::whereIn('id', array_diff($existingAttrIds, $newAttrIds))->delete();
+                        $attrIdsToDelete = array_diff($existingAttrIds, $newAttrIds);
+                        Attribute::whereIn('id', $attrIdsToDelete)->get()->each->delete();
                     }
                 } else {
                     $newVariant = $category->variants()->create(['title' => $variantData['title']]);
@@ -103,7 +104,8 @@ class CategoryController extends Controller
                 }
             }
 
-            Variant::whereIn('id', array_diff($existingVariantIds, $newVariantIds))->delete();
+            $variantIdsToDelete = array_diff($existingVariantIds, $newVariantIds);
+            Variant::whereIn('id', $variantIdsToDelete)->get()->each->delete();
 
             DB::commit();
             return $this->responseSuccess($category, 'Cập nhật danh mục thành công');

@@ -11,6 +11,29 @@ class Variant extends Model
         'title',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($variant) {
+            // Nếu có attribute con
+            if ($variant->attributes()->exists()) {
+                throw new \Exception('Không thể xóa biến thể vì có thuộc tính liên kết.');
+            }
+
+            // Nếu thuộc tính của variant đang được dùng trong stock_products
+            $attributeIds = \App\Models\Attribute::where('variant_id', $variant->id)->pluck('id');
+
+            $usedInStock = \App\Models\StockProduct::whereIn('attribute_first_id', $attributeIds)
+                ->orWhereIn('attribute_second_id', $attributeIds)
+                ->exists();
+
+            if ($usedInStock) {
+                throw new \Exception('Không thể xóa biến thể vì thuộc tính đang được sử dụng trong tồn kho.');
+            }
+        });
+    }
+
     public function categories()
     {
         return $this->belongsTo(Category::class, 'category_id');

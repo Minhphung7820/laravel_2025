@@ -101,14 +101,17 @@
             @change="handleCoverImage"
           />
           <img v-if="coverImagePreview" :src="coverImagePreview" class="object-cover w-full h-full" />
-          <div v-else class="text-gray-400 text-center">
-            <i class="fas fa-image text-2xl"></i><br>
-            {{ $t('product.select_file') }}
+          <div
+            v-else
+            class="border-2 border-dashed border-gray-300 w-full h-full flex flex-col items-center justify-center text-gray-400 text-center"
+          >
+            <PhotoIcon class="w-12 h-12 text-gray-400" />
+            <span class="mt-1 text-sm">{{ $t('product.select_file') }}</span>
           </div>
           <button v-if="form.cover_image"
                   @click.stop="removeCoverImage"
                   class="absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-red-600">
-            <i class="fas fa-times text-xs"></i>
+            <XMarkIcon class="w-6 h-6 text-white-500" />
           </button>
         </div>
       </div>
@@ -123,14 +126,14 @@
             <img :src="src" class="object-cover w-full h-full" />
             <button @click="removeGalleryImage(index)"
                     class="absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-red-600">
-              <i class="fas fa-times text-xs"></i>
+              <XMarkIcon class="w-6 h-6 text-white-500" />
             </button>
           </div>
 
           <!-- Nút thêm ảnh -->
           <div @click="$refs.galleryImageInput.click()"
               class="w-24 h-24 border-dashed border-2 rounded flex items-center justify-center text-gray-400 cursor-pointer hover:border-blue-500 hover:text-blue-500">
-            <i class="fas fa-plus text-xl"></i>
+            <PlusIcon class="w-6 h-6 text-blue-500" />
           </div>
 
           <!-- Input ảnh ẩn -->
@@ -216,10 +219,11 @@ import ComboGrid from './ComboGrid.vue'
 import StockPriceTable from './StockPriceTable.vue'
 import Swal from 'sweetalert2'
 import AddStockModal from '@/components/common/AddStockModal.vue'
-
+import { XMarkIcon, PlusIcon } from '@heroicons/vue/24/solid'
+import { PhotoIcon } from '@heroicons/vue/24/outline'
 export default {
   name: 'ProductForm',
-  components: { VariantGrid, ComboGrid, StockPriceTable,AddStockModal },
+  components: { VariantGrid, ComboGrid, StockPriceTable,AddStockModal ,XMarkIcon, PlusIcon, PhotoIcon },
   props: {
     type: { type: String, default: 'single' },
     mode: { type: String, default: 'create' },

@@ -222,8 +222,8 @@ export default {
     variantStockTotals() {
       const totals = {}
       this.stocks.forEach(stock => {
-        totals[stock.id] = this.form.variants
-          .filter(v => v.stock_id === stock.id)
+        totals[stock.stock_id] = this.form.variants
+          .filter(v => v.stock_id === stock.stock_id)
           .reduce((sum, v) => sum + Number(v.quantity || 0), 0)
       })
       return totals
@@ -335,7 +335,7 @@ export default {
           tempStockData[stockId] = {
             id: stockId,
             stock_id: stockId,
-            qty: 0,
+            quantity: 0,
             purchase_price: 0,
             sell_price: 0,
             max_discount_percent: 0,
@@ -741,7 +741,7 @@ export default {
             this.form.stock_data[stock.id] = {
               id: stock.id,
               stock_id: stock.id,
-              qty: 0,
+              quantity: 0,
               purchase_price: 0,
               sell_price: 0,
               max_discount_percent: 0,
@@ -799,7 +799,7 @@ export default {
           stockDataObj[item.stock_id] = {
             id: item.id,
             stock_id: item.stock_id,
-            qty: item.quantity ?? 0,
+            quantity: item.quantity ?? 0,
             purchase_price: item.purchase_price ?? 0,
             sell_price: item.sell_price ?? 0,
             max_discount_percent: item.max_discount_percent ?? 0,
@@ -813,7 +813,7 @@ export default {
         this.stocks = Object.keys(stockDataObj).map(stockId => ({
           stock_id: parseInt(stockId),
           name: stockDataObj[stockId].name,
-          qty: stockDataObj[stockId].quantity ?? 0,
+          quantity: stockDataObj[stockId].quantity ?? 0,
           purchase_price: stockDataObj[stockId].purchase_price ?? 0,
           sell_price: stockDataObj[stockId].sell_price ?? 0,
           max_discount_percent: stockDataObj[stockId].max_discount_percent ?? 0,
@@ -951,7 +951,7 @@ export default {
             finalStockData.push({
               id:row.id??null,
               stock_id: parseInt(stockId),
-              quantity: row.qty ?? 0,
+              quantity: row.quantity ?? 0,
               purchase_price: row.purchase_price ?? 0,
               sell_price: row.sell_price ?? 0,
               max_discount_percent: row.max_discount_percent ?? 0,
@@ -963,7 +963,7 @@ export default {
           Object.values(this.form.stock_data).forEach(row => {
             finalStockData.push({
               stock_id: row.id,
-              quantity: row.qty ?? 0,
+              quantity: row.quantity ?? 0,
               purchase_price: row.purchase_price ?? 0,
               sell_price: row.sell_price ?? 0,
               max_discount_percent: row.max_discount_percent ?? 0,

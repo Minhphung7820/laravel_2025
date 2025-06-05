@@ -39,7 +39,7 @@
             <input
               type="number"
               v-if="!isVariableProduct"
-              v-model.number="localData[stock.stock_id].qty"
+              v-model.number="localData[stock.stock_id].quantity"
               class="w-full px-1 py-1 text-xs border border-gray-300 rounded"
             />
             <span v-else>{{ variantStockTotals[stock.stock_id] || 0 }}</span>
@@ -118,7 +118,7 @@ export default {
         this.localData[stock.stock_id] = {
           id: existing.id ?? null,
           stock_id : stock.id,
-          qty: existing.qty ?? 0,
+          quantity: existing.quantity ?? 0,
           purchase_price: existing.purchase_price ?? 0,
           sell_price: existing.sell_price ?? 0,
           max_discount_percent: existing.max_discount_percent ?? 0,

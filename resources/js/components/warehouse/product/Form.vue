@@ -88,55 +88,62 @@
     </div>
     <!-- Ảnh -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div>
-    <label class="block font-semibold mb-1">{{ $t('product.cover_image') }}</label>
-    <div class="relative w-full flex items-center gap-2">
-      <input
-        ref="coverImageInput"
-        type="file"
-        accept="image/*"
-        class="hidden"
-        @change="handleCoverImage"
-      />
-      <button type="button" @click="$refs.coverImageInput.click()"
-        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-        {{ $t('product.select_file') }}
-      </button>
-      <span class="text-gray-500 truncate">
-        {{ form.cover_image?.name || (typeof form.cover_image === 'string' ? form.cover_image.split('/').pop() : $t('product.no_file')) }}
-      </span>
-      </div>
-      <div v-if="form.cover_image" class="mt-2 relative w-max">
-        <img v-if="coverImagePreview" :src="coverImagePreview" class="w-24 h-24 object-cover rounded border" />
-        <button @click="removeCoverImage" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs">×</button>
-      </div>
-    </div>
-    <div>
-      <label class="block font-semibold mb-1">{{ $t('product.gallery_images') }}</label>
-      <div class="relative w-full flex items-center gap-2">
-        <input
-          ref="galleryImageInput"
-          type="file"
-          accept="image/*"
-          multiple
-          class="hidden"
-          @change="handleGalleryImages"
-        />
-        <button type="button" @click="$refs.galleryImageInput.click()"
-          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-          {{ $t('product.select_file') }}
-        </button>
-        <span class="text-gray-500">
-          {{ galleryImagePreviews.length ? $t('product.total_files', { count: galleryImagePreviews.length }) : $t('product.no_file') }}
-        </span>
-      </div>
-      <div class="flex flex-wrap gap-2 mt-2">
-        <div v-for="(src, index) in galleryImagePreviews" :key="index" class="relative w-max">
-          <img :src="src" alt="Gallery" class="w-20 h-20 object-cover rounded border" />
-          <button @click="removeGalleryImage(index)" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs">×</button>
+      <!-- Ảnh bìa -->
+      <div>
+        <label class="block font-semibold mb-1">{{ $t('product.cover_image') }}</label>
+        <div class="w-32 h-32 border border-dashed rounded relative flex items-center justify-center overflow-hidden cursor-pointer hover:border-blue-500"
+            @click="$refs.coverImageInput.click()">
+          <input
+            ref="coverImageInput"
+            type="file"
+            accept="image/*"
+            class="hidden"
+            @change="handleCoverImage"
+          />
+          <img v-if="coverImagePreview" :src="coverImagePreview" class="object-cover w-full h-full" />
+          <div v-else class="text-gray-400 text-center">
+            <i class="fas fa-image text-2xl"></i><br>
+            {{ $t('product.select_file') }}
+          </div>
+          <button v-if="form.cover_image"
+                  @click.stop="removeCoverImage"
+                  class="absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-red-600">
+            <i class="fas fa-times text-xs"></i>
+          </button>
         </div>
       </div>
-    </div>
+
+      <!-- Ảnh chính (Gallery) -->
+      <div>
+        <label class="block font-semibold mb-1">{{ $t('product.gallery_images') }}</label>
+        <div class="flex flex-wrap gap-2">
+          <div v-for="(src, index) in galleryImagePreviews"
+              :key="index"
+              class="relative w-24 h-24 border rounded overflow-hidden">
+            <img :src="src" class="object-cover w-full h-full" />
+            <button @click="removeGalleryImage(index)"
+                    class="absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-red-600">
+              <i class="fas fa-times text-xs"></i>
+            </button>
+          </div>
+
+          <!-- Nút thêm ảnh -->
+          <div @click="$refs.galleryImageInput.click()"
+              class="w-24 h-24 border-dashed border-2 rounded flex items-center justify-center text-gray-400 cursor-pointer hover:border-blue-500 hover:text-blue-500">
+            <i class="fas fa-plus text-xl"></i>
+          </div>
+
+          <!-- Input ảnh ẩn -->
+          <input
+            ref="galleryImageInput"
+            type="file"
+            accept="image/*"
+            multiple
+            class="hidden"
+            @change="handleGalleryImages"
+          />
+        </div>
+      </div>
     </div>
     <!-- Biến thể -->
     <div v-if="showVariantCheckbox || (mode === 'create' && form.type !== 'combo') || (mode === 'update' && type === 'variable')">

@@ -101,7 +101,9 @@
         "is_sale": "Mở bán",
         "action": "Thao tác",
         "disable_field_add_msg": "Các trường khác bị vô hiệu hóa",
-        "choose_warehouse": "Chọn kho"
+        "choose_warehouse": "Chọn kho",
+        "limit_exceeded": "Vượt giới hạn",
+        "limit_exceeded_msg": "Tổng số biến thể vượt quá giới hạn cho phép (100 dòng). Vui lòng giảm số lượng thuộc tính hoặc kho."
     },
     "common": {
         "unnamed": "Không tên",

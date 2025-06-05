@@ -102,7 +102,9 @@
         "is_sale": "판매 가능",
         "action": "동작",
         "disable_field_add_msg": "다른 필드는 비활성화됨",
-        "choose_warehouse": "창고를 선택하세요"
+        "choose_warehouse": "창고를 선택하세요",
+        "limit_exceeded": "제한 초과",
+        "limit_exceeded_msg": "총 변형 수가 허용 한도(100행)를 초과했습니다. 속성이나 재고 수를 줄여주세요."
     },
     "common": {
         "unnamed": "이름 없음",

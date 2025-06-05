@@ -102,7 +102,9 @@
         "is_sale": "販売可能",
         "action": "操作",
         "disable_field_add_msg": "他のフィールドは無効です",
-        "choose_warehouse": "倉庫を選択してください"
+        "choose_warehouse": "倉庫を選択してください",
+        "limit_exceeded": "制限を超えました",
+        "limit_exceeded_msg": "バリエーションの合計が許容制限（100行）を超えています。属性または在庫数を減らしてください。"
     },
     "common": {
         "unnamed": "名称未設定",

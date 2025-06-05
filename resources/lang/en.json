@@ -101,7 +101,9 @@
         "is_sale": "Available for Sale",
         "action": "Action",
         "disable_field_add_msg": "Other fields disabled",
-        "choose_warehouse": "Choose warehouse"
+        "choose_warehouse": "Choose warehouse",
+        "limit_exceeded": "Limit Exceeded",
+        "limit_exceeded_msg": "Total variants exceed the allowed limit (100 rows). Please reduce the number of attributes or stocks."
     },
     "common": {
         "unnamed": "Unnamed",

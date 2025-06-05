@@ -101,7 +101,9 @@
         "is_sale": "可销售",
         "action": "操作",
         "disable_field_add_msg": "其他字段已禁用",
-        "choose_warehouse": "请选择仓库"
+        "choose_warehouse": "请选择仓库",
+        "limit_exceeded": "超出限制",
+        "limit_exceeded_msg": "变体总数超出允许的限制（100行）。请减少属性或库存数量。"
     },
     "common": {
         "unnamed": "未命名",

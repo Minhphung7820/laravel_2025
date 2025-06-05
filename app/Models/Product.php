@@ -12,7 +12,7 @@ class Product extends Model
         'type',
         'sku',
         'barcode',
-        'have_variant',
+        'has_variant',
         'json_variants',
         'status',
         'has_serial',
@@ -31,6 +31,10 @@ class Product extends Model
         'image_cover_url'
     ];
 
+    protected $casts = [
+        'has_variant' => 'boolean',
+        'has_serial' => 'boolean'
+    ];
     public function stockData()
     {
         return $this->hasMany(StockProduct::class, 'product_id')->where('product_type', 'root_stock');

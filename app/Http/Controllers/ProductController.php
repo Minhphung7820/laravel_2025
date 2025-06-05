@@ -291,8 +291,8 @@ class ProductController extends Controller
                 'sku'          => $request->input('sku') ?? null,
                 'barcode'      => $request->input('barcode') ?? null,
                 'type'         => $request->input('type') ?? null,
-                'have_variant' => $request->boolean('has_variant') ?? 0,
-                'has_serial'  => $request->boolean('has_serial') ?? 0,
+                'has_variant' => $request->input('has_variant') ?? 0,
+                'has_serial'  => $request->input('has_serial') ?? 0,
                 'warranty'     => $request->input('warranty') ?? null,
                 'unit_id'      => $request->input('unit_id') ?? null,
                 'brand_id'     => $request->input('brand_id') ?? null,
@@ -512,7 +512,7 @@ class ProductController extends Controller
                 'name'        => $request['name'],
                 'sku'         => $request['sku'] ?? '',
                 'barcode'     => $request['barcode'] ?? '',
-                'has_serial'  => $request['has_serial'] ?? '',
+                'has_serial'  => $request['has_serial'] ?? 0,
                 'warranty'    => $request['warranty'] ?? null,
                 'unit_id'     => $request['unit_id'] ?? null,
                 'brand_id'    => $request['brand_id'] ?? null,
@@ -541,7 +541,7 @@ class ProductController extends Controller
                 throw new Exception("Không tìm thấy sản phẩm !");
             }
             if ($product['type'] === 'variable' && $data['type'] === 'single') {
-                $data['have_variant'] = 0;
+                $data['has_variant'] = 0;
                 StockProduct::where('product_id', $product['id'])
                     ->where('product_type', 'variable')
                     ->delete();

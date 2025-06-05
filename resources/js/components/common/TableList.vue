@@ -29,6 +29,14 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 bg-white">
+          <tr v-if="data.length === 0">
+            <td
+              :colspan="(columns.length + (withCheckbox ? 1 : 0) + (hasActions ? 1 : 0))"
+              class="text-center text-gray-500 py-8"
+            >
+              {{ $t('table.no_data') }}
+            </td>
+          </tr>
           <tr
             v-for="item in data"
             :key="item.id"

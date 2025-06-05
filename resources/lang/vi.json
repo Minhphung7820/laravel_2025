@@ -144,5 +144,9 @@
         "next": "Sau",
         "last": "Cuối",
         "showing_rows": "Hiển thị {from}–{to} / {total} dòng"
+    },
+    "table": {
+        "no_data": "Không có dữ liệu",
+        "search_placeholder": "Tìm kiếm..."
     }
 }

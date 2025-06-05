@@ -145,5 +145,9 @@
         "next": "次へ",
         "last": "最後",
         "showing_rows": "{from}～{to} / {total} 件を表示中"
+    },
+    "table": {
+        "no_data": "データがありません",
+        "search_placeholder": "検索..."
     }
 }

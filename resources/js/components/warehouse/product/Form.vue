@@ -794,7 +794,7 @@ export default {
           name: product.name,
           sku: product.sku,
           barcode: product.barcode,
-          has_serial: Number(product.has_serial) === 1,
+          has_serial: Boolean(product.has_serial),
           warranty: product.warranty,
           unit_id: product.unit_id,
           brand_id: product.brand_id,
@@ -802,7 +802,7 @@ export default {
           supplier_id: product.supplier_id,
           description: product.description || '',
           type: product.type,
-          has_variant: Number(product.have_variant) === 1,
+          has_variant: Boolean(product.has_variant),
         })
 
         this.hasVariantInitial = this.form.has_variant
@@ -1001,6 +1001,8 @@ export default {
           })
         }
         formData.append('stock_data', JSON.stringify(finalStockData))
+        formData.append('has_serial', this.form.has_serial ? 1 : 0)
+        formData.append('has_variant', this.form.has_variant ? 1 : 0)
 
         if (this.form.cover_image instanceof File) {
           formData.append('cover_image', this.form.cover_image)

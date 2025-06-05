@@ -144,5 +144,9 @@
         "next": "Next",
         "last": "Last",
         "showing_rows": "Showing {from}–{to} of {total} rows"
+    },
+    "table": {
+        "no_data": "No data available",
+        "search_placeholder": "Search..."
     }
 }

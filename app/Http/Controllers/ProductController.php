@@ -600,10 +600,12 @@ class ProductController extends Controller
                     return is_null($item['id']);
                 }));
 
-                StockProduct::where('product_id', $id)
-                    ->where('product_type', 'root_stock')
-                    ->whereNotIn('id', array_column($stockData, 'id'))
-                    ->delete();
+                if (!empty($request['remove_stock_ids'])) {
+                    StockProduct::where('product_id', $id)
+                        ->where('product_type', 'root_stock')
+                        ->whereIn('stock_id', $request['remove_stock_ids'])
+                        ->delete();
+                }
 
                 if ($data['type'] === 'variable') {
                     $canceledVariant      = [];

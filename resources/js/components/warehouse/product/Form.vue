@@ -280,7 +280,8 @@ export default {
       trashVariants: [],
       restoringVariant: null,
       hasVariantInitial: false,
-      showAddStockModal: false
+      showAddStockModal: false,
+      remove_stock_ids: []
     }
   },
   watch: {
@@ -313,6 +314,11 @@ export default {
     onRemoveStock(stockId) {
       const stock = this.form.stock_data[stockId]
       if (stock?.is_default === 1) return
+
+      if (!this.remove_stock_ids.includes(stockId)) {
+        this.remove_stock_ids.push(stockId)
+      }
+
       this.stocks = this.stocks.filter(s => s.stock_id !== stockId)
       delete this.form.stock_data[stockId]
       this.form.variants = this.form.variants.filter(v => v.stock_id !== stockId)
@@ -343,6 +349,11 @@ export default {
             auto_calc: false,
             name: stock.name,
             is_default: stock.is_default || 0
+          }
+          // Nếu stock_id nằm trong danh sách remove thì xóa ra
+          const idx = this.remove_stock_ids.indexOf(stockId)
+          if (idx !== -1) {
+            this.remove_stock_ids.splice(idx, 1)
           }
         }
       })
@@ -959,6 +970,11 @@ export default {
               auto_calc: row.auto_calc ? 1 : 0
             })
           })
+          if(this.remove_stock_ids.length > 0){
+              this.remove_stock_ids.forEach(id => {
+                formData.append('remove_stock_ids[]', id)
+              })
+          }
         } else {
           Object.values(this.form.stock_data).forEach(row => {
             finalStockData.push({

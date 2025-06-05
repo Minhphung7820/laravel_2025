@@ -323,6 +323,14 @@ export default {
         const stockId = stock.id
         const exists = this.stocks.find(s => s.stock_id === stockId)
         if (!exists) {
+          // thêm vào danh sách stocks
+          this.stocks.push({
+            stock_id: stockId,
+            name: stock.name,
+            is_default: stock.is_default || 0
+          })
+
+          // thêm vào stock_data cho form
           this.form.stock_data[stockId] = {
             id: null,
             stock_id: stockId,
@@ -335,12 +343,12 @@ export default {
             name: stock.name,
             is_default: stock.is_default || 0
           }
-          this.stocks.push({
-            stock_id: stockId,
-            name: stock.name,
-            is_default: stock.is_default || 0
-          })
         }
+      })
+
+      // gọi lại generateVariantGrid sau khi thêm kho để sinh biến thể mới
+      this.$nextTick(() => {
+        this.generateVariantGrid()
       })
     },
     onVariantImageChange({ index, file }) {

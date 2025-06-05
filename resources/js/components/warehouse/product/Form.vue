@@ -794,7 +794,7 @@ export default {
           name: product.name,
           sku: product.sku,
           barcode: product.barcode,
-          has_serial: Number(product.have_serial) === 1,
+          has_serial: Number(product.has_serial) === 1,
           warranty: product.warranty,
           unit_id: product.unit_id,
           brand_id: product.brand_id,

@@ -15,7 +15,7 @@ class Product extends Model
         'have_variant',
         'json_variants',
         'status',
-        'have_serial',
+        'has_serial',
         'image_cover',
         'unit_id',
         'category_id',

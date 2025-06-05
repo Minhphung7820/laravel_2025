@@ -292,7 +292,7 @@ class ProductController extends Controller
                 'barcode'      => $request->input('barcode') ?? null,
                 'type'         => $request->input('type') ?? null,
                 'have_variant' => $request->boolean('has_variant') ?? 0,
-                'have_serial'  => $request->boolean('has_serial') ?? 0,
+                'has_serial'  => $request->boolean('has_serial') ?? 0,
                 'warranty'     => $request->input('warranty') ?? null,
                 'unit_id'      => $request->input('unit_id') ?? null,
                 'brand_id'     => $request->input('brand_id') ?? null,

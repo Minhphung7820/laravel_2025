@@ -319,19 +319,20 @@ export default {
       this.trashVariants = this.trashVariants.filter(v => v.stock_id !== stockId)
     },
     handleAddStocks(newStocks) {
+      const tempStocks = [...this.stocks]
+      const tempStockData = { ...this.form.stock_data }
+
       newStocks.forEach(stock => {
         const stockId = stock.id
-        const exists = this.stocks.find(s => s.stock_id === stockId)
+        const exists = tempStocks.find(s => s.stock_id === stockId)
         if (!exists) {
-          // thêm vào danh sách stocks
-          this.stocks.push({
+          tempStocks.push({
             stock_id: stockId,
             name: stock.name,
             is_default: stock.is_default || 0
           })
 
-          // thêm vào stock_data cho form
-          this.form.stock_data[stockId] = {
+          tempStockData[stockId] = {
             id: null,
             stock_id: stockId,
             qty: 0,
@@ -346,7 +347,43 @@ export default {
         }
       })
 
-      // gọi lại generateVariantGrid sau khi thêm kho để sinh biến thể mới
+      // Dự đoán số variant sau khi thêm kho
+      const selected = this.selectedAttributes
+        .filter(attr => {
+          const values = this.selectedAttributeValues[attr.id]
+          return attr && attr.id && Array.isArray(values) && values.length > 0
+        })
+        .map(attr => ({
+          attr,
+          values: this.selectedAttributeValues[attr.id]
+        }))
+
+      let count = 0
+      if (selected.length > 0) {
+        const combinations = this.generateCombinations(
+          selected.map(item => ({
+            attribute: item.attr,
+            values: item.values
+          }))
+        )
+        count = combinations.length * tempStocks.length
+      }
+
+      const total = count + this.trashVariants.length
+      if (total > 100) {
+        Swal.fire({
+          icon: 'error',
+          title: this.$t('variant_grid.limit_exceeded'),
+          text: this.$t('variant_grid.limit_exceeded_msg'),
+          confirmButtonText: 'OK'
+        })
+        return
+      }
+
+      // Nếu không vượt giới hạn thì apply
+      this.stocks = tempStocks
+      this.form.stock_data = tempStockData
+
       this.$nextTick(() => {
         this.generateVariantGrid()
       })
@@ -454,28 +491,102 @@ export default {
     },
     onValueChange(event, attrId, valueId) {
       const isChecked = event.target.checked
+
+      // Clone tạm selected values để tính trước
+      const tempSelectedAttributeValues = JSON.parse(JSON.stringify(this.selectedAttributeValues))
+      const tempSelectedAttributes = [...this.selectedAttributes]
+
       if (!isChecked && (!valueId || valueId)) {
-         if(!valueId){
+        if (!valueId) {
+          tempSelectedAttributeValues[attrId] = []
+          const index = tempSelectedAttributes.findIndex(a => a.id === attrId)
+          if (index !== -1) tempSelectedAttributes.splice(index, 1)
+        } else {
+          tempSelectedAttributeValues[attrId] = tempSelectedAttributeValues[attrId].filter(v => v !== valueId)
+        }
+      } else {
+        // isChecked
+        if (!tempSelectedAttributeValues[attrId].includes(valueId)) {
+          tempSelectedAttributeValues[attrId].push(valueId)
+        }
+      }
+
+      // Tính tổ hợp mới nếu thêm value này
+      const selected = tempSelectedAttributes
+        .filter(attr => {
+          const values = tempSelectedAttributeValues[attr.id]
+          return attr && attr.id && Array.isArray(values) && values.length > 0
+        })
+        .map(attr => ({
+          attr,
+          values: tempSelectedAttributeValues[attr.id]
+        }))
+
+      let projected = 0
+      if (selected.length > 0) {
+        const combinations = this.generateCombinations(
+          selected.map(item => ({
+            attribute: item.attr,
+            values: item.values
+          }))
+        )
+        projected = combinations.length * this.stocks.length
+      }
+
+      const total = projected + this.trashVariants.length
+      if (total > 100) {
+        Swal.fire({
+          icon: 'error',
+          title: this.$t('variant_grid.limit_exceeded'),
+          text: this.$t('variant_grid.limit_exceeded_msg'),
+          confirmButtonText: 'OK'
+        })
+
+        // Rollback checkbox lại thủ công vì Vue đã cập nhật trước
+        if (!isChecked) {
+          // đang uncheck → rollback lại check
+          if (!valueId) {
+            const attr = this.variantAttributes.find(a => a.id === attrId)
+            if (attr && !this.selectedAttributes.some(a => a.id === attr.id)) {
+              this.selectedAttributes.push(attr)
+            }
+          } else {
+            if (!this.selectedAttributeValues[attrId].includes(valueId)) {
+              this.selectedAttributeValues[attrId].push(valueId)
+            }
+          }
+        } else {
+          // đang check → rollback lại uncheck
+          if (!valueId) {
+            this.selectedAttributes = this.selectedAttributes.filter(a => a.id !== attrId)
+          } else {
+            this.selectedAttributeValues[attrId] = this.selectedAttributeValues[attrId].filter(v => v !== valueId)
+          }
+        }
+
+        return
+      }
+
+      if (!isChecked && (!valueId || valueId)) {
+        if (!valueId) {
           this.trashVariants = this.trashVariants.filter(variant => {
-            return variant.attributes.every(attr => {
-              return attr.attribute.id !== attrId
-            })
+            return variant.attributes.every(attr => attr.attribute.id !== attrId)
           })
           this.selectedAttributeValues[attrId] = []
-         } else if(valueId){
+          this.selectedAttributes = this.selectedAttributes.filter(a => a.id !== attrId)
+        } else {
           this.trashVariants = this.trashVariants.filter(variant => {
-            return variant.attributes.every(attr => {
-              return attr.value.id !== valueId
-            })
+            return variant.attributes.every(attr => attr.value.id !== valueId)
           })
-         }
+          this.selectedAttributeValues[attrId] = this.selectedAttributeValues[attrId].filter(v => v !== valueId)
+        }
       } else {
-         this.trashVariants = this.trashVariants.filter(variant => {
-            return variant.attributes.every(attr => {
-              const allowedValues = this.selectedAttributeValues[attr.attribute.id] || []
-              return allowedValues.includes(attr.value.id)
-            })
-         })
+        this.trashVariants = this.trashVariants.filter(variant => {
+          return variant.attributes.every(attr => {
+            const allowedValues = this.selectedAttributeValues[attr.attribute.id] || []
+            return allowedValues.includes(attr.value.id)
+          })
+        })
       }
       this.$nextTick(() => {
         this.generateVariantGrid()

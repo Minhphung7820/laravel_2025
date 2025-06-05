@@ -138,7 +138,25 @@ export default {
       restoringStock: ''
     }
   },
+  watch: {
+    totalVariants(newVal) {
+      if (newVal > 100) {
+        Swal.fire({
+          icon: 'error',
+          title: this.$t('variant_grid.limit_exceeded'),
+          text: this.$t('variant_grid.limit_exceeded_msg'),
+          confirmButtonText: 'OK'
+        })
+      }
+    }
+  },
   computed: {
+    totalVariants() {
+      return this.variants.length + this.trashVariants.length
+    },
+    isVariantLimitExceeded() {
+      return this.totalVariants >= 100
+    },
     isRestoreReady() {
       return (
         this.restoringAttributes.length === this.previewAttributes.length &&
@@ -171,13 +189,20 @@ export default {
   },
   methods: {
     handleAddRestore() {
-      this.$emit('start-restore')
+      if (this.isVariantLimitExceeded) {
+        Swal.fire({
+          icon: 'warning',
+          title: this.$t('variant_grid.limit_exceeded'),
+          text: this.$t('variant_grid.limit_exceeded_msg'),
+          confirmButtonText: 'OK'
+        })
+        return
+      }
 
+      this.$emit('start-restore')
       this.$nextTick(() => {
         const el = this.$refs.variantScrollContainer
-        if (el) {
-          el.scrollTo({ top: 0, behavior: 'smooth' })
-        }
+        if (el) el.scrollTo({ top: 0, behavior: 'smooth' })
       })
     },
     getStockName(stockId) {

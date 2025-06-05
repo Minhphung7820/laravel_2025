@@ -540,7 +540,12 @@ class ProductController extends Controller
             if (!$product) {
                 throw new Exception("Không tìm thấy sản phẩm !");
             }
-
+            if ($product['type'] === 'variable' && $data['type'] === 'single') {
+                $data['have_variant'] = 0;
+                StockProduct::where('product_id', $product['id'])
+                    ->where('product_type', 'variable')
+                    ->delete();
+            }
             $result = $product->update($data);
             $deletedIds = $request->input('deleted_gallery_ids', []);
 

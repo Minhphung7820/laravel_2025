@@ -134,7 +134,7 @@ export default {
     },
     withCheckbox: { type: Boolean, default: false },
     withCheckbox: { type: Boolean, default: false },
-    hasActions: { type: Boolean, default: false }
+    hasActions: { type: Boolean, default: true }
   },
   data() {
     return {

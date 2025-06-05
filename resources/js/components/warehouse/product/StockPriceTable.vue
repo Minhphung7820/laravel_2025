@@ -98,7 +98,7 @@ export default {
     isVariableProduct: Boolean,
     variantStockTotals: Object
   },
-    emits: ['update:modelValue', 'remove-stock', 'open-add-stock-modal'],
+  emits: ['update:modelValue', 'remove-stock', 'open-add-stock-modal'],
   data() {
     return {
       localData: {},

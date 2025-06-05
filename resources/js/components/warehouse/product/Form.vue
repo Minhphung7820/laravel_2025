@@ -312,19 +312,18 @@ export default {
   methods: {
     onRemoveStock(stockId) {
       const stock = this.form.stock_data[stockId]
-      // Nếu là kho mặc định thì không cho xóa
-      if (stock?.is_default === 1) {
-        return
-      }
-
+      if (stock?.is_default === 1) return
       this.stocks = this.stocks.filter(s => s.stock_id !== stockId)
       delete this.form.stock_data[stockId]
+      this.form.variants = this.form.variants.filter(v => v.stock_id !== stockId)
+      this.trashVariants = this.trashVariants.filter(v => v.stock_id !== stockId)
     },
     handleAddStocks(newStocks) {
       newStocks.forEach(stock => {
         const stockId = stock.id
-        if (!this.stocks.find(s => s.stock_id === stockId)) {
-          this.$set(this.form.stock_data, stockId, {
+        const exists = this.stocks.find(s => s.stock_id === stockId)
+        if (!exists) {
+          this.form.stock_data[stockId] = {
             id: null,
             stock_id: stockId,
             qty: 0,
@@ -334,9 +333,13 @@ export default {
             max_increase_percent: 0,
             auto_calc: false,
             name: stock.name,
-            is_default: 0
+            is_default: stock.is_default || 0
+          }
+          this.stocks.push({
+            stock_id: stockId,
+            name: stock.name,
+            is_default: stock.is_default || 0
           })
-          this.stocks.push({ stock_id: stockId, name: stock.name })
         }
       })
     },
@@ -519,18 +522,18 @@ export default {
         this.stocks.forEach(stock => {
           // tìm variant cũ trùng attributes + stock_id
           const old = this.form.variants.find(v =>
-            v.stock_id === stock.id &&
+            v.stock_id === stock.stock_id &&
             this.isSameAttributes(v.attributes, combo)
           )
 
           const isTrashed = this.trashVariants.some(tv =>
-            tv.stock_id === stock.id &&
+            tv.stock_id === stock.stock_id &&
             this.isSameAttributes(tv.attributes, combo)
           )
           if (!isTrashed) {
             newVariants.push({
               id: old?.id ?? null,
-              stock_id: stock.id,
+              stock_id: stock.stock_id,
               attributes: combo,
               quantity: old?.quantity || 0,
               sell_price: old?.sell_price || 0,
@@ -592,7 +595,7 @@ export default {
         const isCreate = this.mode === 'create'
         const isNotCombo = this.form.type !== 'combo'
         if (isCreate) {
-          fetches.push(fetch('/api/warehouse/stock/list', { headers }))
+          fetches.push(fetch('/api/warehouse/stock/list?is_default=1', { headers }))
         }
         if (isNotCombo) {
           fetches.push(fetch('/api/supplier/list', { headers }))
@@ -608,7 +611,26 @@ export default {
         this.brands = jsons[1]?.data.data || []
         this.categories = jsons[2]?.data.data || []
         if(isCreate){
-           this.stocks =(jsons[3]?.data.data || [])
+          const defaultStocks = jsons[3]?.data.data || []
+          this.stocks = defaultStocks.map(stock => ({
+            stock_id: stock.id,
+            name: stock.name,
+            is_default: stock.is_default || 0
+          }))
+          defaultStocks.forEach(stock => {
+            this.form.stock_data[stock.id] = {
+              id: null,
+              stock_id: stock.id,
+              qty: 0,
+              purchase_price: 0,
+              sell_price: 0,
+              max_discount_percent: 0,
+              max_increase_percent: 0,
+              auto_calc: false,
+              name: stock.name,
+              is_default: stock.is_default || 0
+            }
+          })
         }
         this.suppliers = isNotCombo
           ? (isCreate ? (jsons[4]?.data.data || []) : (jsons[3]?.data.data || []))

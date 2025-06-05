@@ -2,7 +2,7 @@
   <div v-if="visible" class="fixed inset-0 bg-gray-100 z-50 flex items-center justify-center">
     <div class="bg-white rounded-xl shadow-lg w-[800px] max-w-full p-6">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-semibold">Chọn kho</h2>
+        <h2 class="text-lg font-semibold">{{ $t('stock_table.select_stock') }}</h2>
         <button @click="$emit('close')" class="text-gray-600 hover:text-red-600 text-xl">×</button>
       </div>
 
@@ -18,8 +18,8 @@
       </div>
 
       <div class="flex justify-end mt-6">
-        <button @click="$emit('close')" class="mr-3 px-4 py-2 border rounded hover:bg-gray-100">Hủy</button>
-        <button @click="confirmSelection" class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700">Thêm</button>
+        <button @click="$emit('close')" class="mr-3 px-4 py-2 border rounded hover:bg-gray-100">{{ $t('stock_table.cancel') }}</button>
+        <button @click="confirmSelection" class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700">{{ $t('stock_table.confirm') }}</button>
       </div>
     </div>
   </div>
@@ -54,7 +54,7 @@ export default {
         current_page: 1, last_page: 1, per_page: 10, from: 0, to: 0, total: 0
       },
       columns: [
-        { key: 'name', label: 'Tên kho' }
+        { key: 'name', label:  this.$t('stock_table.stock_name') }
       ]
     }
   },

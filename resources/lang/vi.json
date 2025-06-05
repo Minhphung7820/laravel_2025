@@ -60,7 +60,14 @@
         "max_discount": "% giảm tối đa",
         "max_increase": "% tăng tối đa",
         "auto_calc": "Tự động tính",
-        "calc": "Tính"
+        "calc": "Tính",
+        "add_stock": "Thêm kho",
+        "default": "Mặc định",
+        "remove": "Xóa",
+        "select_stock": "Chọn kho",
+        "stock_name": "Tên kho",
+        "cancel": "Hủy",
+        "confirm": "Thêm"
     },
     "combo_grid": {
         "title": "Danh sách sản phẩm combo",

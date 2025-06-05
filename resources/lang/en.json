@@ -60,7 +60,14 @@
         "max_discount": "Max Discount (%)",
         "max_increase": "Max Increase (%)",
         "auto_calc": "Auto Calculate",
-        "calc": "Calculate"
+        "calc": "Calculate",
+        "add_stock": "Add Stock",
+        "default": "Default",
+        "remove": "Remove",
+        "select_stock": "Select Stock",
+        "stock_name": "Stock Name",
+        "cancel": "Cancel",
+        "confirm": "Add"
     },
     "combo_grid": {
         "title": "Combo Product List",

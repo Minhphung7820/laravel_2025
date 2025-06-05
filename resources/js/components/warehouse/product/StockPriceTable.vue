@@ -7,7 +7,7 @@
         @click="$emit('open-add-stock-modal')"
         class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm"
       >
-        + Thêm kho
+        + {{ $t('stock_table.add_stock') }}
       </button>
     </div>
     <table class="w-full text-sm border border-gray-300">
@@ -21,7 +21,7 @@
           <th class="border px-3 py-2 text-center">{{ $t('stock_table.max_increase') }}</th>
           <th class="border px-3 py-2 text-center">{{ $t('stock_table.auto_calc') }}</th>
           <th class="border px-3 py-2 text-center">{{ $t('stock_table.calc') }}</th>
-          <th class="border px-3 py-2 text-center">Xoá</th>
+          <th class="border px-3 py-2 text-center">{{ $t('stock_table.remove') }}</th>
         </tr>
       </thead>
       <tbody>
@@ -32,7 +32,7 @@
               v-if="localData[stock.stock_id]?.is_default === 1"
               class="ml-2 inline-block bg-blue-100 text-blue-700 text-[12px] font-medium px-2 py-[1px] rounded-full"
             >
-              Mặc định
+              {{ $t('stock_table.default') }}
             </span>
           </td>
           <td class="border px-2 py-1 text-center">

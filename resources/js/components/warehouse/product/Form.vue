@@ -323,7 +323,7 @@ export default {
       const tempStockData = { ...this.form.stock_data }
 
       newStocks.forEach(stock => {
-        const stockId = stock.id
+        const stockId = stock.stock_id
         const exists = tempStocks.find(s => s.stock_id === stockId)
         if (!exists) {
           tempStocks.push({
@@ -333,7 +333,7 @@ export default {
           })
 
           tempStockData[stockId] = {
-            id: null,
+            id: stockId,
             stock_id: stockId,
             qty: 0,
             purchase_price: 0,
@@ -962,8 +962,7 @@ export default {
         } else {
           Object.values(this.form.stock_data).forEach(row => {
             finalStockData.push({
-              id: row.id ?? null,
-              stock_id: row.stock_id,
+              stock_id: row.id,
               quantity: row.qty ?? 0,
               purchase_price: row.purchase_price ?? 0,
               sell_price: row.sell_price ?? 0,

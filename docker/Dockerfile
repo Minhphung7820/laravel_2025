@@ -16,7 +16,8 @@ RUN apt-get update && apt-get install -y \
 
 # Copy file opcache.ini
 COPY ./docker/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
-
+# Copy file custom cấu hình PHP
+COPY ./docker/custom-php.ini /usr/local/etc/php/conf.d/custom-php.ini
 # Cài Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 

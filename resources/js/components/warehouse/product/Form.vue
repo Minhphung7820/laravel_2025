@@ -621,13 +621,14 @@ export default {
         if(isCreate){
           const defaultStocks = jsons[3]?.data.data || []
           this.stocks = defaultStocks.map(stock => ({
+            id: stock.id,
             stock_id: stock.id,
             name: stock.name,
             is_default: stock.is_default || 0
           }))
           defaultStocks.forEach(stock => {
             this.form.stock_data[stock.id] = {
-              id: null,
+              id: stock.id,
               stock_id: stock.id,
               qty: 0,
               purchase_price: 0,

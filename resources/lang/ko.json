@@ -144,9 +144,7 @@
         "prev": "이전",
         "next": "다음",
         "last": "마지막",
-        "showing_rows": "{from}–{to} / 총 {total}개 항목 표시 중"
-    },
-    "table": {
+        "showing_rows": "{from}–{to} / 총 {total}개 항목 표시 중",
         "no_data": "데이터가 없습니다",
         "search_placeholder": "검색..."
     }

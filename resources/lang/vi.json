@@ -143,9 +143,7 @@
         "prev": "Trước",
         "next": "Sau",
         "last": "Cuối",
-        "showing_rows": "Hiển thị {from}–{to} / {total} dòng"
-    },
-    "table": {
+        "showing_rows": "Hiển thị {from}–{to} / {total} dòng",
         "no_data": "Không có dữ liệu",
         "search_placeholder": "Tìm kiếm..."
     }

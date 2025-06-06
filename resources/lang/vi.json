@@ -49,7 +49,9 @@
         "msg_max_attr": "Chọn thuộc tính biến thể (tối đa 2)",
         "select_file": "Chọn tệp",
         "no_file": "Không có tệp nào được chọn",
-        "total_files": "{count} tệp đã chọn"
+        "total_files": "{count} tệp đã chọn",
+        "required_name": "Tên sản phẩm không được để trống",
+        "required_supplier": "Vui lòng chọn nhà cung cấp"
     },
     "stock_table": {
         "title": "Kho hàng",

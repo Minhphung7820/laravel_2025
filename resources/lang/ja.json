@@ -49,7 +49,9 @@
         "msg_max_attr": "バリエーション属性を最大2つまで選択してください",
         "select_file": "ファイルを選択",
         "no_file": "選択されたファイルはありません",
-        "total_files": "{count} 件のファイルが選択されました"
+        "total_files": "{count} 件のファイルが選択されました",
+        "required_name": "商品名は必須です",
+        "required_supplier": "仕入先を選択してください"
     },
     "stock_table": {
         "title": "在庫",

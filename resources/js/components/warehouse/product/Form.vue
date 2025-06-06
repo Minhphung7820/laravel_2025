@@ -7,7 +7,14 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div>
         <label class="block font-semibold">{{ $t('product.name') }} *</label>
-        <input v-model="form.name" type="text" :placeholder="$t('common.please_enter')" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <input
+          v-model="form.name"
+          :class="['w-full px-4 py-2 border rounded shadow-sm focus:outline-none', errors.name ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500']"
+          type="text"
+          :placeholder="$t('common.please_enter')"
+          class="is-invalid"
+        />
+        <p v-if="errors.name" class="text-sm text-red-500 mt-1">{{ errors.name }}</p>
       </div>
       <div>
         <label class="block font-semibold">{{ $t('product.sku') }}</label>
@@ -64,13 +71,18 @@
       </div>
     </div>
     <div v-if="type !== 'combo'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <label class="block font-semibold">{{ $t('product.supplier') }} *</label>
-        <select v-model="form.supplier_id" class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm">
-          <option value="">{{ $t('common.please_select') }}</option>
-          <option v-for="sup in suppliers" :key="sup.id" :value="sup.id">{{ sup.name }}</option>
-        </select>
-      </div>
+    <div>
+      <label class="block font-semibold">{{ $t('product.supplier') }} *</label>
+      <select
+        v-model="form.supplier_id"
+        :class="['w-full px-4 py-2 border rounded shadow-sm', errors.supplier_id ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500']"
+        class="is-invalid"
+      >
+        <option value="">{{ $t('common.please_select') }}</option>
+        <option v-for="sup in suppliers" :key="sup.id" :value="sup.id">{{ sup.name }}</option>
+      </select>
+      <p v-if="errors.supplier_id" class="text-sm text-red-500 mt-1">{{ errors.supplier_id }}</p>
+    </div>
     </div>
     <!-- Kho hàng -->
     <StockPriceTable
@@ -292,7 +304,8 @@ export default {
       restoringVariant: null,
       hasVariantInitial: false,
       showAddStockModal: false,
-      remove_stock_ids: []
+      remove_stock_ids: [],
+      errors: {}
     }
   },
   watch: {
@@ -322,6 +335,27 @@ export default {
     await Promise.all(promises)
   },
   methods: {
+    validateForm() {
+      this.errors = {}
+
+      if (!this.form.name) {
+        this.errors.name = this.$t('product.required_name')
+      }
+
+      if (!this.form.supplier_id && (this.form.type === 'single' || this.form.type === 'variable')) {
+        this.errors.supplier_id = this.$t('product.required_supplier')
+      }
+
+      // Scroll tới field đầu tiên bị lỗi
+      this.$nextTick(() => {
+        const firstErrorField = document.querySelector('.is-invalid')
+        if (firstErrorField) {
+          firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      })
+
+      return Object.keys(this.errors).length === 0
+    },
     onRemoveStock(stockId) {
       const stock = this.form.stock_data[stockId]
       if (stock?.is_default === 1) return
@@ -958,6 +992,7 @@ export default {
       this.form.gallery_images.splice(index, 1)
     },
     async handleSubmit() {
+      if (!this.validateForm()) return
       try {
         const formData = new FormData()
         Object.entries(this.form).forEach(([key, value]) => {

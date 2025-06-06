@@ -49,7 +49,9 @@
         "msg_max_attr": "选择变体属性（最多2项）",
         "select_file": "选择文件",
         "no_file": "未选择文件",
-        "total_files": "已选择 {count} 个文件"
+        "total_files": "已选择 {count} 个文件",
+        "required_name": "产品名称不能为空",
+        "required_supplier": "请选择供应商"
     },
     "stock_table": {
         "title": "库存信息",

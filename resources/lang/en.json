@@ -49,7 +49,9 @@
         "msg_max_attr": "Select variant attributes (up to 2)",
         "select_file": "Choose file",
         "no_file": "No file selected",
-        "total_files": "{count} file(s) selected"
+        "total_files": "{count} file(s) selected",
+        "required_name": "Product name is required",
+        "required_supplier": "Please select a supplier"
     },
     "stock_table": {
         "title": "Inventory",

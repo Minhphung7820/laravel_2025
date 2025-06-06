@@ -26,8 +26,6 @@ class Product extends Model
     ];
 
     protected $appends = [
-        'status_text',
-        'type_text',
         'image_cover_url'
     ];
 
@@ -43,16 +41,6 @@ class Product extends Model
     public function getImageCoverUrlAttribute()
     {
         return $this->image_cover ? url($this->image_cover) : env('IMAGE_DEFAULT');
-    }
-
-    public function getStatusTextAttribute()
-    {
-        return Common::PRODUCT_STATUS[$this->status] ?? null;
-    }
-
-    public function getTypeTextAttribute()
-    {
-        return Common::PRODUCT_TYPE[$this->type] ?? null;
     }
 
     public function attributes()

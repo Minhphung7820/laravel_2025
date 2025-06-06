@@ -68,17 +68,6 @@ class ProductController extends Controller
                 ELSE
                     COALESCE(CONCAT('$urlPrefix', p.image_cover), '" . env('IMAGE_DEFAULT') . "')
             END AS image"),
-            DB::raw("CASE
-                WHEN p.type = 'variable' THEN 'Sản phẩm biến thể'
-                WHEN p.type = 'single' THEN 'Sản phẩm đơn'
-                WHEN p.type = 'combo' THEN 'Sản phẩm combo'
-                ELSE 'Không xác định'
-            END AS product_type_text"),
-            DB::raw("CASE
-                WHEN p.status = 'pending' THEN 'Đang chờ'
-                WHEN p.status = 'approved' THEN 'Đã duyệt'
-                ELSE 'Không rõ'
-            END AS status_text"),
             'p.status',
         ]);
 
@@ -132,16 +121,6 @@ class ProductController extends Controller
                     ELSE
                         COALESCE(CONCAT('$urlPrefix', products.image_cover), '$imageDefault')
                 END AS image"),
-                DB::raw("CASE
-                    WHEN products.type = 'variable' THEN 'Sản phẩm biến thể'
-                    WHEN products.type = 'single' THEN 'Sản phẩm đơn'
-                    ELSE 'Không xác định'
-                END AS product_type_text"),
-                DB::raw("CASE
-                    WHEN products.status = 'pending' THEN 'Đang chờ'
-                    WHEN products.status = 'approved' THEN 'Đã duyệt'
-                    ELSE 'Không rõ'
-                END AS status_text"),
                 'products.status',
                 DB::raw('(SELECT JSON_ARRAYAGG(JSON_OBJECT(
                     "id", sp2.id,

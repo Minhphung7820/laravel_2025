@@ -350,14 +350,14 @@ class ProductController extends Controller
                 $syncCombo = $this->syncProductsCombo($product['id'], $combosPrepare);
                 if (! $syncCombo) {
                     DB::rollBack();
-                    return $this->responseError('Save Combo failed!', 500);
+                    return $this->responseError(__('common.product.save_combo_failed'), 500);
                 }
             }
             DB::commit();
-            return $this->responseSuccess(true, 'Thêm sản phẩm thành công!', 201);
+            return $this->responseSuccess(true, __('common.product.create_success'), 201);
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->responseError($e->getMessage(), 500);
+            return $this->responseError(__('common.product.create_failed'), 500);
         }
     }
 
@@ -508,16 +508,16 @@ class ProductController extends Controller
             if ($data['type'] === 'variable') {
                 $attributes = $request['variants'] ?? [];
                 if (empty($attributes)) {
-                    throw new Exception("Vui lòng chọn ít nhất 1 biến thể !");
+                    throw new Exception(__('common.product.missing_variant'));
                 }
             }
             $stocks = json_decode($request['stock_data'], true);
             if (empty($stocks)) {
-                throw new Exception("Vui lòng chọn ít nhất 1 kho !");
+                throw new Exception(__('common.product.missing_stock'));
             }
             $product = Product::findOrFail($id);
             if (!$product) {
-                throw new Exception("Không tìm thấy sản phẩm !");
+                throw new Exception(__('common.product.not_found'));
             }
             if ($product['type'] === 'variable' && $data['type'] === 'single') {
                 $data['has_variant'] = 0;
@@ -619,7 +619,7 @@ class ProductController extends Controller
                             : tap(StockProduct::findOrFail($fillAttribute['id']))->update($fillAttribute);
 
                         if (!$attributeModel) {
-                            throw new \Exception("Lỗi khi thêm biến thể!");
+                            throw new Exception(__('common.product.variant_create_failed'));
                         }
                         $canceledVariant[] = $attributeModel->id;
                         // Xử lý ảnh nếu có
@@ -657,16 +657,16 @@ class ProductController extends Controller
                     $syncCombo = $this->syncProductsCombo($product['id'], $combosPrepare);
                     if (! $syncCombo) {
                         DB::rollBack();
-                        return $this->responseError('Save Combo failed!');
+                        return $this->responseError(__('common.product.save_combo_failed'));
                     }
                 }
             }
 
             DB::commit();
-            return $this->responseSuccess(true, 'Chỉnh sửa sản phẩm thành công!');
+            return $this->responseSuccess(true, __('common.product.update_success'));
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->responseError($e->getMessage());
+            return $this->responseError(__('common.product.update_failed'), 500);
         }
     }
 

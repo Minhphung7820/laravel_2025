@@ -6,7 +6,7 @@
     <!-- Thông tin chung -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div>
-        <label class="block font-semibold">{{ $t('product.name') }} *</label>
+        <label class="block font-semibold">{{ $t('product.name') }} <span class="text-red-500">*</span></label>
         <input
           v-model="form.name"
           :class="['w-full px-4 py-2 border rounded shadow-sm focus:outline-none', errors.name ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500']"
@@ -72,7 +72,7 @@
     </div>
     <div v-if="type !== 'combo'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div>
-      <label class="block font-semibold">{{ $t('product.supplier') }} *</label>
+      <label class="block font-semibold">{{ $t('product.supplier') }} <span class="text-red-500">*</span></label>
       <select
         v-model="form.supplier_id"
         :class="['w-full px-4 py-2 border rounded shadow-sm', errors.supplier_id ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500']"
@@ -1096,16 +1096,17 @@ export default {
 
       await Swal.fire({
         icon: 'success',
-        title: 'Thành công!',
+        title: res?.data?.message,
         showConfirmButton: false,
         timer: 1500
       })
       this.$router.push('/warehouse/product')
       } catch (err) {
+        const res = err?.response?.data || {}
         Swal.fire({
           icon: 'error',
-          title: 'Thất bại khi gửi form.',
-          text: err?.response?.data?.message || 'Đã xảy ra lỗi. Vui lòng thử lại.'
+          title: res.message,
+          text: res.message
         })
       }
     },

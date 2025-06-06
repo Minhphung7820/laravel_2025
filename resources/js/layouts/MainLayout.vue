@@ -8,7 +8,10 @@
       ]"
     >
       <div v-if="showSidebar && activeModule?.name" class="font-bold text-lg mb-4 text-left w-full">
-        {{ $t(activeModule.name) }}
+        <div class="flex items-center gap-2">
+          <img :src="publicPath + 'images/favicon.png'" class="h-6 w-6" />
+          <span>{{ $t(activeModule.name) }}</span>
+        </div>
       </div>
       <ul class="w-full" v-if="activeModule?.epics?.length">
         <li v-for="item in activeModule.epics" :key="item.name" class="mb-2">
@@ -105,6 +108,7 @@ import { mapGetters, mapActions } from 'vuex'
 export default {
   data() {
     return {
+      publicPath: window.location.origin + '/',
       selectedLang: localStorage.getItem('lang') || 'vi',
       showSidebar: true,
       modules: [

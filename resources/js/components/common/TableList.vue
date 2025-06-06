@@ -48,13 +48,14 @@
             <td
               v-for="col in columns"
               :key="col.key"
-              class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap"
+              class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]"
+              :title="item[col.key]"
             >
               <template v-if="col.type === 'image_file' && item[col.key]">
                 <img :src="item[col.key]" class="w-10 h-10 rounded-full object-cover border" />
               </template>
               <template v-else>
-                {{ item[col.key] }}
+                 {{ getCellText(item, col) }}
               </template>
             </td>
             <td v-if="hasActions" class="px-4 py-2 text-center">
@@ -175,6 +176,12 @@ export default {
     }
   },
   methods: {
+    getCellText(item, col) {
+      if (!col.withLang || !col.keyLang) return item[col.key]
+
+      const fullKey = `${col.keyLang}.${item[col.key]}`
+      return this.$t(fullKey)
+    },
     toggleAll(e) {
       this.selected = e.target.checked ? [...this.data] : []
       this.$emit('selection-change', this.selected)

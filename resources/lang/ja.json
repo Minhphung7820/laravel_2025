@@ -147,5 +147,14 @@
         "showing_rows": "{from}～{to} / {total} 件を表示中",
         "no_data": "データがありません",
         "search_placeholder": "検索..."
+    },
+    "product_type": {
+        "single": "通常商品",
+        "combo": "コンボ商品",
+        "variable": "バリアント商品"
+    },
+    "product_status": {
+        "pending": "承認待ち",
+        "approved": "承認済み"
     }
 }

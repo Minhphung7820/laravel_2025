@@ -146,5 +146,14 @@
         "showing_rows": "正在显示第 {from}–{to} 项，共 {total} 项",
         "no_data": "没有可用的数据",
         "search_placeholder": "搜索..."
+    },
+    "product_type": {
+        "single": "普通商品",
+        "combo": "组合商品",
+        "variable": "变体商品"
+    },
+    "product_status": {
+        "pending": "等待审批",
+        "approved": "已审批"
     }
 }

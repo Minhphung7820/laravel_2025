@@ -146,5 +146,14 @@
         "showing_rows": "Hiển thị {from}–{to} / {total} dòng",
         "no_data": "Không có dữ liệu",
         "search_placeholder": "Tìm kiếm..."
+    },
+    "product_type": {
+        "single": "Sản phẩm thường",
+        "combo": "Sản phẩm Combo",
+        "variable": "Sản phẩm biến thể"
+    },
+    "product_status": {
+        "pending": "Đang chờ duyệt",
+        "approved": "Đã duyệt"
     }
 }

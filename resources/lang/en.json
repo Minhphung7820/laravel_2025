@@ -146,5 +146,14 @@
         "showing_rows": "Showing {from}–{to} of {total} rows",
         "no_data": "No data available",
         "search_placeholder": "Search..."
+    },
+    "product_type": {
+        "single": "Single product",
+        "combo": "Combo product",
+        "variable": "Variant product"
+    },
+    "product_status": {
+        "pending": "Pending approval",
+        "approved": "Approved"
     }
 }

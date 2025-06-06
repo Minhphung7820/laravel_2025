@@ -56,7 +56,7 @@
                 </template>
               </select>
             </td>
-            <td class="px-3 py-2">{{ item.product_type_text }}</td>
+            <td class="px-3 py-2">{{ $t('product_type.'+ item.product_type) }}</td>
             <td class="px-3 py-2">{{ item.sku }}</td>
             <td class="px-3 py-2">
               <input
@@ -138,7 +138,7 @@ export default {
         { label: this.$t('combo_grid.image'), key: 'image', type: 'image_file' },
         { label: this.$t('combo_grid.sku'), key: 'sku' },
         { label: this.$t('combo_grid.product_name'), key: 'product_name' },
-        { label: this.$t('combo_grid.type'), key: 'product_type_text' },
+        { label: this.$t('combo_grid.type'), key: 'product_type' , withLang : true , keyLang : 'product_type'  },
         { label: this.$t('combo_grid.barcode'), key: 'barcode' },
         { label: this.$t('combo_grid.stock'), key: 'stock_name' },
         { label: this.$t('combo_grid.available_stock'), key: 'quantity' },

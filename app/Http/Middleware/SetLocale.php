@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
 
 class SetLocale
 {
@@ -17,7 +18,7 @@ class SetLocale
     public function handle(Request $request, Closure $next): Response
     {
         $lang = $request->header('Accept-Language', 'vi');
-        if (!in_array($lang, ['vi', 'en'])) {
+        if (!in_array($lang, ['vi', 'en', 'ja', 'ko', 'zh'])) {
             $lang = 'vi';
         }
         App::setLocale($lang);

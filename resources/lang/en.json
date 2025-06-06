@@ -51,7 +51,11 @@
         "no_file": "No file selected",
         "total_files": "{count} file(s) selected",
         "required_name": "Product name is required",
-        "required_supplier": "Please select a supplier"
+        "required_supplier": "Please select a supplier",
+        "confirm_remove_variant_title": "Remove variants?",
+        "confirm_remove_variant_text": "This action will delete all current variant rows. Are you sure?",
+        "confirm_remove_variant_button_text": "Yes, I'm sure",
+        "cancel_button_text": "Cancel"
     },
     "stock_table": {
         "title": "Inventory",

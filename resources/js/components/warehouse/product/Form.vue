@@ -529,15 +529,13 @@ export default {
 
       if (this.mode === 'update' && this.hasVariantInitial && willUncheck) {
         const result = await Swal.fire({
-          title: 'Bỏ biến thể?',
-          text: 'Thao tác này sẽ xóa toàn bộ lưới biến thể đang có. Bạn có chắc chắn không?',
+          title: this.$t('product.confirm_remove_variant_title'),
+          text: this.$t('product.confirm_remove_variant_text'),
           icon: 'warning',
           showCancelButton: true,
-          confirmButtonText: 'Có, tôi chắc chắn',
-          cancelButtonText: 'Hủy',
-          confirmButtonColor: '#d33',
-          cancelButtonColor: '#3085d6'
-        })
+          confirmButtonText: this.$t('product.confirm_remove_variant_button_text'),
+          cancelButtonText: this.$t('product.cancel_button_text'),
+        });
 
         if (!result.isConfirmed) {
           this.form.has_variant = true

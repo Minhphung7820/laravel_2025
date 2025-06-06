@@ -51,7 +51,11 @@
         "no_file": "選択されたファイルはありません",
         "total_files": "{count} 件のファイルが選択されました",
         "required_name": "商品名は必須です",
-        "required_supplier": "仕入先を選択してください"
+        "required_supplier": "仕入先を選択してください",
+        "confirm_remove_variant_title": "バリアントを削除しますか？",
+        "confirm_remove_variant_text": "この操作はすべてのバリアント行を削除します。本当に実行しますか？",
+        "confirm_remove_variant_button_text": "はい、確かです",
+        "cancel_button_text": "キャンセル"
     },
     "stock_table": {
         "title": "在庫",

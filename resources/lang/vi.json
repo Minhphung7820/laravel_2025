@@ -51,7 +51,11 @@
         "no_file": "Không có tệp nào được chọn",
         "total_files": "{count} tệp đã chọn",
         "required_name": "Tên sản phẩm không được để trống",
-        "required_supplier": "Vui lòng chọn nhà cung cấp"
+        "required_supplier": "Vui lòng chọn nhà cung cấp",
+        "confirm_remove_variant_title": "Bỏ biến thể?",
+        "confirm_remove_variant_text": "Thao tác này sẽ xóa toàn bộ lưới biến thể đang có. Bạn có chắc chắn không?",
+        "confirm_remove_variant_button_text": "Có, tôi chắc chắn",
+        "cancel_button_text": "Huỷ"
     },
     "stock_table": {
         "title": "Kho hàng",

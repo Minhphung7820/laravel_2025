@@ -55,7 +55,12 @@
                 <img :src="item[col.key]" class="w-10 h-10 rounded-full object-cover border" />
               </template>
               <template v-else>
-                 {{ getCellText(item, col) }}
+                <component
+                  :is="col.wrapperTag || 'span'"
+                  :class="getCellClass(item, col)"
+                >
+                  {{ getCellText(item, col) }}
+                </component>
               </template>
             </td>
             <td v-if="hasActions" class="px-4 py-2 text-center">
@@ -178,9 +183,13 @@ export default {
   methods: {
     getCellText(item, col) {
       if (!col.withLang || !col.keyLang) return item[col.key]
-
       const fullKey = `${col.keyLang}.${item[col.key]}`
       return this.$t(fullKey)
+    },
+    getCellClass(item, col) {
+      if (!col.classMap) return ''
+      const value = item[col.key]
+      return col.classMap[value] || ''
     },
     toggleAll(e) {
       this.selected = e.target.checked ? [...this.data] : []

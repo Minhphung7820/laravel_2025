@@ -75,12 +75,21 @@ export default {
         { label: this.$t('product_list.image'), key: 'image', type: 'image_file' },
         { label: this.$t('product_list.sku'), key: 'sku' },
         { label: this.$t('product_list.stock'), key: 'stock_name' },
-        { label: this.$t('product_list.type'), key: 'product_type' , withLang : true , keyLang : 'product_type' },
+        { label: this.$t('product_list.type'), key: 'product_type' , withLang : true ,keyLang : 'product_type' ,classMap: {
+            'combo': 'bg-purple-100 text-purple-700 font-semibold px-2 py-1 rounded-full text-xs inline-block',
+            'single': 'bg-green-100 text-green-700 font-semibold px-2 py-1 rounded-full text-xs inline-block',
+            'variable': 'bg-blue-100 text-blue-700 font-semibold px-2 py-1 rounded-full text-xs inline-block'
+          }
+        },
         { label: this.$t('product_list.purchase_price'), key: 'purchase_price' },
         { label: this.$t('product_list.sell_price'), key: 'sell_price' },
         { label: this.$t('product_list.quantity'), key: 'quantity' },
         { label: this.$t('product_list.unit'), key: 'unit_name' },
-        { label: this.$t('product_list.status'), key: 'status',  withLang : true  , keyLang : 'product_status'}
+        { label: this.$t('product_list.status'), key: 'status',  withLang : true  ,keyLang : 'product_status' ,classMap: {
+            'pending': 'bg-yellow-100 text-yellow-700 font-semibold px-2 py-1 rounded-full text-xs inline-block',
+            'approved': 'bg-green-100 text-green-700 font-semibold px-2 py-1 rounded-full text-xs inline-block'
+          }
+        }
       ]
     }
   },

@@ -1,4 +1,10 @@
 <template>
+<div v-if="loading" class="fixed inset-0 bg-white bg-opacity-60 z-50 flex items-center justify-center">
+  <svg class="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+  </svg>
+</div>
   <div class="space-y-6 p-4 bg-white rounded-xl shadow-md">
     <h1 class="text-2xl font-bold">
       {{ mode === 'update' ? $t('product.update_title') : $t('product.create_title') }}
@@ -305,7 +311,8 @@ export default {
       hasVariantInitial: false,
       showAddStockModal: false,
       remove_stock_ids: [],
-      errors: {}
+      errors: {},
+      loading: false
     }
   },
   watch: {
@@ -993,6 +1000,7 @@ export default {
     },
     async handleSubmit() {
       if (!this.validateForm()) return
+      this.loading = true
       try {
         const formData = new FormData()
         Object.entries(this.form).forEach(([key, value]) => {
@@ -1108,6 +1116,8 @@ export default {
           title: res.message,
           text: res.message
         })
+      } finally {
+        this.loading = false
       }
     },
   }

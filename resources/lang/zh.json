@@ -88,7 +88,9 @@
         "action": "操作",
         "save": "保存",
         "cancel": "取消",
-        "barcode": "条码"
+        "barcode": "条码",
+        "limit_exceeded_title": "超出限制！",
+        "limit_exceeded_msg": "一个组合最多只能添加30个商品。"
     },
     "variant_grid": {
         "title": "产品变体网格",

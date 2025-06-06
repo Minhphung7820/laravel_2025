@@ -89,7 +89,9 @@
         "save": "저장",
         "cancel": "취소",
         "barcode": "바코드",
-        "search_placeholder": "상품명 또는 SKU로 검색..."
+        "search_placeholder": "상품명 또는 SKU로 검색...",
+        "limit_exceeded_title": "제한 초과!",
+        "limit_exceeded_msg": "콤보에는 최대 30개의 상품만 추가할 수 있습니다."
     },
     "variant_grid": {
         "title": "상품 옵션 그리드",

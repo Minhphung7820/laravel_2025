@@ -116,6 +116,7 @@
 
 <script>
 import CommonTable from '@/components/common/TableList.vue'
+import Swal from 'sweetalert2'
 
 export default {
   components: { CommonTable },
@@ -218,6 +219,7 @@ export default {
       this.selectedProductItems = items
     },
     onSaveComboItems() {
+      // Xử lý parse related_variants nếu cần
       this.selectedProductItems.forEach(item => {
         if (typeof item.related_variants === 'string') {
           try {
@@ -232,12 +234,28 @@ export default {
         item.sell_price_combo = item.sell_price_combo ?? 0
         item.quantity_combo = item.quantity_combo ?? 1
       })
+
+      // Lọc các item chưa tồn tại
       const newItems = this.selectedProductItems.filter(item =>
         !this.comboItems.some(c => c.parent_id === item.parent_id)
       )
-      console.log(this.selectedProductItems);
 
+      // Kiểm tra giới hạn
+      const totalAfterAdd = this.comboItems.length + newItems.length
+      if (totalAfterAdd > 30) {
+        Swal.fire({
+          icon: 'error',
+          title: this.$t('combo_grid.limit_exceeded_title') || 'Vượt quá giới hạn!',
+          text: this.$t('combo_grid.limit_exceeded_msg') || `Bạn chỉ được thêm tối đa 30 sản phẩm vào combo.`,
+          confirmButtonText: 'OK'
+        })
+        return
+      }
+
+      // Nếu hợp lệ thì push
       this.comboItems.unshift(...newItems)
+
+      // Reset trạng thái
       this.selectedProductItems = []
       this.showModal = false
       this.productList = []

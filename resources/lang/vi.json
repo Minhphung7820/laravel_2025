@@ -88,7 +88,9 @@
         "action": "Thao tác",
         "save": "Lưu",
         "cancel": "Hủy",
-        "barcode": "Mã vạch"
+        "barcode": "Mã vạch",
+        "limit_exceeded_title": "Vượt quá giới hạn!",
+        "limit_exceeded_msg": "Bạn chỉ được thêm tối đa 30 sản phẩm vào combo."
     },
     "variant_grid": {
         "title": "Lưới biến thể sản phẩm",

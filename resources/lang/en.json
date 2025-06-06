@@ -88,7 +88,9 @@
         "action": "Action",
         "save": "Save",
         "cancel": "Cancel",
-        "barcode": "Barcode"
+        "barcode": "Barcode",
+        "limit_exceeded_title": "Limit exceeded!",
+        "limit_exceeded_msg": "You can only add up to 30 products to the combo."
     },
     "variant_grid": {
         "title": "Product Variant Grid",

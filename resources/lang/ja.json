@@ -89,7 +89,9 @@
         "action": "操作",
         "search_placeholder": "商品名またはSKUで検索...",
         "cancel": "キャンセル",
-        "save": "保存"
+        "save": "保存",
+        "limit_exceeded_title": "上限を超えました！",
+        "limit_exceeded_msg": "コンボには最大30個までの商品しか追加できません。"
     },
     "variant_grid": {
         "title": "商品バリエーショングリッド",

@@ -136,14 +136,31 @@
         "sell_price": "Sell Price",
         "quantity": "In Stock",
         "unit": "Unit",
-        "status": "Status"
+        "status": "Status",
+        "filter": "Filter",
+        "supplier": "Supplier",
+        "brand": "Brand",
+        "category": "Category",
+        "from_date": "From Date",
+        "to_date": "To Date",
+        "time_filter": "Time Range",
+        "supplier_placeholder": "Enter supplier",
+        "brand_placeholder": "Enter brand",
+        "category_placeholder": "Enter category",
+        "unit_placeholder": "Enter unit",
+        "time_filter_placeholder": "--Select--",
+        "today": "Today",
+        "this_week": "This Week",
+        "this_month": "This Month"
     },
     "actions": {
         "view": "View",
         "edit": "Edit",
         "delete": "Delete",
         "confirm_delete": "Delete product",
-        "deleted": "Deleted!"
+        "deleted": "Deleted!",
+        "filter": "Filter",
+        "reset_filter": "Clear Filter"
     },
     "table": {
         "search_placeholder": "🔍 Search products...",

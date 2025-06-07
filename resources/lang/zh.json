@@ -136,14 +136,31 @@
         "sell_price": "售价",
         "quantity": "库存数量",
         "unit": "单位",
-        "status": "状态"
+        "status": "状态",
+        "filter": "筛选",
+        "supplier": "供应商",
+        "brand": "品牌",
+        "category": "类别",
+        "from_date": "开始日期",
+        "to_date": "结束日期",
+        "time_filter": "时间范围",
+        "supplier_placeholder": "请输入供应商",
+        "brand_placeholder": "请输入品牌",
+        "category_placeholder": "请输入类别",
+        "unit_placeholder": "请输入单位",
+        "time_filter_placeholder": "--选择--",
+        "today": "今天",
+        "this_week": "本周",
+        "this_month": "本月"
     },
     "actions": {
         "view": "查看",
         "edit": "编辑",
         "delete": "删除",
         "confirm_delete": "确认删除该产品？",
-        "deleted": "已删除！"
+        "deleted": "已删除！",
+        "filter": "筛选",
+        "reset_filter": "清除筛选"
     },
     "table": {
         "search_placeholder": "🔍 搜索产品...",

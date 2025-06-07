@@ -136,14 +136,31 @@
         "sell_price": "Giá bán",
         "quantity": "Tồn kho",
         "unit": "Đơn vị",
-        "status": "Trạng thái"
+        "status": "Trạng thái",
+        "filter": "Bộ lọc",
+        "supplier": "Nhà cung cấp",
+        "brand": "Nhãn hiệu",
+        "category": "Danh mục",
+        "from_date": "Từ ngày",
+        "to_date": "Đến ngày",
+        "time_filter": "Thời gian",
+        "supplier_placeholder": "Nhập nhà cung cấp",
+        "brand_placeholder": "Nhập nhãn hiệu",
+        "category_placeholder": "Nhập danh mục",
+        "unit_placeholder": "Nhập đơn vị",
+        "time_filter_placeholder": "--Chọn--",
+        "today": "Hôm nay",
+        "this_week": "Tuần này",
+        "this_month": "Tháng này"
     },
     "actions": {
         "view": "Xem",
         "edit": "Sửa",
         "delete": "Xóa",
         "confirm_delete": "Xoá sản phẩm",
-        "deleted": "Đã xóa!"
+        "deleted": "Đã xóa!",
+        "filter": "Lọc",
+        "reset_filter": "Hủy bỏ lọc"
     },
     "table": {
         "search_placeholder": "🔍 Tìm kiếm sản phẩm...",

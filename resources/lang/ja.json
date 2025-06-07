@@ -137,14 +137,31 @@
         "sell_price": "販売価格",
         "quantity": "在庫数",
         "unit": "単位",
-        "status": "状態"
+        "status": "状態",
+        "filter": "フィルター",
+        "supplier": "仕入先",
+        "brand": "ブランド",
+        "category": "カテゴリ",
+        "from_date": "開始日",
+        "to_date": "終了日",
+        "time_filter": "期間",
+        "supplier_placeholder": "仕入先を入力",
+        "brand_placeholder": "ブランドを入力",
+        "category_placeholder": "カテゴリを入力",
+        "unit_placeholder": "単位を入力",
+        "time_filter_placeholder": "--選択--",
+        "today": "今日",
+        "this_week": "今週",
+        "this_month": "今月"
     },
     "actions": {
         "view": "表示",
         "edit": "編集",
         "delete": "削除",
         "confirm_delete": "商品を削除しますか？",
-        "deleted": "削除されました！"
+        "deleted": "削除されました！",
+        "filter": "フィルター",
+        "reset_filter": "フィルターをリセット"
     },
     "table": {
         "search_placeholder": "🔍 商品を検索...",

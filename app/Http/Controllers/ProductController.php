@@ -675,15 +675,21 @@ class ProductController extends Controller
                     }
                     if (!empty($canceledImageVariant) || !empty($request['removed_variant_image_ids'])) {
                         ProductVariantImage::where(function ($query) use ($canceledImageVariant, $request) {
-                            $query->where(function ($query) use ($canceledImageVariant) {
-                                $query->whereIn('stock_product_id', array_column($canceledImageVariant, 'stock_product_id'))
-                                    ->whereNotIn('id', array_column($canceledImageVariant, 'id'));
-                            })->orWhere(function ($query) use ($request) {
-                                $query->whereIn('stock_product_id', $request['removed_variant_image_ids']);
-                            });
-                        })
-                            ->delete();
+                            if (!empty($canceledImageVariant)) {
+                                $query->where(function ($subQuery) use ($canceledImageVariant) {
+                                    $subQuery->whereIn('stock_product_id', array_column($canceledImageVariant, 'stock_product_id'))
+                                        ->whereNotIn('id', array_column($canceledImageVariant, 'id'));
+                                });
+                            }
+
+                            if (!empty($request['removed_variant_image_ids'])) {
+                                $query->orWhere(function ($subQuery) use ($request) {
+                                    $subQuery->whereIn('stock_product_id', $request['removed_variant_image_ids']);
+                                });
+                            }
+                        })->delete();
                     }
+
                     // Xóa các biến thể không còn sử dụng
                     if (!empty($canceledVariant)) {
                         StockProduct::where('product_id', $id)

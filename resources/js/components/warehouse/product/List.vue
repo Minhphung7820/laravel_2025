@@ -28,6 +28,13 @@
           >
             {{ $t('product_list.add_combo_product') }}
           </button>
+          <button
+            @click="showFilter = true"
+            class="bg-white text-gray-700 px-4 py-2 border rounded-md hover:bg-gray-100 flex items-center gap-2 shadow-sm"
+          >
+            <FunnelIcon class="w-5 h-5 text-gray-700" />
+            {{ $t('actions.filter') }}
+          </button>
         </div>
       </template>
       <template #actions="{ item }">
@@ -51,18 +58,36 @@
         </div>
       </template>
     </CommonTable>
+    <Filter
+      :visible="showFilter"
+      @close="showFilter = false"
+      @apply="onApplyFilter"
+      @reset="onResetFilter"
+    />
   </div>
 </template>
 
 <script>
 import CommonTable from '@/components/common/TableList.vue'
 import { encodeQuery, decodeQuery } from '@/utils/queryEncoder'
+import Filter from '@/components/warehouse/product/Filter.vue'
+import { FunnelIcon } from '@heroicons/vue/24/solid'
 
 export default {
   name: 'ListProduct',
-  components: { CommonTable },
+  components: { CommonTable, Filter ,FunnelIcon },
   data() {
     return {
+      showFilter: false,
+      filters: {
+        supplier: '',
+        brand: '',
+        category: '',
+        unit: '',
+        from_date: '',
+        to_date: '',
+        time_range: ''
+      },
       products: [],
       currentStatus: 'all',
       statusTabs: [
@@ -121,6 +146,22 @@ export default {
     document.removeEventListener('click', this.closeDropdown)
   },
   methods: {
+    onApplyFilter(values) {
+      this.filters = values
+      this.fetchProducts(1)
+    },
+    onResetFilter() {
+      this.filters = {
+        supplier: '',
+        brand: '',
+        category: '',
+        unit: '',
+        from_date: '',
+        to_date: '',
+        time_range: ''
+      }
+      this.fetchProducts(1)
+    },
     onChangeTab(status) {
       this.currentStatus = status
       this.fetchProducts(1)
@@ -146,7 +187,8 @@ export default {
       const queryObj = {
         page,
         keyword: this.searchKeyword,
-        limit: this.pagination.per_page
+        limit: this.pagination.per_page,
+        ...this.filters
       }
 
       if (['pending', 'approved','rejected'].includes(this.currentStatus)) {
@@ -163,7 +205,8 @@ export default {
       const params = {
         page,
         keyword: this.searchKeyword,
-        limit: this.pagination.per_page
+        limit: this.pagination.per_page,
+        ...this.filters // gửi các field lọc xuống API
       }
 
       if (['pending', 'approved','rejected'].includes(this.currentStatus)) {

@@ -137,14 +137,31 @@
         "sell_price": "판매가",
         "quantity": "재고 수량",
         "unit": "단위",
-        "status": "상태"
+        "status": "상태",
+        "filter": "필터",
+        "supplier": "공급업체",
+        "brand": "브랜드",
+        "category": "카테고리",
+        "from_date": "시작 날짜",
+        "to_date": "종료 날짜",
+        "time_filter": "기간",
+        "supplier_placeholder": "공급업체 입력",
+        "brand_placeholder": "브랜드 입력",
+        "category_placeholder": "카테고리 입력",
+        "unit_placeholder": "단위 입력",
+        "time_filter_placeholder": "--선택--",
+        "today": "오늘",
+        "this_week": "이번 주",
+        "this_month": "이번 달"
     },
     "actions": {
         "view": "보기",
         "edit": "편집",
         "delete": "삭제",
         "confirm_delete": "상품을 삭제하시겠습니까?",
-        "deleted": "삭제 완료!"
+        "deleted": "삭제 완료!",
+        "filter": "필터",
+        "reset_filter": "필터 초기화"
     },
     "table": {
         "search_placeholder": "🔍 상품 검색...",

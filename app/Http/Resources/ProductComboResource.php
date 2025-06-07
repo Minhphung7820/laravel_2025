@@ -29,6 +29,7 @@ class ProductComboResource extends JsonResource
             'quantity_combo'         => $this->quantity_combo,
             'stock_id'               => $this->stock_id,
             'id'                     => $this->id,
+            'product_type'           => $parent['product_type'] === 'variable' ? $parent['product_type'] : ($parent['product']['type'] ?? '')
         ];
     }
 }

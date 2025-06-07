@@ -96,12 +96,7 @@ class ProductController extends Controller
             'products.status',
         ]);
 
-        $query->orderByRaw("
-            CASE
-                WHEN products.type = 'variable' THEN st.created_at
-                ELSE products.created_at
-            END DESC
-    ");
+        $query->orderBy("st.id","desc");
 
         $results = $query->paginate($limit);
 

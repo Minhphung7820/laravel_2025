@@ -8,29 +8,23 @@
       </button>
       <span class="text-sm text-gray-500">({{ trashVariants.length }})</span>
     </div>
+    <!-- Áp dụng toàn bộ (full hàng, không nền xám) -->
+    <div class="grid grid-cols-4 gap-4 mb-4">
+      <input v-model.number="applyToAll.purchase_price" type="number" min="0"
+        class="px-3 py-1 border rounded w-full" placeholder="Giá mua" />
 
+      <input v-model.number="applyToAll.sell_price" type="number" min="0"
+        class="px-3 py-1 border rounded w-full" placeholder="Giá bán" />
+
+      <input v-model.number="applyToAll.quantity" type="number" min="0"
+        class="px-3 py-1 border rounded w-full" placeholder="Tồn kho ban đầu" />
+
+      <button @click="applyAll"
+        class="w-full px-4 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer">
+        Áp dụng toàn bộ
+      </button>
+    </div>
     <div ref="variantScrollContainer" class="rounded border border-gray-300 overflow-y-auto max-h-[600px] min-h-[600px] custom-scroll">
-      <!-- Áp dụng toàn bộ giá trị -->
-      <div class="flex flex-wrap justify-end gap-4 p-3 border border-gray-300 rounded mb-4">
-        <div>
-          <input v-model.number="applyToAll.purchase_price" type="number" min="0"
-            class="px-3 py-1 border rounded w-full" placeholder="Giá mua" />
-        </div>
-        <div>
-          <input v-model.number="applyToAll.sell_price" type="number" min="0"
-            class="px-3 py-1 border rounded w-full" placeholder="Giá bán" />
-        </div>
-        <div>
-          <input v-model.number="applyToAll.quantity" type="number" min="0"
-            class="px-3 py-1 border rounded w-full" placeholder="Tồn kho ban đầu" />
-        </div>
-        <div>
-          <button @click="applyAll"
-            class="px-4 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer">
-            Áp dụng toàn bộ
-          </button>
-        </div>
-      </div>
       <table class="min-w-full divide-y divide-gray-200 text-sm">
         <thead class="bg-gray-100 sticky top-0 z-20">
           <tr>

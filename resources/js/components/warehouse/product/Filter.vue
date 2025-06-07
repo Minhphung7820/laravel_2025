@@ -11,7 +11,7 @@
       <!-- Header -->
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-lg font-semibold text-gray-800">{{ $t('product_list.filter') }}</h2>
-        <button @click="$emit('close')" class="text-gray-400 hover:text-red-500 text-xl">&times;</button>
+        <button @click="$emit('close')" class="text-gray-400 hover:text-red-500 text-xl cursor-pointer">&times;</button>
       </div>
 
       <!-- Filter Form -->
@@ -59,8 +59,8 @@
 
         <!-- Actions -->
         <div class="flex justify-between items-center pt-4">
-          <button @click="onResetFilter" class="text-red-600 hover:underline text-sm">{{ $t('actions.reset_filter') }}</button>
-          <button @click="$emit('apply', filter)" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm">
+          <button @click="onResetFilter" class="text-red-600 hover:underline text-sm cursor-pointer">{{ $t('actions.reset_filter') }}</button>
+          <button @click="$emit('apply', filter)" class="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm">
             {{ $t('actions.filter') }}
           </button>
         </div>

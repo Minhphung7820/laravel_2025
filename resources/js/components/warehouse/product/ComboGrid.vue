@@ -242,7 +242,8 @@ export default {
       this.selectedProductItems = items
     },
     onSaveComboItems() {
-      // Xử lý parse related_variants nếu cần
+      const MAX_ITEMS = 30
+
       this.selectedProductItems.forEach(item => {
         if (typeof item.related_variants === 'string') {
           try {
@@ -258,27 +259,36 @@ export default {
         item.quantity_combo = item.quantity_combo ?? 1
       })
 
-      // Lọc các item chưa tồn tại
-      const newItems = this.selectedProductItems.filter(item =>
+      let newItems = this.selectedProductItems.filter(item =>
         !this.comboItems.some(c => c.parent_id === item.parent_id)
       )
 
-      // Kiểm tra giới hạn
-      const totalAfterAdd = this.comboItems.length + newItems.length
-      if (totalAfterAdd > 30) {
+      const availableSlots = MAX_ITEMS - this.comboItems.length
+
+      if (availableSlots <= 0) {
         Swal.fire({
           icon: 'error',
           title: this.$t('combo_grid.limit_exceeded_title') || 'Vượt quá giới hạn!',
-          text: this.$t('combo_grid.limit_exceeded_msg') || `Bạn chỉ được thêm tối đa 30 sản phẩm vào combo.`,
+          text: this.$t('combo_grid.limit_exceeded_msg') || `Bạn chỉ được thêm tối đa ${MAX_ITEMS} sản phẩm vào combo.`,
           confirmButtonText: 'OK'
         })
         return
       }
 
-      // Nếu hợp lệ thì push
+      if (newItems.length > availableSlots) {
+        newItems = newItems.slice(0, availableSlots)
+        Swal.fire({
+          icon: 'warning',
+          title: this.$t('combo_grid.limit_exceeded_title') || 'Vượt quá giới hạn!',
+          text: `Chỉ thêm được tối đa ${availableSlots} sản phẩm vào combo.`,
+          confirmButtonText: 'OK'
+        })
+      }
+
+      // Push dữ liệu hợp lệ
       this.comboItems.unshift(...newItems)
 
-      // Reset trạng thái
+      // Reset trạng thái modal
       this.selectedProductItems = []
       this.showModal = false
       this.productList = []

@@ -133,6 +133,18 @@ class ProductController extends Controller
                     WHEN products.type = 'variable' THEN stock_products.sku
                     ELSE products.sku
                     END AS sku"),
+                // DB::raw("CASE
+                //     WHEN products.type = 'variable' THEN
+                //         CONCAT(
+                //             products.name,
+                //             ' ',
+                //             COALESCE(var1.title, ''), ' ',
+                //             COALESCE(attr1_org.title, ''), ' ',
+                //             COALESCE(var2.title, ''), ' ',
+                //             COALESCE(attr2_org.title, '')
+                //         )
+                //     ELSE products.name
+                // END AS product_name"),
                 'products.name as product_name',
                 'stocks.name as stock_name',
                 'stocks.id as stock_id',

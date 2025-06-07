@@ -35,7 +35,8 @@ class Product extends Model
     ];
     public function stockData()
     {
-        return $this->hasMany(StockProduct::class, 'product_id')->where('product_type', 'root_stock');
+        return $this->hasMany(StockProduct::class, 'product_id')
+            ->where('product_type', 'root_stock');
     }
 
     public function getImageCoverUrlAttribute()
@@ -57,12 +58,12 @@ class Product extends Model
     public function combo()
     {
         return $this->hasMany(StockProduct::class, 'product_id')
-            ->where('product_type', 'combo');
+            ->where('product_type', 'combo')->orderBy('id', 'desc');
     }
 
     public function comboList()
     {
         return $this->hasMany(StockProduct::class, 'product_id', 'product_id')
-            ->where('product_type', 'combo');
+            ->where('product_type', 'combo')->orderBy('id', 'desc');
     }
 }

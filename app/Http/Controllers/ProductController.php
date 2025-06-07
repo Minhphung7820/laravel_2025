@@ -483,8 +483,10 @@ class ProductController extends Controller
                 case 'combo':
                     $product->load(array_merge($baseRelations, [
                         'combo.parent',
-                        'combo.parent.attributeFirst:id,title',
-                        'combo.parent.attributeSecond:id,title',
+                        'combo.parent.attributeFirst:id,title,variant_id',
+                        'combo.parent.attributeSecond:id,title,variant_id',
+                        'combo.parent.attributeFirst.variant:id,title',
+                        'combo.parent.attributeSecond.variant:id,title',
                         'combo.parent.product.stockData.stock:id,name',
                         'combo.parent.variantImages:id,stock_product_id,image',
                         'combo.parent.product:id,type,status,image_cover,name,sku',

@@ -78,7 +78,7 @@ export default {
       if (!p) return ''
       return p.product?.type === 'single'
         ? p.product.image_cover_url
-        : p.variant_images?.[0]?.image || ''
+        : p.variant_images?.[0]?.image || 'https://static.thenounproject.com/png/1077596-200.png'
     },
     getSku(combo) {
       const p = combo.parent

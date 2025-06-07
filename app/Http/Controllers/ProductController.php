@@ -126,6 +126,13 @@ class ProductController extends Controller
             ->leftJoin('attributes as attr2_org', 'stock_products.attribute_second_id', '=', 'attr2_org.id')
             ->leftJoin('variants as var1', 'attr1_org.variant_id', '=', 'var1.id')
             ->leftJoin('variants as var2', 'attr2_org.variant_id', '=', 'var2.id')
+            ->join('products', 'stock_products.product_id', '=', 'products.id')
+            ->join('stocks', function ($join) {
+                $join->on('stock_products.stock_id', '=', 'stocks.id')
+                    ->where('stocks.is_default', 1);
+            })
+            ->leftJoin('units', 'stock_products.unit_id', '=', 'units.id')
+            ->leftJoin('product_variant_images', 'product_variant_images.stock_product_id', '=', 'stock_products.id')
             ->select([
                 'stock_products.id',
                 'stock_products.product_id',
@@ -193,13 +200,6 @@ class ProductController extends Controller
                 AND sp2.product_type = "variable"
                 ) AS related_variants')
             ])
-            ->join('products', 'stock_products.product_id', '=', 'products.id')
-            ->join('stocks', function ($join) {
-                $join->on('stock_products.stock_id', '=', 'stocks.id')
-                    ->where('stocks.is_default', 1);
-            })
-            ->leftJoin('units', 'stock_products.unit_id', '=', 'units.id')
-            ->leftJoin('product_variant_images', 'product_variant_images.stock_product_id', '=', 'stock_products.id')
             ->where(function ($q) use ($request) {
                 $q->where(function ($q2) use ($request) {
                     $q2->where('products.type', 'variable')

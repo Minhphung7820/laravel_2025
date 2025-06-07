@@ -164,5 +164,27 @@
     "product_status": {
         "pending": "承認待ち",
         "approved": "承認済み"
+    },
+    "category": {
+        "title": "カテゴリ名",
+        "add_title": "カテゴリを追加",
+        "edit_title": "カテゴリを編集",
+        "variant_title": "バリアント {index}",
+        "delete_variant": "バリアントを削除",
+        "variant_name_placeholder": "バリアント名",
+        "attribute_name_placeholder": "属性名",
+        "add_attribute": "+ 属性を追加",
+        "add_variant": "+ バリアントを追加",
+        "save": "💾 保存",
+        "list_title": "カテゴリ一覧",
+        "search_placeholder": "🔍 カテゴリ検索...",
+        "add_button": "+ カテゴリ追加",
+        "column_id": "ID",
+        "column_title": "カテゴリ名",
+        "column_variants_count": "バリアント数",
+        "action_view": "👁 表示",
+        "action_edit": "✏️ 編集",
+        "action_delete": "🗑 削除",
+        "confirm_delete": "カテゴリを削除しますか: {title}？"
     }
 }

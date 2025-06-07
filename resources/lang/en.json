@@ -163,5 +163,27 @@
     "product_status": {
         "pending": "Pending approval",
         "approved": "Approved"
+    },
+    "category": {
+        "title": "Category name",
+        "add_title": "Add Category",
+        "edit_title": "Edit Category",
+        "variant_title": "Variant {index}",
+        "delete_variant": "Delete variant",
+        "variant_name_placeholder": "Variant name",
+        "attribute_name_placeholder": "Attribute name",
+        "add_attribute": "+ Add attribute",
+        "add_variant": "+ Add variant",
+        "save": "💾 Save",
+        "list_title": "Category List",
+        "search_placeholder": "🔍 Search category...",
+        "add_button": "+ Add Category",
+        "column_id": "ID",
+        "column_title": "Category Name",
+        "column_variants_count": "Number of Variants",
+        "action_view": "👁 View",
+        "action_edit": "✏️ Edit",
+        "action_delete": "🗑 Delete",
+        "confirm_delete": "Delete category: {title}?"
     }
 }

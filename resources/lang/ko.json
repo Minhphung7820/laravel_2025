@@ -164,5 +164,27 @@
     "product_status": {
         "pending": "승인 대기 중",
         "approved": "승인됨"
+    },
+    "category": {
+        "title": "카테고리 이름",
+        "add_title": "카테고리 추가",
+        "edit_title": "카테고리 수정",
+        "variant_title": "변형 {index}",
+        "delete_variant": "변형 삭제",
+        "variant_name_placeholder": "변형 이름",
+        "attribute_name_placeholder": "속성 이름",
+        "add_attribute": "+ 속성 추가",
+        "add_variant": "+ 변형 추가",
+        "save": "💾 저장",
+        "list_title": "카테고리 목록",
+        "search_placeholder": "🔍 카테고리 검색...",
+        "add_button": "+ 카테고리 추가",
+        "column_id": "ID",
+        "column_title": "카테고리 이름",
+        "column_variants_count": "변형 수",
+        "action_view": "👁 보기",
+        "action_edit": "✏️ 수정",
+        "action_delete": "🗑 삭제",
+        "confirm_delete": "카테고리 삭제: {title}?"
     }
 }

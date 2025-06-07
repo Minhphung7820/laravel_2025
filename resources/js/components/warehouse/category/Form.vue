@@ -1,52 +1,52 @@
 <template>
   <div>
-    <h2 class="text-2xl font-bold mb-6">{{ mode === 'create' ? 'Thêm' : 'Chỉnh sửa' }} danh Mục</h2>
+    <h2 class="text-2xl font-bold mb-6">{{ mode === 'create' ? $t('category.add_title') : $t('category.edit_title') }}</h2>
 
     <div class="mb-4">
-      <label class="block font-medium mb-1">Danh mục</label>
+      <label class="block font-medium mb-1">{{ $t('category.title') }}</label>
       <input
         v-model="form.title"
-        placeholder="Tên danh mục"
+        :placeholder="$t('category.title')"
         class="w-full border px-4 py-2 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
       />
     </div>
 
     <div v-for="(variant, vIndex) in form.variants" :key="vIndex" class="border p-4 rounded mb-4 bg-gray-50">
       <div class="flex justify-between items-center mb-2">
-        <h3 class="font-semibold">🔸 Biến thể {{ vIndex + 1 }}</h3>
+        <h3 class="font-semibold">🔸 {{ $t('category.variant_title', { index: vIndex + 1 }) }}</h3>
         <button @click="removeVariant(vIndex)" class="text-red-500 hover:underline text-sm">
-          Xoá biến thể
+          {{ $t('category.delete_variant') }}
         </button>
       </div>
 
       <input
         v-model="variant.title"
-        placeholder="Tên biến thể"
+        :placeholder="$t('category.variant_name_placeholder')"
         class="w-full border px-4 py-2 rounded shadow-sm mb-3"
       />
 
       <div v-for="(attr, aIndex) in variant.attributes" :key="aIndex" class="flex items-center gap-2 mb-2">
         <input
           v-model="attr.title"
-          placeholder="Tên thuộc tính"
+          :placeholder="$t('category.attribute_name_placeholder')"
           class="flex-1 border px-3 py-2 rounded"
         />
         <button @click="removeAttribute(vIndex, aIndex)" class="text-red-400 hover:text-red-600 text-sm">❌</button>
       </div>
 
       <button @click="addAttribute(vIndex)" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm">
-        + Thêm thuộc tính
+        {{ $t('category.add_attribute') }}
       </button>
     </div>
 
     <div class="mb-4">
       <button @click="addVariant" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-        + Thêm biến thể
+        {{ $t('category.add_variant') }}
       </button>
     </div>
 
     <button @click="submit" class="bg-blue-700 text-white px-6 py-2 rounded hover:bg-blue-800 font-semibold">
-      💾 Lưu
+        {{ $t('category.save') }}
     </button>
   </div>
 </template>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2 class="text-2xl font-bold mb-4">Danh sách danh mục</h2>
+    <h2 class="text-2xl font-bold mb-4">{{ $t('category.list_title') }}</h2>
 
     <TableList
       :columns="columns"
@@ -8,7 +8,7 @@
       :pagination="pagination"
       @page-change="fetchCategories"
       @search="onSearch"
-      :placeholder="'🔍 Tìm kiếm danh mục...'"
+      :placeholder="$t('category.search_placeholder')"
     >
       <!-- Nút thêm -->
       <template #buttons>
@@ -16,7 +16,7 @@
           @click="createCategory"
           class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 shadow font-semibold cursor-pointer"
         >
-          + Thêm danh mục
+         {{ $t('category.add_button') }}
         </button>
       </template>
 
@@ -35,9 +35,9 @@
             class="absolute right-0 mt-2 bg-white border rounded shadow z-50 whitespace-nowrap px-2 py-1 min-w-[100px]"
           >
             <ul class="text-sm text-gray-700">
-              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer" @click="onView(item)">👁 Xem</li>
-              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer" @click="onEdit(item)">✏️ Sửa</li>
-              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer text-red-500" @click="onDelete(item)">🗑 Xóa</li>
+              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer" @click="onView(item)">{{ $t('category.action_view') }}</li>
+              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer" @click="onEdit(item)">{{ $t('category.action_edit') }}</li>
+              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer text-red-500" @click="onDelete(item)">{{ $t('category.action_delete') }}</li>
             </ul>
           </div>
         </div>
@@ -62,9 +62,9 @@ export default {
         total: 0
       },
       columns: [
-        { label: 'ID', key: 'id' },
-        { label: 'Tên danh mục', key: 'title' },
-        { label: 'Số lượng biến thể', key: 'variants_count' }
+        { label: this.$t('category.column_id'), key: 'id' },
+        { label: this.$t('category.column_title'), key: 'title' },
+        { label: this.$t('category.column_variants_count'), key: 'variants_count' }
       ],
       keyword: '',
       dropdownId: null
@@ -114,7 +114,7 @@ export default {
       this.dropdownId = null
     },
     onDelete(item) {
-      if (confirm(`Xóa danh mục: ${item.title}?`)) {
+      if (confirm(this.$t('category.confirm_delete', { title: item.title }))) {
         console.log('Đã xoá:', item)
       }
       this.dropdownId = null

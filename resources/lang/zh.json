@@ -163,5 +163,27 @@
     "product_status": {
         "pending": "等待审批",
         "approved": "已审批"
+    },
+    "category": {
+        "title": "分类名称",
+        "add_title": "新增分类",
+        "edit_title": "编辑分类",
+        "variant_title": "变体 {index}",
+        "delete_variant": "删除变体",
+        "variant_name_placeholder": "变体名称",
+        "attribute_name_placeholder": "属性名称",
+        "add_attribute": "+ 添加属性",
+        "add_variant": "+ 添加变体",
+        "save": "💾 保存",
+        "list_title": "分类列表",
+        "search_placeholder": "🔍 搜索分类...",
+        "add_button": "+ 添加分类",
+        "column_id": "ID",
+        "column_title": "分类名称",
+        "column_variants_count": "变体数量",
+        "action_view": "👁 查看",
+        "action_edit": "✏️ 编辑",
+        "action_delete": "🗑 删除",
+        "confirm_delete": "删除分类：{title}？"
     }
 }

@@ -13,6 +13,7 @@
       @search="onSearch"
       @page-change="onPageChange"
       :placeholder="$t('product_list.search_placeholder')"
+      @show-combo="handleShowCombo"
     >
       <template #buttons>
         <div class="flex gap-2 justify-end">
@@ -64,6 +65,11 @@
       @apply="onApplyFilter"
       @reset="onResetFilter"
     />
+    <ComboQuickView
+      :comboList="comboList"
+      :visible="showCombo"
+      @close="showCombo = false"
+    />
   </div>
 </template>
 
@@ -72,10 +78,10 @@ import CommonTable from '@/components/common/TableList.vue'
 import { encodeQuery, decodeQuery } from '@/utils/queryEncoder'
 import Filter from '@/components/warehouse/product/Filter.vue'
 import { FunnelIcon } from '@heroicons/vue/24/solid'
-
+import ComboQuickView from '@/components/warehouse/product/ComboQuickView.vue'
 export default {
   name: 'ListProduct',
-  components: { CommonTable, Filter ,FunnelIcon },
+  components: { CommonTable, Filter ,FunnelIcon,ComboQuickView },
   data() {
     return {
       showFilter: false,
@@ -126,7 +132,9 @@ export default {
             'approved': 'bg-green-100 text-green-700 font-semibold px-2 py-1 rounded-full text-xs inline-block'
           }
         }
-      ]
+      ],
+      comboList: [],
+      showCombo: false
     }
   },
   mounted() {
@@ -146,6 +154,10 @@ export default {
     document.removeEventListener('click', this.closeDropdown)
   },
   methods: {
+    handleShowCombo(item) {
+      this.comboList = item.combo_list || []
+      this.showCombo = true
+    },
     onApplyFilter(values) {
       this.filters = values
       this.fetchProducts(1)

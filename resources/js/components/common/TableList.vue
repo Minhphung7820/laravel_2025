@@ -85,6 +85,18 @@
               <template v-if="col.type === 'image_file' && item[col.key]">
                 <img :src="item[col.key]" class="w-10 h-10 rounded-full object-cover border" />
               </template>
+              <template v-else-if="col.key === 'product_name'">
+                <div>
+                  <div>{{ getCellText(item, col) }}</div>
+                  <button
+                    v-if="item.product_type === 'combo'"
+                    @click="$emit('show-combo', item)"
+                    class="text-blue-600 text-sm mt-1 hover:underline"
+                  >
+                    Xem thành phần combo
+                  </button>
+                </div>
+              </template>
               <template v-else>
                 <component
                   :is="col.wrapperTag || 'span'"

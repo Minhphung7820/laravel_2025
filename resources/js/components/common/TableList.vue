@@ -1,14 +1,45 @@
 <template>
   <div class="p-4 bg-white rounded-xl shadow-md">
     <div class="mb-4 flex flex-col md:flex-row md:justify-between md:items-center gap-2">
-     <input
+      <input
         v-model="search"
         @input="$emit('search', search)"
         type="text"
-        :placeholder="$t('table.search_placeholder')"
+        :placeholder="placeholder"
         class="w-full md:w-[400px] px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
       />
-      <slot name="buttons"></slot>
+      <slot name="buttons" />
+    </div>
+
+    <!-- Tabs Section -->
+    <div v-if="withTabs" class="flex flex-wrap gap-2 mb-4">
+      <button
+        v-for="tab in tabs"
+        :key="tab.key"
+        @click="$emit('change-tab', tab.key)"
+        :class="[
+          'px-4 py-1.5 rounded-full font-medium text-sm border transition-all duration-200 flex items-center gap-1 cursor-pointer',
+          tab.key === currentTab
+            ? 'bg-blue-600 text-white border-blue-600 shadow'
+            : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-100'
+        ]"
+      >
+        {{ $t(tab.label) }}
+        <span
+          v-if="tab.count !== undefined"
+          class="ml-1 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold rounded-full shadow-sm ring-2 ring-inset"
+          :class="tab.key === currentTab
+            ? 'bg-yellow-400 text-white ring-yellow-500'
+            : 'bg-gray-200 text-gray-800 ring-gray-300'"
+        >
+          {{ tab.count }}
+        </span>
+      </button>
+    </div>
+
+    <!-- Table Section -->
+    <div class="rounded-lg border border-gray-200 overflow-visible">
+      <!-- (table unchanged) -->
     </div>
 
     <div class="rounded-lg border border-gray-200 overflow-visible">
@@ -131,24 +162,19 @@ export default {
   props: {
     columns: { type: Array, required: true },
     data: { type: Array, required: true },
-    pagination: {
-      type: Object,
-      default: () => ({
-        current_page: 1,
-        last_page: 1,
-        per_page : 10,
-        from: 0,
-        to: 0,
-        total: 0
-      })
+    pagination: { type: Object, default: () => ({ current_page: 1, last_page: 1, per_page: 10, from: 0, to: 0, total: 0 }) },
+    placeholder: { type: String, default: 'Nhập nội dung...' },
+    withCheckbox: { type: Boolean, default: false },
+    hasActions: { type: Boolean, default: true },
+    withTabs: { type: Boolean, default: false },
+    tabs: {
+      type: Array,
+      default: () => []
     },
-    placeholder: {
+    currentTab: {
       type: String,
-      default: 'Nhập nội dung...'
-    },
-    withCheckbox: { type: Boolean, default: false },
-    withCheckbox: { type: Boolean, default: false },
-    hasActions: { type: Boolean, default: true }
+      default: 'all'
+    }
   },
   data() {
     return {

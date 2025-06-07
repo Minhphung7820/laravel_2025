@@ -161,6 +161,7 @@
         "variable": "Variant product"
     },
     "product_status": {
+        "all": "All",
         "pending": "Pending approval",
         "approved": "Approved"
     },

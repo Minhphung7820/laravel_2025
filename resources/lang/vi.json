@@ -161,6 +161,7 @@
         "variable": "Sản phẩm biến thể"
     },
     "product_status": {
+        "all": "Tất cả",
         "pending": "Đang chờ duyệt",
         "approved": "Đã duyệt"
     },

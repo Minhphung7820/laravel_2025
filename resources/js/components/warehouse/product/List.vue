@@ -6,6 +6,10 @@
       :columns="columns"
       :data="products"
       :pagination="pagination"
+      :tabs="statusTabs"
+      :withTabs="true"
+      :current-tab="currentStatus"
+      @change-tab="onChangeTab"
       @search="onSearch"
       @page-change="onPageChange"
       :placeholder="$t('product_list.search_placeholder')"
@@ -60,6 +64,12 @@ export default {
   data() {
     return {
       products: [],
+      currentStatus: 'all',
+      statusTabs: [
+        { key: 'all', label: 'product_status.all', count: 12 },
+        { key: 'pending', label: 'product_status.pending', count: 5 },
+        { key: 'approved', label: 'product_status.approved', count: 7 }
+      ],
       pagination: {
         current_page: 1,
         last_page: 1,
@@ -99,6 +109,7 @@ export default {
     if (encoded) {
       const decoded = decodeQuery(encoded)
       this.searchKeyword = decoded.keyword || ''
+      this.currentStatus = decoded.status || 'all'
       this.pagination.current_page = parseInt(decoded.page) || 1
       this.pagination.per_page = parseInt(decoded.limit) || 10
     }
@@ -109,6 +120,10 @@ export default {
     document.removeEventListener('click', this.closeDropdown)
   },
   methods: {
+    onChangeTab(status) {
+      this.currentStatus = status
+      this.fetchProducts(1)
+    },
     closeDropdown() {
       this.dropdownId = null
     },
@@ -132,6 +147,11 @@ export default {
         keyword: this.searchKeyword,
         limit: this.pagination.per_page
       }
+
+      if (['pending', 'approved'].includes(this.currentStatus)) {
+        queryObj.status = this.currentStatus
+      }
+
       const encoded = encodeQuery(queryObj)
       this.$router.replace({
         path: this.$route.path,
@@ -143,6 +163,10 @@ export default {
         page,
         keyword: this.searchKeyword,
         limit: this.pagination.per_page
+      }
+
+      if (['pending', 'approved'].includes(this.currentStatus)) {
+        params.status = this.currentStatus
       }
 
       this.updateUrlQuery(page)

@@ -162,6 +162,7 @@
         "variable": "변형 상품"
     },
     "product_status": {
+        "all": "전체",
         "pending": "승인 대기 중",
         "approved": "승인됨"
     },

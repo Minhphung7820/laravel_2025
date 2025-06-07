@@ -162,6 +162,7 @@
         "variable": "バリアント商品"
     },
     "product_status": {
+        "all": "すべて",
         "pending": "承認待ち",
         "approved": "承認済み"
     },

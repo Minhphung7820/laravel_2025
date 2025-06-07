@@ -184,6 +184,8 @@
         "action_view": "👁 Xem",
         "action_edit": "✏️ Sửa",
         "action_delete": "🗑 Xóa",
-        "confirm_delete": "Xóa danh mục: {title}?"
+        "confirm_delete": "Xóa danh mục: {title}?",
+        "duplicate_attribute": "Tên thuộc tính đã tồn tại",
+        "required": "Không được để trống"
     }
 }

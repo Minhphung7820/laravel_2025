@@ -184,6 +184,8 @@
         "action_view": "👁 View",
         "action_edit": "✏️ Edit",
         "action_delete": "🗑 Delete",
-        "confirm_delete": "Delete category: {title}?"
+        "confirm_delete": "Delete category: {title}?",
+        "duplicate_attribute": "Attribute name already exists",
+        "required": "This field is required"
     }
 }

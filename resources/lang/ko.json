@@ -185,6 +185,8 @@
         "action_view": "👁 보기",
         "action_edit": "✏️ 수정",
         "action_delete": "🗑 삭제",
-        "confirm_delete": "카테고리 삭제: {title}?"
+        "confirm_delete": "카테고리 삭제: {title}?",
+        "duplicate_attribute": "속성 이름이 이미 존재합니다",
+        "required": "이 항목은 필수입니다"
     }
 }

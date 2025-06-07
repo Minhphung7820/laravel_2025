@@ -185,6 +185,8 @@
         "action_view": "👁 表示",
         "action_edit": "✏️ 編集",
         "action_delete": "🗑 削除",
-        "confirm_delete": "カテゴリを削除しますか: {title}？"
+        "confirm_delete": "カテゴリを削除しますか: {title}？",
+        "duplicate_attribute": "属性名はすでに存在します",
+        "required": "必須項目です"
     }
 }

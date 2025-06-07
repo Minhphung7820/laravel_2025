@@ -184,6 +184,8 @@
         "action_view": "👁 查看",
         "action_edit": "✏️ 编辑",
         "action_delete": "🗑 删除",
-        "confirm_delete": "删除分类：{title}？"
+        "confirm_delete": "删除分类：{title}？",
+        "duplicate_attribute": "属性名称已存在",
+        "required": "该字段为必填"
     }
 }

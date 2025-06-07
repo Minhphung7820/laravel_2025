@@ -28,15 +28,19 @@
           <tr v-for="(item, index) in comboItems" :key="item.parent_id" class="hover:bg-gray-50">
             <td class="px-3 py-2"><img :src="item.image" class="w-10 h-10 rounded object-cover" /></td>
             <td class="px-3 py-2">
-              <span>
+              <span class="truncate-cell" :title="item.product_name">
                 {{ item.product_name }}
-                <template v-if="item.product?.type === 'variable'">
-                  - {{ item.attribute_first?.title || '' }}
-                  <template v-if="item.attribute_second">
-                    - {{ item.attribute_second.title }}
-                  </template>
-                </template>
               </span>
+              <template v-if="item.product?.type === 'variable'">
+                <span class="truncate-cell" :title="item.attribute_first?.title">
+                  - {{ item.attribute_first?.title || '' }}
+                </span>
+                <template v-if="item.attribute_second">
+                  <span class="truncate-cell" :title="item.attribute_second.title">
+                    - {{ item.attribute_second.title }}
+                  </span>
+                </template>
+              </template>
             </td>
             <td class="px-3 py-2">
               <select
@@ -56,8 +60,20 @@
                 </template>
               </select>
             </td>
-            <td class="px-3 py-2">{{ $t('product_type.'+ item.product_type) }}</td>
-            <td class="px-3 py-2">{{ item.sku }}</td>
+            <td class="px-3 py-2">
+              <span
+                class="text-xs font-semibold px-2 py-1 rounded"
+                :class="{
+                  'bg-blue-100 text-blue-800': item.product_type === 'single',
+                  'bg-yellow-100 text-yellow-800': item.product_type === 'variable'
+                }"
+              >
+                {{ $t('product_type.' + item.product_type) }}
+              </span>
+            </td>
+            <td class="px-3 py-2">
+              <span class="truncate-cell" :title="item.sku">{{ item.sku }}</span>
+            </td>
             <td class="px-3 py-2">
               <input
                 type="number"
@@ -68,7 +84,9 @@
               />
             </td>
             <td class="px-3 py-2">{{ item.quantity }}</td>
-            <td class="px-3 py-2">{{ item.unit_name || '' }}</td>
+            <td class="px-3 py-2">
+              <span class="truncate-cell" :title="item.unit_name">{{ item.unit_name }}</span>
+            </td>
             <td class="px-3 py-2">{{ item.sell_price }}</td>
             <td class="px-3 py-2">{{ item.purchase_price }}</td>
             <td class="px-3 py-2">
@@ -139,7 +157,12 @@ export default {
         { label: this.$t('combo_grid.image'), key: 'image', type: 'image_file' },
         { label: this.$t('combo_grid.sku'), key: 'sku' },
         { label: this.$t('combo_grid.product_name'), key: 'product_name' },
-        { label: this.$t('combo_grid.type'), key: 'product_type' , withLang : true , keyLang : 'product_type'  },
+        { label: this.$t('combo_grid.type'), key: 'product_type' ,withLang : true ,keyLang : 'product_type' ,classMap: {
+            'combo': 'bg-purple-100 text-purple-700 font-semibold px-2 py-1 rounded-full text-xs inline-block',
+            'single': 'bg-green-100 text-green-700 font-semibold px-2 py-1 rounded-full text-xs inline-block',
+            'variable': 'bg-blue-100 text-blue-700 font-semibold px-2 py-1 rounded-full text-xs inline-block'
+          }
+        },
         { label: this.$t('combo_grid.barcode'), key: 'barcode' },
         { label: this.$t('combo_grid.stock'), key: 'stock_name' },
         { label: this.$t('combo_grid.available_stock'), key: 'quantity' },
@@ -314,4 +337,12 @@ export default {
 </script>
 
 <style scoped>
+.truncate-cell {
+  max-width: 200px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: inline-block;
+  vertical-align: middle;
+}
 </style>

@@ -116,11 +116,29 @@ class ProductController extends Controller
             'attributeFirst:id,title',
             'attributeSecond:id,title',
         ])
+            ->leftJoin('attributes as attr1_org', 'stock_products.attribute_first_id', '=', 'attr1_org.id')
+            ->leftJoin('attributes as attr2_org', 'stock_products.attribute_second_id', '=', 'attr2_org.id')
+            ->leftJoin('variants as var1', 'attr1_org.variant_id', '=', 'var1.id')
+            ->leftJoin('variants as var2', 'attr2_org.variant_id', '=', 'var2.id')
             ->select([
                 'stock_products.id',
                 'stock_products.product_id',
-                DB::raw("CASE WHEN products.type = 'variable' THEN stock_products.sku ELSE products.sku END AS sku"),
-                'products.name as product_name',
+                DB::raw("CASE
+                    WHEN products.type = 'variable' THEN stock_products.sku
+                    ELSE products.sku
+                    END AS sku"),
+                DB::raw("CASE
+                    WHEN products.type = 'variable' THEN
+                        CONCAT(
+                            products.name,
+                            ' ',
+                            COALESCE(var1.title, ''), ' ',
+                            COALESCE(attr1_org.title, ''), ' ',
+                            COALESCE(var2.title, ''), ' ',
+                            COALESCE(attr2_org.title, '')
+                        )
+                    ELSE products.name
+                END AS product_name"),
                 'stocks.name as stock_name',
                 'stocks.id as stock_id',
                 'products.type as product_type',

@@ -31,7 +31,7 @@
               <span class="truncate-cell" :title="item.product_name">
                 {{ item.product_name }}
               </span>
-              <template v-if="item.product?.type === 'variable'">
+              <!-- <template v-if="item.product?.type === 'variable'">
                 <span class="truncate-cell" :title="item.attribute_first?.title">
                   - {{ item.attribute_first?.title || '' }}
                 </span>
@@ -40,7 +40,7 @@
                     - {{ item.attribute_second.title }}
                   </span>
                 </template>
-              </template>
+              </template> -->
             </td>
             <td class="px-3 py-2">
               <select

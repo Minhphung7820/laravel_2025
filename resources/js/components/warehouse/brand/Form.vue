@@ -1,43 +1,72 @@
 <template>
-  <div>
-    <h2 class="text-xl font-bold mb-4">
-      {{ mode === 'update' ? 'Sửa thương hiệu' : 'Thêm thương hiệu' }}
-    </h2>
+  <div class="w-full p-6 bg-white rounded-xl shadow-md">
+    <h1 class="text-2xl font-bold">
+      {{ mode === 'update' ? $t('brand.edit_title') : $t('brand.add_title') }}
+    </h1>
 
     <!-- Tên -->
     <div class="mb-4">
-      <label class="block mb-1 font-medium">Tên thương hiệu</label>
-      <input v-model="form.name" class="w-full border px-4 py-2 rounded" />
+      <label class="block mb-1 font-medium">{{ $t('brand.name') }} <span class="text-red-500">*</span></label>
+      <input
+        v-model="form.name"
+        :placeholder="$t('brand.name')"
+        class="w-1/2 border px-4 py-2 rounded"
+        :class="{ 'border-red-500': !form.name.trim() }"
+      />
+      <p v-if="!form.name.trim()" class="text-red-500 text-xs mt-1">{{ $t('brand.required') }}</p>
     </div>
 
     <!-- Mô tả -->
     <div class="mb-4">
-      <label class="block mb-1 font-medium">Mô tả</label>
-      <textarea v-model="form.description" class="w-full border px-4 py-2 rounded"></textarea>
+      <label class="block mb-1 font-medium">{{ $t('brand.description') }}</label>
+      <textarea v-model="form.description" class="w-1/2 border px-4 py-2 rounded"></textarea>
     </div>
 
     <!-- Logo -->
     <div class="mb-4">
-      <label class="block mb-1 font-medium">Logo</label>
-      <input type="file" @change="handleFile" />
+      <label class="block mb-1 font-medium">{{ $t('brand.logo') }}</label>
 
-      <!-- Preview -->
-      <div v-if="form.logo_url" class="mb-2 mt-2 relative w-[120px]">
-        <img :src="form.logo_url" alt="Preview" class="rounded shadow w-[120px] h-[120px] object-cover border" />
-        <button @click="removeLogo" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-700 cursor-pointer">✕</button>
+      <div class="w-32 h-32 border-2 border-dashed border-gray-400 rounded relative flex items-center justify-center overflow-hidden cursor-pointer hover:border-blue-500"
+           @click="$refs.logoInput.click()">
+        <input
+          ref="logoInput"
+          type="file"
+          accept="image/*"
+          class="hidden"
+          @change="handleFile"
+        />
+        <img v-if="form.logo_url" :src="form.logo_url" class="object-cover w-full h-full" />
+        <div
+          v-else
+          class="w-full h-full flex flex-col items-center justify-center text-gray-400 text-center"
+        >
+          <PhotoIcon class="w-10 h-10 text-gray-400" />
+          <span class="mt-1 text-sm">{{ $t('brand.select_file') }}</span>
+        </div>
+
+        <button v-if="form.logo_url"
+                @click.stop="removeLogo"
+                class="absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-red-600">
+          <XMarkIcon class="w-4 h-4 text-white-500" />
+        </button>
       </div>
     </div>
 
     <!-- Submit -->
-    <button @click="submit"
-      class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 font-semibold">
-      💾 Lưu
+    <button
+      @click="submit"
+      class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 font-semibold"
+    >
+      💾 {{ $t('brand.save') }}
     </button>
   </div>
 </template>
 
 <script>
+import { PhotoIcon, XMarkIcon } from '@heroicons/vue/24/solid'
+
 export default {
+  components: { PhotoIcon, XMarkIcon },
   props: {
     mode: { type: String, default: 'create' },
     id: Number
@@ -58,15 +87,14 @@ export default {
   },
   methods: {
     async fetch() {
-    try {
-      const res = await window.axios.get(`/api/warehouse/brand/detail/${this.id}`)
-      this.form.name = res.data.data.name
-      this.form.description = res.data.data.description
-      this.form.logo_url =  res.data.data.logo_url
-    } catch (error) {
-      console.log(error);
-
-    }
+      try {
+        const res = await window.axios.get(`/api/warehouse/brand/detail/${this.id}`)
+        this.form.name = res.data.data.name
+        this.form.description = res.data.data.description
+        this.form.logo_url = res.data.data.logo_url
+      } catch (error) {
+        console.log(error)
+      }
     },
     handleFile(e) {
       const file = e.target.files[0]

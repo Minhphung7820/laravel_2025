@@ -188,5 +188,25 @@
         "confirm_delete": "カテゴリを削除しますか: {title}？",
         "duplicate_attribute": "属性名はすでに存在します",
         "required": "必須項目です"
+    },
+    "brand": {
+        "list_title": "ブランド一覧",
+        "search_placeholder": "🔍 ブランドを検索...",
+        "add_button": "+ ブランド追加",
+        "column_id": "ID",
+        "column_name": "名前",
+        "column_logo": "ロゴ",
+        "action_view": "👁 表示",
+        "action_edit": "✏️ 編集",
+        "action_delete": "🗑 削除",
+        "confirm_delete": "本当に削除しますか？",
+        "add_title": "ブランドを追加",
+        "edit_title": "ブランドを編集",
+        "name": "ブランド名",
+        "description": "説明",
+        "logo": "ロゴ",
+        "save": "保存",
+        "required": "必須項目です",
+        "select_file": "ファイルを選択"
     }
 }

@@ -187,5 +187,25 @@
         "confirm_delete": "Delete category: {title}?",
         "duplicate_attribute": "Attribute name already exists",
         "required": "This field is required"
+    },
+    "brand": {
+        "list_title": "Brand List",
+        "search_placeholder": "🔍 Search brand...",
+        "add_button": "+ Add Brand",
+        "column_id": "ID",
+        "column_name": "Name",
+        "column_logo": "Logo",
+        "action_view": "👁 View",
+        "action_edit": "✏️ Edit",
+        "action_delete": "🗑 Delete",
+        "confirm_delete": "Are you sure you want to delete?",
+        "add_title": "Add Brand",
+        "edit_title": "Edit Brand",
+        "name": "Brand Name",
+        "description": "Description",
+        "logo": "Logo",
+        "save": "Save",
+        "required": "This field is required",
+        "select_file": "Select file"
     }
 }

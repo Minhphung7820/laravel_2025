@@ -187,5 +187,25 @@
         "confirm_delete": "Xóa danh mục: {title}?",
         "duplicate_attribute": "Tên thuộc tính đã tồn tại",
         "required": "Không được để trống"
+    },
+    "brand": {
+        "list_title": "Danh sách thương hiệu",
+        "search_placeholder": "🔍 Tìm kiếm thương hiệu...",
+        "add_button": "+ Thêm thương hiệu",
+        "column_id": "ID",
+        "column_name": "Tên",
+        "column_logo": "Logo",
+        "action_view": "👁 Xem",
+        "action_edit": "✏️ Sửa",
+        "action_delete": "🗑 Xóa",
+        "confirm_delete": "Xác nhận xoá?",
+        "add_title": "Thêm thương hiệu",
+        "edit_title": "Sửa thương hiệu",
+        "name": "Tên thương hiệu",
+        "description": "Mô tả",
+        "logo": "Logo",
+        "save": "Lưu",
+        "required": "Không được để trống",
+        "select_file": "Chọn tệp"
     }
 }

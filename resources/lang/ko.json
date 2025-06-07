@@ -188,5 +188,25 @@
         "confirm_delete": "카테고리 삭제: {title}?",
         "duplicate_attribute": "속성 이름이 이미 존재합니다",
         "required": "이 항목은 필수입니다"
+    },
+    "brand": {
+        "list_title": "브랜드 목록",
+        "search_placeholder": "🔍 브랜드 검색...",
+        "add_button": "+ 브랜드 추가",
+        "column_id": "ID",
+        "column_name": "이름",
+        "column_logo": "로고",
+        "action_view": "👁 보기",
+        "action_edit": "✏️ 수정",
+        "action_delete": "🗑 삭제",
+        "confirm_delete": "정말로 삭제하시겠습니까?",
+        "add_title": "브랜드 추가",
+        "edit_title": "브랜드 수정",
+        "name": "브랜드 이름",
+        "description": "설명",
+        "logo": "로고",
+        "save": "저장",
+        "required": "필수 항목입니다",
+        "select_file": "파일 선택"
     }
 }

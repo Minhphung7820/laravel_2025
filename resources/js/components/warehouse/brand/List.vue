@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2 class="text-2xl font-bold mb-4">Danh sách thương hiệu</h2>
+    <h2 class="text-2xl font-bold mb-4">{{ $t('brand.list_title') }}</h2>
 
     <CommonTable
       :columns="columns"
@@ -8,14 +8,14 @@
       :pagination="pagination"
       @search="onSearch"
       @page-change="fetchBrands"
-      :placeholder="'🔍 Tìm kiếm thương hiệu...'"
+      :placeholder="$t('brand.search_placeholder')"
     >
       <template #buttons>
         <button
           class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 shadow font-semibold"
           @click="$router.push('/warehouse/brand/create')"
         >
-          + Thêm thương hiệu
+          {{ $t('brand.add_button') }}
         </button>
       </template>
       <template #actions="{ item }">
@@ -32,9 +32,9 @@
             class="absolute right-20 mt-2 bg-white border rounded shadow z-50 whitespace-nowrap px-2 py-1 min-w-[100px]"
           >
             <ul class="text-sm text-gray-700">
-              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer" @click="onView(item.id)">👁 Xem</li>
-              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer" @click="onEdit(item.id)">✏️ Sửa</li>
-              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer text-red-500" @click="onDelete(item.id)">🗑 Xóa</li>
+              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer" @click="onView(item.id)">{{ $t('brand.action_view') }}</li>
+              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer" @click="onEdit(item.id)">{{ $t('brand.action_edit') }}</li>
+              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer text-red-500" @click="onDelete(item.id)">{{ $t('brand.action_delete') }}</li>
             </ul>
           </div>
         </div>
@@ -61,9 +61,9 @@ export default {
         per_page: 10,
       },
       columns: [
-        { label: 'ID', key: 'id' },
-        { label: 'Tên', key: 'name' },
-        { label: 'Logo', key: 'logo_url',type : 'image_file' }
+        { label: this.$t('brand.column_id'), key: 'id' },
+        { label: this.$t('brand.column_name'), key: 'name' },
+        { label: this.$t('brand.column_logo'), key: 'logo_url',type : 'image_file' }
       ],
       dropdownId: null
     }
@@ -107,7 +107,7 @@ export default {
       this.$router.push(`/warehouse/brand/${id}/edit`)
     },
     onDelete(id) {
-      if (confirm('Xác nhận xoá?')) {
+      if (confirm(this.$t('brand.confirm_delete'))) {
         // call API delete
       }
     }

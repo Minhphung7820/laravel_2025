@@ -187,5 +187,25 @@
         "confirm_delete": "删除分类：{title}？",
         "duplicate_attribute": "属性名称已存在",
         "required": "该字段为必填"
+    },
+    "brand": {
+        "list_title": "品牌列表",
+        "search_placeholder": "🔍 搜索品牌...",
+        "add_button": "+ 添加品牌",
+        "column_id": "ID",
+        "column_name": "名称",
+        "column_logo": "Logo",
+        "action_view": "👁 查看",
+        "action_edit": "✏️ 编辑",
+        "action_delete": "🗑 删除",
+        "confirm_delete": "确定要删除吗？",
+        "add_title": "添加品牌",
+        "edit_title": "编辑品牌",
+        "name": "品牌名称",
+        "description": "描述",
+        "logo": "标志",
+        "save": "保存",
+        "required": "此字段为必填项",
+        "select_file": "选择文件"
     }
 }

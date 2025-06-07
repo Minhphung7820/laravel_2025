@@ -91,9 +91,9 @@
                   <button
                     v-if="item.product_type === 'combo'"
                     @click="$emit('show-combo', item)"
-                    class="text-blue-600 text-sm mt-1 hover:underline"
+                    class="text-blue-600 text-sm mt-1 hover:underline cursor-pointer"
                   >
-                    Xem thành phần combo
+                    👁 Xem thành phần combo
                   </button>
                 </div>
               </template>

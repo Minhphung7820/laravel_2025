@@ -21,7 +21,7 @@
 
       <button @click="applyAll"
         class="w-full px-4 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer">
-        Áp dụng toàn bộ
+        Áp dụng toàn bộ ({{this.variants.length}})
       </button>
     </div>
     <div ref="variantScrollContainer" class="rounded border border-gray-300 overflow-y-auto max-h-[600px] min-h-[600px] custom-scroll">

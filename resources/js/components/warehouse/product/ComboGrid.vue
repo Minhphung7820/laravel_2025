@@ -116,7 +116,7 @@
           :data="productList"
           :pagination="pagination"
           :withCheckbox="true"
-          :placeholder="$t('combo_grid.search_placeholder')"
+          :placeholder="$t('product_list.search_placeholder')"
           @search="onSearch"
           @page-change="onPageChange"
           @selection-change="onSelected"

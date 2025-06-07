@@ -59,4 +59,10 @@ class Product extends Model
         return $this->hasMany(StockProduct::class, 'product_id')
             ->where('product_type', 'combo');
     }
+
+    public function comboList()
+    {
+        return $this->hasMany(StockProduct::class, 'product_id', 'product_id')
+            ->where('product_type', 'combo');
+    }
 }

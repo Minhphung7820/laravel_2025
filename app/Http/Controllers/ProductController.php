@@ -23,8 +23,17 @@ class ProductController extends Controller
         $limit = $request->input('limit', 20);
         $urlPrefix = url('/');
 
-        $query = DB::table('stock_products as st')
-            ->join('products as p', 'st.product_id', '=', 'p.id')
+        $query = Product::with([
+            'comboList.parent.attributeFirst:id,title',
+            'comboList.parent.attributeSecond:id,title',
+            'comboList.parent.product:id,name,image_cover,type,sku',
+            'comboList.parent.variantImages:id,image,stock_product_id',
+            'comboList:id,sell_price_combo,parent_id,quantity_combo,product_id',
+            'comboList.parent:id,sku,product_id,attribute_first_id,attribute_second_id'
+        ])
+            ->join('stock_products as st', function ($join) {
+                $join->on('products.id', '=', 'st.product_id');
+            })
             ->join('stocks as s', function ($join) {
                 $join->on('st.stock_id', '=', 's.id')
                     ->where('s.is_default', 1);
@@ -34,68 +43,65 @@ class ProductController extends Controller
             ->leftJoin('attributes as attr2', 'st.attribute_second_id', '=', 'attr2.id')
             ->leftJoin('variants as var1', 'attr1.variant_id', '=', 'var1.id')
             ->leftJoin('variants as var2', 'attr2.variant_id', '=', 'var2.id')
+            ->leftJoin('product_variant_images as pvi', 'pvi.stock_product_id', '=', 'st.id')
             ->where(function ($q) {
                 $q->where(function ($q2) {
-                    $q2->where('p.type', 'variable')
+                    $q2->where('products.type', 'variable')
                         ->where('st.product_type', 'variable');
                 })->orWhere(function ($q2) {
-                    $q2->whereIn('p.type', ['single', 'combo'])
+                    $q2->whereIn('products.type', ['single', 'combo'])
                         ->where('st.product_type', 'root_stock');
                 });
             });
 
         if ($search = $request->input('keyword')) {
             $query->where(function ($q) use ($search) {
-                $q->where('p.name', 'like', "%{$search}%")
+                $q->where('products.name', 'like', "%{$search}%")
                     ->orWhere('st.sku', 'like', "%{$search}%");
             });
         }
 
         if ($status = $request->input('status')) {
-            $query->where('p.status', $status);
+            $query->where('products.status', $status);
         }
 
         $query->select([
             'st.id',
             'st.product_id',
-            DB::raw("CASE WHEN p.type = 'variable' THEN st.sku ELSE p.sku END AS sku"),
+            DB::raw("CASE WHEN products.type = 'variable' THEN st.sku ELSE products.sku END AS sku"),
             DB::raw("CASE
-            WHEN p.type = 'variable' THEN
-                CONCAT(
-                    p.name,
-                    ' ',
-                    COALESCE(var1.title, ''), ' ',
-                    COALESCE(attr1.title, ''), ' ',
-                    COALESCE(var2.title, ''), ' ',
-                    COALESCE(attr2.title, '')
-                )
-            ELSE p.name
-        END AS product_name"),
+                WHEN products.type = 'variable' THEN
+                    CONCAT(
+                        products.name,
+                        ' ',
+                        COALESCE(var1.title, ''), ' ',
+                        COALESCE(attr1.title, ''), ' ',
+                        COALESCE(var2.title, ''), ' ',
+                        COALESCE(attr2.title, '')
+                    )
+                ELSE products.name
+            END AS product_name"),
             's.name as stock_name',
-            'p.type as product_type',
+            'products.type as product_type',
             'st.purchase_price',
             'st.sell_price',
             'st.quantity',
             'u.name as unit_name',
             DB::raw("CASE
-            WHEN p.type = 'variable' THEN
-                COALESCE(CONCAT('$urlPrefix', pvi.image), '" . env('IMAGE_DEFAULT') . "')
-            ELSE
-                COALESCE(CONCAT('$urlPrefix', p.image_cover), '" . env('IMAGE_DEFAULT') . "')
-        END AS image"),
-            'p.status',
+                WHEN products.type = 'variable' THEN
+                    COALESCE(CONCAT('$urlPrefix', pvi.image), '" . env('IMAGE_DEFAULT') . "')
+                ELSE
+                    COALESCE(CONCAT('$urlPrefix', products.image_cover), '" . env('IMAGE_DEFAULT') . "')
+            END AS image"),
+            'products.status',
         ]);
-
-        $query->leftJoin('product_variant_images as pvi', function ($join) {
-            $join->on('pvi.stock_product_id', '=', 'st.id');
-        });
 
         $query->orderByRaw("
             CASE
-                WHEN p.type = 'variable' THEN st.created_at
-                ELSE p.created_at
+                WHEN products.type = 'variable' THEN st.created_at
+                ELSE products.created_at
             END DESC
-        ");
+    ");
 
         $results = $query->paginate($limit);
 

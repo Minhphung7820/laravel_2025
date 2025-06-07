@@ -30,6 +30,10 @@ class ProductController extends Controller
                     ->where('s.is_default', 1);
             })
             ->leftJoin('units as u', 'st.unit_id', '=', 'u.id')
+            ->leftJoin('attributes as attr1', 'st.attribute_first_id', '=', 'attr1.id')
+            ->leftJoin('attributes as attr2', 'st.attribute_second_id', '=', 'attr2.id')
+            ->leftJoin('variants as var1', 'attr1.variant_id', '=', 'var1.id')
+            ->leftJoin('variants as var2', 'attr2.variant_id', '=', 'var2.id')
             ->where(function ($q) {
                 $q->where(function ($q2) {
                     $q2->where('p.type', 'variable')
@@ -55,7 +59,18 @@ class ProductController extends Controller
             'st.id',
             'st.product_id',
             DB::raw("CASE WHEN p.type = 'variable' THEN st.sku ELSE p.sku END AS sku"),
-            'p.name as product_name',
+            DB::raw("CASE
+            WHEN p.type = 'variable' THEN
+                CONCAT(
+                    p.name,
+                    ' ',
+                    COALESCE(var1.title, ''), ' ',
+                    COALESCE(attr1.title, ''), ' ',
+                    COALESCE(var2.title, ''), ' ',
+                    COALESCE(attr2.title, '')
+                )
+            ELSE p.name
+        END AS product_name"),
             's.name as stock_name',
             'p.type as product_type',
             'st.purchase_price',
@@ -63,11 +78,11 @@ class ProductController extends Controller
             'st.quantity',
             'u.name as unit_name',
             DB::raw("CASE
-                WHEN p.type = 'variable' THEN
-                    COALESCE(CONCAT('$urlPrefix', pvi.image), '" . env('IMAGE_DEFAULT') . "')
-                ELSE
-                    COALESCE(CONCAT('$urlPrefix', p.image_cover), '" . env('IMAGE_DEFAULT') . "')
-            END AS image"),
+            WHEN p.type = 'variable' THEN
+                COALESCE(CONCAT('$urlPrefix', pvi.image), '" . env('IMAGE_DEFAULT') . "')
+            ELSE
+                COALESCE(CONCAT('$urlPrefix', p.image_cover), '" . env('IMAGE_DEFAULT') . "')
+        END AS image"),
             'p.status',
         ]);
 

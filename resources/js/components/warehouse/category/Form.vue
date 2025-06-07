@@ -90,6 +90,8 @@
 </template>
 
 <script>
+import Swal from 'sweetalert2'
+
 export default {
   props: {
     mode: {
@@ -107,7 +109,8 @@ export default {
         title: '',
         variants: [],
       },
-      loading : true
+      loading : true,
+      formBackup: null
     };
   },
  async created() {
@@ -121,6 +124,7 @@ export default {
       try {
         const res = await window.axios.get(`/api/warehouse/category/detail/${this.id}`)
         this.form = res.data.data
+        this.formBackup = JSON.parse(JSON.stringify(this.form))
       } catch (e) {
         console.error('Lỗi khi load dữ liệu:', e)
       }
@@ -134,9 +138,20 @@ export default {
         await window.axios.post(url, this.form)
         this.$router.push('/warehouse/category')
       } catch (e) {
-        console.error('Lỗi khi lưu:', e)
+        const res = e?.response?.data
+        if (this.formBackup) {
+          this.form = JSON.parse(JSON.stringify(this.formBackup))
+          this.$nextTick(() => {
+            document.querySelector('input')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          })
+        }
+        await Swal.fire({
+          icon: 'error',
+          title: res?.message || 'Đã xảy ra lỗi!',
+          text: typeof res?.errors === 'string' ? res.errors : 'Vui lòng kiểm tra lại dữ liệu.',
+        })
       } finally {
-        this.loading = false;
+        this.loading = false
       }
     },
     submit() {

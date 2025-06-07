@@ -232,9 +232,9 @@ export default {
   methods: {
     applyAll() {
       this.variants.forEach((variant) => {
-        variant.purchase_price = this.applyToAll.purchase_price
-        variant.sell_price = this.applyToAll.sell_price
-        variant.quantity = this.applyToAll.quantity
+          variant.purchase_price = Number(this.applyToAll.purchase_price) || 0
+          variant.sell_price = Number(this.applyToAll.sell_price) || 0
+          variant.quantity = Number(this.applyToAll.quantity) || 0
       })
 
       this.$nextTick(() => {

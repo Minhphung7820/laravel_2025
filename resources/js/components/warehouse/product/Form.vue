@@ -182,8 +182,8 @@
     <!-- Chọn thuộc tính và giá trị con -->
     <div v-if="form.has_variant && variantAttributes.length" class="space-y-4">
       <h2 class="font-semibold text-blue-600">{{ $t('product.msg_max_attr') }}</h2>
-      <div v-for="(attr, index) in variantAttributes" :key="attr.id" class="border p-3 rounded shadow-sm">
-        <label>
+      <div v-for="(attr, index) in variantAttributes" :key="attr.id" class="p-3 rounded w-fit">
+        <label class="font-semibold block mb-1">
           <input
             type="checkbox"
             :value="attr"
@@ -193,10 +193,22 @@
           />
           {{ attr.title }}
         </label>
-        <div v-if="isAttrSelected(attr)" class="ml-4 mt-2">
-          <label v-for="opt in attr.attributes" :key="opt.id" class="inline-flex items-center mr-3">
-            <input type="checkbox" :value="Number(opt.id)" v-model="selectedAttributeValues[attr.id]" @change="onValueChange($event, attr.id, opt.id)" />
-            <span class="ml-1">{{ opt.title }}</span>
+        <div
+          v-if="isAttrSelected(attr)"
+          class="ml-4 mt-2 inline-flex flex-wrap gap-2 w-auto max-w-full"
+        >
+          <label
+            v-for="opt in attr.attributes"
+            :key="opt.id"
+            class="inline-flex items-center gap-1 bg-gray-100 px-2 py-1 rounded"
+          >
+            <input
+              type="checkbox"
+              :value="Number(opt.id)"
+              v-model="selectedAttributeValues[attr.id]"
+              @change="onValueChange($event, attr.id, opt.id)"
+            />
+            <span>{{ opt.title }}</span>
           </label>
         </div>
       </div>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2 class="text-2xl font-bold mb-4">Danh sách kho</h2>
+    <h2 class="text-2xl font-bold mb-4">{{ $t('stock.list_title') }}</h2>
 
     <CommonTable
       :columns="columns"
@@ -8,35 +8,36 @@
       :pagination="pagination"
       @search="onSearch"
       @page-change="fetchStocks"
-      :placeholder="'🔍 Tìm kiếm kho...'"
+      :placeholder="$t('stock.search_placeholder')"
     >
       <template #buttons>
         <button
           class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 shadow font-semibold"
           @click="$router.push('/warehouse/stock/create')"
         >
-          + Thêm kho
+          {{ $t('stock.add_button') }}
         </button>
       </template>
 
       <template #actions="{ item }">
         <div v-if="item && item.id" class="relative" @click.stop>
-                <button
-                  @click="toggleDropdown(item.id)"
-                  class="px-2 py-1 rounded hover:bg-gray-100 focus:outline-none cursor-pointer"
-                >
-                  ⋯
-                </button>
-                <div
-                  v-if="dropdownId === item.id"
-                  class="absolute right-50 mt-2 bg-white border rounded shadow z-50 whitespace-nowrap px-2 py-1 min-w-[100px]"
-                >
-                  <ul class="text-sm text-gray-700">
-                    <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer" @click="onView(item.id)">👁 Xem</li>
-                    <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer" @click="onEdit(item.id)">✏️ Sửa</li>
-                    <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer text-red-500" @click="onDelete(item.id)">🗑 Xóa</li>
-                  </ul>
-                </div>
+          <button
+            @click="toggleDropdown(item.id)"
+            class="px-2 py-1 rounded hover:bg-gray-100 focus:outline-none cursor-pointer"
+          >
+            ⋯
+          </button>
+
+          <div
+            v-if="dropdownId === item.id"
+            class="absolute right-20 mt-2 bg-white border rounded shadow z-50 whitespace-nowrap px-2 py-1 min-w-[100px]"
+          >
+            <ul class="text-sm text-gray-700">
+              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer" @click="onView(item.id)">{{ $t('stock.view') }}</li>
+              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer" @click="onEdit(item.id)">{{ $t('stock.edit') }}</li>
+              <li v-if="item.is_default !== 1" class="hover:bg-gray-100 px-4 py-2 cursor-pointer text-red-500" @click="onDelete(item.id)">{{ $t('stock.delete') }}</li>
+            </ul>
+          </div>
         </div>
       </template>
     </CommonTable>
@@ -60,18 +61,27 @@ export default {
         total: 0,
         per_page: 10,
       },
-      columns: [
-        { label: 'ID', key: 'id' },
-        { label: 'Tên kho', key: 'name' }
-      ],
       dropdownId: null
+    }
+  },
+  computed: {
+    columns() {
+      return [
+        { label: this.$t('id'), key: 'id' },
+        { label: this.$t('stock.name'), key: 'name' },
+        { label: this.$t('stock.is_default'), key: 'is_default', withLang : true , keyLang : 'stock' , classMap: {
+            0: 'bg-purple-100 text-purple-700 font-semibold px-2 py-1 rounded-full text-xs inline-block',
+            1: 'bg-green-100 text-green-700 font-semibold px-2 py-1 rounded-full text-xs inline-block'
+          }
+        }
+      ]
     }
   },
   mounted() {
     document.addEventListener('click', this.closeDropdown)
     this.fetchStocks()
   },
-  beforeDestroy(){
+  beforeDestroy() {
     document.removeEventListener('click', this.closeDropdown)
   },
   methods: {
@@ -106,7 +116,7 @@ export default {
       this.$router.push(`/warehouse/stock/${id}/edit`)
     },
     onDelete(id) {
-      if (confirm('Xác nhận xoá kho này?')) {
+      if (confirm(this.$t('stock.confirm_delete'))) {
         // call API xoá
       }
     }

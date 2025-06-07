@@ -1,4 +1,10 @@
 <template>
+  <div v-if="loading" class="fixed inset-0 bg-white bg-opacity-60 z-50 flex items-center justify-center">
+    <svg class="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+    </svg>
+  </div>
   <div class="w-full p-6 bg-white rounded-xl shadow-md">
     <h1 class="text-2xl font-bold">
       {{ mode === 'update' ? $t('brand.edit_title') : $t('brand.add_title') }}
@@ -79,11 +85,13 @@ export default {
         logo: null,
         logo_url: '',
       },
-      remove_logo: false
+      remove_logo: false,
+      loading : true
     }
   },
-  mounted() {
-    if (this.mode === 'update') this.fetch()
+  async mounted() {
+    if (this.mode === 'update') await this.fetch()
+    this.loading = false
   },
   methods: {
     async fetch() {
@@ -112,23 +120,30 @@ export default {
       this.remove_logo = true
     },
     async submit() {
-      const formData = new FormData()
-      for (const key in this.form) {
-        if (this.form[key] !== null) {
-          formData.append(key, this.form[key])
+      this.loading = true
+      try {
+        const formData = new FormData()
+        for (const key in this.form) {
+          if (this.form[key] !== null) {
+            formData.append(key, this.form[key])
+          }
         }
+
+        if (this.remove_logo) {
+          formData.append('remove_logo', '1')
+        }
+
+        const url = this.mode === 'create'
+          ? '/api/warehouse/brand/create'
+          : `/api/warehouse/brand/update/${this.id}`
+
+        await window.axios.post(url, formData)
+        this.$router.push('/warehouse/brand')
+      } catch (error) {
+
+      } finally {
+        this.loading = false
       }
-
-      if (this.remove_logo) {
-        formData.append('remove_logo', '1')
-      }
-
-      const url = this.mode === 'create'
-        ? '/api/warehouse/brand/create'
-        : `/api/warehouse/brand/update/${this.id}`
-
-      await window.axios.post(url, formData)
-      this.$router.push('/warehouse/brand')
     }
   }
 }

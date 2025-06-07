@@ -207,5 +207,37 @@
         "save": "Save",
         "required": "This field is required",
         "select_file": "Select file"
+    },
+    "unit": {
+        "id": "ID",
+        "add_title": "Add Unit",
+        "edit_title": "Edit Unit",
+        "name": "Unit Name",
+        "abbreviation": "Abbreviation",
+        "save": "Save",
+        "required": "This field is required",
+        "list_title": "Unit List",
+        "add_button": "+ Add Unit",
+        "search_placeholder": "🔍 Search units...",
+        "view": "👁 View",
+        "edit": "✏️ Edit",
+        "delete": "🗑 Delete",
+        "confirm_delete": "Are you sure to delete this unit?"
+    },
+    "stock": {
+        "add_title": "Add Stock",
+        "edit_title": "Edit Stock",
+        "name": "Stock Name",
+        "save": "Save",
+        "required": "This field is required",
+        "list_title": "Stock List",
+        "add_button": "+ Add Stock",
+        "search_placeholder": "🔍 Search stock...",
+        "view": "👁 View",
+        "edit": "✏️ Edit",
+        "delete": "🗑 Delete",
+        "is_default": "Default Stock",
+        "1": "Default Stock",
+        "0": "Regular Stock"
     }
 }

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2 class="text-2xl font-bold mb-4">Danh sách đơn vị</h2>
+    <h2 class="text-2xl font-bold mb-4">{{ $t('unit.list_title') }}</h2>
 
     <CommonTable
       :columns="columns"
@@ -8,14 +8,14 @@
       :pagination="pagination"
       @search="onSearch"
       @page-change="fetchUnits"
-      :placeholder="'🔍 Tìm kiếm đơn vị...'"
+      :placeholder="$t('unit.search_placeholder')"
     >
       <template #buttons>
         <button
           class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 shadow font-semibold"
           @click="$router.push('/warehouse/unit/create')"
         >
-          + Thêm đơn vị
+          {{ $t('unit.add_button') }}
         </button>
       </template>
 
@@ -33,9 +33,9 @@
             class="absolute right-30 mt-2 bg-white border rounded shadow z-50 whitespace-nowrap px-2 py-1 min-w-[100px]"
           >
             <ul class="text-sm text-gray-700">
-              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer" @click="onView(item.id)">👁 Xem</li>
-              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer" @click="onEdit(item.id)">✏️ Sửa</li>
-              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer text-red-500" @click="onDelete(item.id)">🗑 Xóa</li>
+              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer" @click="onView(item.id)">{{ $t('unit.view') }}</li>
+              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer" @click="onEdit(item.id)">{{ $t('unit.edit') }}</li>
+              <li class="hover:bg-gray-100 px-4 py-2 cursor-pointer text-red-500" @click="onDelete(item.id)">{{ $t('unit.delete') }}</li>
             </ul>
           </div>
         </div>
@@ -61,10 +61,10 @@ export default {
         total: 0,
         per_page: 10,
       },
-      columns: [
-        { label: 'ID', key: 'id' },
-        { label: 'Tên đơn vị', key: 'name' },
-        { label: 'Viết tắt', key: 'abbreviation' }
+     columns: [
+        { label: this.$t('unit.id'), key: 'id' },
+        { label: this.$t('unit.name'), key: 'name' },
+        { label: this.$t('unit.abbreviation'), key: 'abbreviation' }
       ],
       dropdownId: null
     }
@@ -108,7 +108,7 @@ export default {
       this.$router.push(`/warehouse/unit/${id}/edit`)
     },
     onDelete(id) {
-      if (confirm('Xác nhận xoá đơn vị này?')) {
+      if (confirm(this.$t('unit.confirm_delete'))) {
         // call API xoá
       }
     }

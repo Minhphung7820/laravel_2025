@@ -207,5 +207,37 @@
         "save": "Lưu",
         "required": "Không được để trống",
         "select_file": "Chọn tệp"
+    },
+    "unit": {
+        "id": "ID",
+        "add_title": "Thêm đơn vị",
+        "edit_title": "Sửa đơn vị",
+        "name": "Tên đơn vị",
+        "abbreviation": "Viết tắt",
+        "save": "Lưu",
+        "required": "Không được để trống",
+        "list_title": "Danh sách đơn vị",
+        "add_button": "+ Thêm đơn vị",
+        "search_placeholder": "🔍 Tìm kiếm đơn vị...",
+        "view": "👁 Xem",
+        "edit": "✏️ Sửa",
+        "delete": "🗑 Xóa",
+        "confirm_delete": "Xác nhận xoá đơn vị này?"
+    },
+    "stock": {
+        "add_title": "Thêm kho",
+        "edit_title": "Sửa kho",
+        "name": "Tên kho",
+        "save": "Lưu",
+        "required": "Không được để trống",
+        "list_title": "Danh sách kho",
+        "add_button": "+ Thêm kho",
+        "search_placeholder": "🔍 Tìm kiếm kho...",
+        "view": "👁 Xem",
+        "edit": "✏️ Sửa",
+        "delete": "🗑 Xóa",
+        "1": "Kho mặc định",
+        "0": "Kho thường",
+        "is_default": "Loại kho"
     }
 }

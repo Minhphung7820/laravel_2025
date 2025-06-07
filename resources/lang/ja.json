@@ -112,7 +112,16 @@
         "disable_field_add_msg": "他のフィールドは無効です",
         "choose_warehouse": "倉庫を選択してください",
         "limit_exceeded": "制限を超えました",
-        "limit_exceeded_msg": "バリエーションの合計が許容制限（100行）を超えています。属性または在庫数を減らしてください。"
+        "limit_exceeded_msg": "バリエーションの合計が許容制限（100行）を超えています。属性または在庫数を減らしてください。",
+        "apply_all": "すべてに適用 ({total})",
+        "success_apply": "すべてのバリアントに適用しました",
+        "placeholder": {
+            "purchase_price": "仕入れ価格",
+            "sell_price": "販売価格",
+            "quantity": "初期在庫数"
+        },
+        "required_title": "情報不足",
+        "required_msg": "すべての値を選択してください！"
     },
     "common": {
         "unnamed": "名称未設定",
@@ -171,7 +180,8 @@
         "last": "最後",
         "showing_rows": "{from}～{to} / {total} 件を表示中",
         "no_data": "データがありません",
-        "search_placeholder": "検索..."
+        "search_placeholder": "検索...",
+        "view_combo_detail": "👁 コンボの構成を見る"
     },
     "product_type": {
         "single": "通常商品",
@@ -259,5 +269,11 @@
         "is_default": "デフォルト倉庫",
         "1": "デフォルト倉庫",
         "0": "通常倉庫"
+    },
+    "combo_modal": {
+        "title": "コンボの構成要素",
+        "sku": "SKU",
+        "quantity_price": "数量: {quantity} - 価格: {price}",
+        "load_more": "もっと読み込む"
     }
 }

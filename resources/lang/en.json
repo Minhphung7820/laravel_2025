@@ -111,7 +111,16 @@
         "disable_field_add_msg": "Other fields disabled",
         "choose_warehouse": "Choose warehouse",
         "limit_exceeded": "Limit Exceeded",
-        "limit_exceeded_msg": "Total variants exceed the allowed limit (100 rows). Please reduce the number of attributes or stocks."
+        "limit_exceeded_msg": "Total variants exceed the allowed limit (100 rows). Please reduce the number of attributes or stocks.",
+        "apply_all": "Apply to all ({total})",
+        "success_apply": "Successfully applied to all variants",
+        "placeholder": {
+            "purchase_price": "Purchase price",
+            "sell_price": "Selling price",
+            "quantity": "Initial stock"
+        },
+        "required_title": "Missing information",
+        "required_msg": "Please select all required values!"
     },
     "common": {
         "unnamed": "Unnamed",
@@ -170,7 +179,8 @@
         "last": "Last",
         "showing_rows": "Showing {from}–{to} of {total} rows",
         "no_data": "No data available",
-        "search_placeholder": "Search..."
+        "search_placeholder": "Search...",
+        "view_combo_detail": "👁 View combo components"
     },
     "product_type": {
         "single": "Single product",
@@ -258,5 +268,11 @@
         "is_default": "Default Stock",
         "1": "Default Stock",
         "0": "Regular Stock"
+    },
+    "combo_modal": {
+        "title": "Combo Components",
+        "sku": "SKU",
+        "quantity_price": "Qty: {quantity} - Price: {price}",
+        "load_more": "Load more"
     }
 }

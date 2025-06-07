@@ -111,7 +111,16 @@
         "disable_field_add_msg": "其他字段已禁用",
         "choose_warehouse": "请选择仓库",
         "limit_exceeded": "超出限制",
-        "limit_exceeded_msg": "变体总数超出允许的限制（100行）。请减少属性或库存数量。"
+        "limit_exceeded_msg": "变体总数超出允许的限制（100行）。请减少属性或库存数量。",
+        "apply_all": "应用到全部 ({total})",
+        "success_apply": "已成功应用于所有变体",
+        "placeholder": {
+            "purchase_price": "进货价",
+            "sell_price": "销售价",
+            "quantity": "初始库存"
+        },
+        "required_title": "信息不完整",
+        "required_msg": "请选择所有必填项！"
     },
     "common": {
         "unnamed": "未命名",
@@ -170,7 +179,8 @@
         "last": "末页",
         "showing_rows": "正在显示第 {from}–{to} 项，共 {total} 项",
         "no_data": "没有可用的数据",
-        "search_placeholder": "搜索..."
+        "search_placeholder": "搜索...",
+        "view_combo_detail": "👁 查看组合明细"
     },
     "product_type": {
         "single": "普通商品",
@@ -258,5 +268,11 @@
         "is_default": "默认仓库",
         "1": "默认仓库",
         "0": "普通仓库"
+    },
+    "combo_modal": {
+        "title": "组合商品明细",
+        "sku": "SKU",
+        "quantity_price": "数量: {quantity} - 售价: {price}",
+        "load_more": "加载更多"
     }
 }

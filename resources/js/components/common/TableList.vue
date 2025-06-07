@@ -93,7 +93,7 @@
                     @click="$emit('show-combo', item)"
                     class="text-blue-600 text-sm mt-1 hover:underline cursor-pointer"
                   >
-                    👁 Xem thành phần combo
+                    {{ $t('table.view_combo_detail') }}
                   </button>
                 </div>
               </template>

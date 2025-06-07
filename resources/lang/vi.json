@@ -111,7 +111,16 @@
         "disable_field_add_msg": "Các trường khác bị vô hiệu hóa",
         "choose_warehouse": "Chọn kho",
         "limit_exceeded": "Vượt giới hạn",
-        "limit_exceeded_msg": "Tổng số biến thể vượt quá giới hạn cho phép (100 dòng). Vui lòng giảm số lượng thuộc tính hoặc kho."
+        "limit_exceeded_msg": "Tổng số biến thể vượt quá giới hạn cho phép (100 dòng). Vui lòng giảm số lượng thuộc tính hoặc kho.",
+        "apply_all": "Áp dụng toàn bộ ({total})",
+        "success_apply": "Áp dụng thành công cho tất cả biến thể",
+        "placeholder": {
+            "purchase_price": "Giá mua",
+            "sell_price": "Giá bán",
+            "quantity": "Tồn kho ban đầu"
+        },
+        "required_title": "Thiếu thông tin",
+        "required_msg": "Vui lòng chọn đầy đủ các giá trị!"
     },
     "common": {
         "unnamed": "Không tên",
@@ -170,7 +179,8 @@
         "last": "Cuối",
         "showing_rows": "Hiển thị {from}–{to} / {total} dòng",
         "no_data": "Không có dữ liệu",
-        "search_placeholder": "Tìm kiếm..."
+        "search_placeholder": "Tìm kiếm...",
+        "view_combo_detail": "👁 Xem thành phần combo"
     },
     "product_type": {
         "single": "Sản phẩm thường",
@@ -258,5 +268,11 @@
         "1": "Kho mặc định",
         "0": "Kho thường",
         "is_default": "Loại kho"
+    },
+    "combo_modal": {
+        "title": "Thành phần combo",
+        "sku": "Mã SKU",
+        "quantity_price": "SL: {quantity} - Giá bán: {price}",
+        "load_more": "Tải thêm"
     }
 }

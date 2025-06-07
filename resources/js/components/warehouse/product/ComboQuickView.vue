@@ -10,7 +10,7 @@
     >
       <!-- Header cố định -->
       <div class="sticky top-0 bg-white px-6 py-4 border-b flex justify-between items-center z-10">
-        <h2 class="text-lg font-semibold text-gray-800">Thành phần combo</h2>
+        <h2 class="text-lg font-semibold text-gray-800">{{ $t('combo_modal.title') }}</h2>
         <button @click="$emit('close')" class="text-gray-400 hover:text-red-500 text-xl cursor-pointer">&times;</button>
       </div>
 
@@ -26,14 +26,14 @@
             <div class="font-semibold text-sm">
               {{ getProductName(combo) }}
             </div>
-            <div class="text-sm text-gray-600">SKU: {{ getSku(combo) }}</div>
-            <div class="text-sm text-gray-600">SL: {{ combo.quantity_combo }} - Giá bán: {{ combo.sell_price_combo }}</div>
+            <div class="text-sm text-gray-600">{{ $t('combo_modal.sku') }}: {{ getSku(combo) }}</div>
+            <div class="text-sm text-gray-600">  {{ $t('combo_modal.quantity_price', { quantity: combo.quantity_combo, price: combo.sell_price_combo }) }}</div>
           </div>
         </div>
 
         <div v-if="hasMoreCombo" class="text-center mt-4">
           <button @click="loadMoreCombo" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 cursor-pointer">
-            Tải thêm
+             {{ $t('combo_modal.load_more') }}
           </button>
         </div>
       </div>

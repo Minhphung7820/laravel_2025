@@ -11,17 +11,17 @@
     <!-- Áp dụng toàn bộ (full hàng, không nền xám) -->
     <div class="grid grid-cols-4 gap-4 mb-4">
       <input v-model.number="applyToAll.purchase_price" type="number" min="0"
-        class="px-3 py-1 border rounded w-full" placeholder="Giá mua" />
+        class="px-3 py-1 border rounded w-full" :placeholder="$t('variant_grid.placeholder.purchase_price')" />
 
       <input v-model.number="applyToAll.sell_price" type="number" min="0"
-        class="px-3 py-1 border rounded w-full" placeholder="Giá bán" />
+        class="px-3 py-1 border rounded w-full" :placeholder="$t('variant_grid.placeholder.sell_price')" />
 
       <input v-model.number="applyToAll.quantity" type="number" min="0"
-        class="px-3 py-1 border rounded w-full" placeholder="Tồn kho ban đầu" />
+        class="px-3 py-1 border rounded w-full" :placeholder="$t('variant_grid.placeholder.quantity')" />
 
       <button @click="applyAll"
         class="w-full px-4 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer">
-        Áp dụng toàn bộ ({{this.variants.length}})
+        {{ $t('variant_grid.apply_all', { total: variants.length }) }}
       </button>
     </div>
     <div ref="variantScrollContainer" class="rounded border border-gray-300 overflow-y-auto max-h-[600px] min-h-[600px] custom-scroll">

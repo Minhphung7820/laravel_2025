@@ -55,7 +55,9 @@
         "confirm_remove_variant_title": "要删除变体？",
         "confirm_remove_variant_text": "此操作将删除所有当前的变体列表。你确定吗？",
         "confirm_remove_variant_button_text": "是的，我确定",
-        "cancel_button_text": "取消"
+        "cancel_button_text": "取消",
+        "category_required_title": "缺少类别",
+        "category_required_msg": "请先选择类别，再启用产品变体。"
     },
     "stock_table": {
         "title": "库存信息",

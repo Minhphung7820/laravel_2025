@@ -347,6 +347,17 @@ export default {
         this.generateVariantGrid()
       },
       deep: true
+    },
+    'form.category_id'(newVal) {
+      if (!newVal && this.form.has_variant) {
+        this.form.has_variant = false
+        Swal.fire({
+          icon: 'warning',
+          title: this.$t('product.category_required_title'),
+          text: this.$t('product.category_required_msg'),
+          confirmButtonText: 'OK'
+        })
+      }
     }
   },
   async mounted() {
@@ -544,7 +555,18 @@ export default {
       this.checkAndLoadVariants()
     },
     async onVariantCheckboxChange(e) {
-      const willUncheck = !e.target.checked
+      const willUncheck = !e.target.checked;
+
+      if (!this.form.category_id) {
+        this.form.has_variant = false;
+        await Swal.fire({
+          icon: 'warning',
+          title: this.$t('product.category_required_title') || 'Thiếu danh mục',
+          text: this.$t('product.category_required_msg') || 'Vui lòng chọn danh mục trước khi bật biến thể.',
+          confirmButtonText: 'OK'
+        });
+        return;
+      }
 
       if (this.mode === 'update' && this.hasVariantInitial && willUncheck) {
         const result = await Swal.fire({
@@ -557,11 +579,12 @@ export default {
         });
 
         if (!result.isConfirmed) {
-          this.form.has_variant = true
-          return
+          this.form.has_variant = true;
+          return;
         }
       }
-      this.onToggleVariantLogic()
+
+      this.onToggleVariantLogic();
     },
     onToggleVariantLogic() {
       this.isMappingVariantData = this.mode === 'create';

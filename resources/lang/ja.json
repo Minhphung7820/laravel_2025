@@ -55,7 +55,9 @@
         "confirm_remove_variant_title": "バリアントを削除しますか？",
         "confirm_remove_variant_text": "この操作はすべてのバリアント行を削除します。本当に実行しますか？",
         "confirm_remove_variant_button_text": "はい、確かです",
-        "cancel_button_text": "キャンセル"
+        "cancel_button_text": "キャンセル",
+        "category_required_title": "カテゴリが未選択",
+        "category_required_msg": "商品にバリエーションを追加する前にカテゴリを選択してください。"
     },
     "stock_table": {
         "title": "在庫",

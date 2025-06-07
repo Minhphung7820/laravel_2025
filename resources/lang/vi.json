@@ -55,7 +55,9 @@
         "confirm_remove_variant_title": "Bỏ biến thể?",
         "confirm_remove_variant_text": "Thao tác này sẽ xóa toàn bộ lưới biến thể đang có. Bạn có chắc chắn không?",
         "confirm_remove_variant_button_text": "Có, tôi chắc chắn",
-        "cancel_button_text": "Huỷ"
+        "cancel_button_text": "Huỷ",
+        "category_required_title": "Thiếu danh mục",
+        "category_required_msg": "Vui lòng chọn danh mục trước khi bật sản phẩm có biến thể."
     },
     "stock_table": {
         "title": "Kho hàng",

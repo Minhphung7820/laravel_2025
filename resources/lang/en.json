@@ -55,7 +55,9 @@
         "confirm_remove_variant_title": "Remove variants?",
         "confirm_remove_variant_text": "This action will delete all current variant rows. Are you sure?",
         "confirm_remove_variant_button_text": "Yes, I'm sure",
-        "cancel_button_text": "Cancel"
+        "cancel_button_text": "Cancel",
+        "category_required_title": "Category Required",
+        "category_required_msg": "Please select a category before enabling product variants."
     },
     "stock_table": {
         "title": "Inventory",

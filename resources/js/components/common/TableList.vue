@@ -47,7 +47,7 @@
         <thead class="bg-gray-100 sticky top-0 z-10">
           <tr>
             <th v-if="withCheckbox" class="w-12 px-4 py-3">
-              <input type="checkbox" @change="toggleAll" :checked="allSelected" />
+              <input type="checkbox" @change="toggleAll" :checked="isAllCheckedOnPage" />
             </th>
             <th
               v-for="col in columns"
@@ -74,7 +74,12 @@
             class="hover:bg-blue-50 transition-all duration-200"
           >
             <td v-if="withCheckbox" class="w-12 px-4 py-2">
-              <input type="checkbox" :value="item" v-model="selected" @change="$emit('selection-change', selected)" />
+              <input
+                type="checkbox"
+                :value="item.id"
+                :checked="isSelected(item.id)"
+                @change="toggleSelection($event, item)"
+              />
             </td>
             <td
               v-for="col in columns"
@@ -191,12 +196,13 @@ export default {
   data() {
     return {
       search: '',
-      selected: []
+      selectedIds: [],
+      selectedItems: []
     }
   },
   computed: {
-    allSelected() {
-      return this.data.length > 0 && this.selected.length === this.data.length
+    isAllCheckedOnPage() {
+      return this.data.length > 0 && this.data.every(item => this.selectedIds.includes(item.id))
     },
     pagesToShow() {
       const current = this.pagination.current_page
@@ -219,6 +225,47 @@ export default {
     }
   },
   methods: {
+    isSelected(id) {
+      return this.selectedIds.includes(id)
+    },
+    toggleSelection(event, item) {
+      const checked = event.target.checked
+      if (checked) {
+        if (!this.selectedIds.includes(item.id)) {
+          this.selectedIds.push(item.id)
+          this.selectedItems.push(item)
+        }
+      } else {
+        const index = this.selectedIds.indexOf(item.id)
+        if (index !== -1) {
+          this.selectedIds.splice(index, 1)
+          this.selectedItems = this.selectedItems.filter(i => i.id !== item.id)
+        }
+      }
+      this.$emit('selection-change', this.selectedItems)
+    },
+    toggleAll(e) {
+      const checked = e.target.checked
+      if (checked) {
+        this.data.forEach(item => {
+          if (!this.selectedIds.includes(item.id)) {
+            this.selectedIds.push(item.id)
+            this.selectedItems.push(item)
+          }
+        })
+      } else {
+        this.data.forEach(item => {
+          const index = this.selectedIds.indexOf(item.id)
+          if (index !== -1) {
+            this.selectedIds.splice(index, 1)
+            this.selectedItems = this.selectedItems.filter(i => i.id !== item.id)
+          }
+        })
+      }
+      this.$emit('selection-change', this.selectedItems)
+      console.log(this.selectedIds);
+
+    },
     getCellText(item, col) {
       if (!col.withLang || !col.keyLang) return item[col.key]
       const fullKey = `${col.keyLang}.${item[col.key]}`
@@ -228,10 +275,6 @@ export default {
       if (!col.classMap) return ''
       const value = item[col.key]
       return col.classMap[value] || ''
-    },
-    toggleAll(e) {
-      this.selected = e.target.checked ? [...this.data] : []
-      this.$emit('selection-change', this.selected)
     }
   }
 }

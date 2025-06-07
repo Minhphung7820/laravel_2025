@@ -18,7 +18,7 @@ class Variant extends Model
         static::deleting(function ($variant) {
             // Nếu có attribute con
             if ($variant->attributes()->exists()) {
-                throw new \Exception('Không thể xóa biến thể vì có thuộc tính liên kết.');
+                throw new \Exception(__('common.variant.delete_has_attribute'));
             }
 
             // Nếu thuộc tính của variant đang được dùng trong stock_products
@@ -29,7 +29,7 @@ class Variant extends Model
                 ->exists();
 
             if ($usedInStock) {
-                throw new \Exception('Không thể xóa biến thể vì thuộc tính đang được sử dụng trong tồn kho.');
+                throw new \Exception(__('common.variant.delete_used_in_stock'));
             }
         });
     }

@@ -12,4 +12,15 @@ return [
     'create_failed' => '创建产品失败！',
     'update_failed' => '更新产品失败！',
   ],
+  'category' => [
+    'delete_has_variant' => '无法删除类别，因为有已关联的变体。',
+    'delete_in_use' => '无法删除类别，因为它正被商品使用中。',
+  ],
+  'variant' => [
+    'delete_has_attribute' => '无法删除变体，因为存在关联属性。',
+    'delete_used_in_stock' => '无法删除变体，因为其属性已被库存使用。',
+  ],
+  'attribute' => [
+    'delete_used' => '无法删除属性，因为它已被库存使用。',
+  ],
 ];

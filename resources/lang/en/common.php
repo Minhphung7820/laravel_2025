@@ -12,4 +12,15 @@ return [
     'create_failed' => 'Failed to create product!',
     'update_failed' => 'Failed to update product!',
   ],
+  'category' => [
+    'delete_has_variant' => 'Cannot delete category because it has associated variants.',
+    'delete_in_use' => 'Cannot delete category because it is used by a product.'
+  ],
+  'variant' => [
+    'delete_has_attribute' => 'Cannot delete variant because it has associated attributes.',
+    'delete_used_in_stock' => 'Cannot delete variant because its attributes are used in stock.'
+  ],
+  'attribute' => [
+    'delete_used' => 'Cannot delete attribute because it is used in stock.'
+  ]
 ];

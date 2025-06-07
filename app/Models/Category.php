@@ -17,12 +17,12 @@ class Category extends Model
         static::deleting(function ($category) {
             // Nếu có Variant con
             if ($category->variants()->exists()) {
-                throw new \Exception('Không thể xóa danh mục vì có biến thể liên kết.');
+                throw new \Exception(__('common.category.delete_has_variant'));
             }
 
             // Nếu có Product liên quan
             if (\App\Models\Product::where('category_id', $category->id)->exists()) {
-                throw new \Exception('Không thể xóa danh mục vì đang được sử dụng bởi sản phẩm.');
+                throw new \Exception(__('common.category.delete_in_use'));
             }
         });
     }

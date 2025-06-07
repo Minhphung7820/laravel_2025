@@ -22,7 +22,7 @@ class Attribute extends Model
             })->exists();
 
             if ($used) {
-                throw new \Exception('Không thể xóa thuộc tính vì đang được sử dụng trong kho.');
+                throw new \Exception(__('common.attribute.delete_used'));
             }
         });
     }

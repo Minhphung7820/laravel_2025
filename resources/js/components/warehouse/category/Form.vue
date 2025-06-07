@@ -150,7 +150,7 @@ export default {
         }
         await Swal.fire({
           icon: 'error',
-          title: res?.message || 'Đã xảy ra lỗi!',
+          title: 'Oops!',
           text: typeof res?.errors === 'string' ? res.errors : 'Vui lòng kiểm tra lại dữ liệu.',
         })
       } finally {

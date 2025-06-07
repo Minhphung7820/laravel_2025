@@ -115,37 +115,37 @@ class ProductController extends Controller
         $urlPrefix = url('/');
         $imageDefault = env('IMAGE_DEFAULT');
 
-        $query = DB::table('stock_products')
-            ->join('products', 'stock_products.product_id', '=', 'products.id')
-            ->join('stocks', function ($join) {
-                $join->on('stock_products.stock_id', '=', 'stocks.id')
-                    ->where('stocks.is_default', 1);
-            })
-            ->leftJoin('units', 'stock_products.unit_id', '=', 'units.id')
+        $query = \App\Models\StockProduct::with([
+            'product:id,type,status',
+            'product.stockData',
+            'product.stockData.stock:id,name',
+            'attributeFirst:id,title',
+            'attributeSecond:id,title',
+        ])
             ->leftJoin('attributes as attr1_org', 'stock_products.attribute_first_id', '=', 'attr1_org.id')
             ->leftJoin('attributes as attr2_org', 'stock_products.attribute_second_id', '=', 'attr2_org.id')
             ->leftJoin('variants as var1', 'attr1_org.variant_id', '=', 'var1.id')
             ->leftJoin('variants as var2', 'attr2_org.variant_id', '=', 'var2.id')
-            ->leftJoin('product_variant_images', 'product_variant_images.stock_product_id', '=', 'stock_products.id')
             ->select([
                 'stock_products.id',
                 'stock_products.product_id',
                 DB::raw("CASE
-                WHEN products.type = 'variable' THEN stock_products.sku
-                ELSE products.sku
-            END AS sku"),
+                    WHEN products.type = 'variable' THEN stock_products.sku
+                    ELSE products.sku
+                    END AS sku"),
                 DB::raw("CASE
-                WHEN products.type = 'variable' THEN
-                    CONCAT(
-                        products.name,
-                        ' ',
-                        COALESCE(var1.title, ''), ' ',
-                        COALESCE(attr1_org.title, ''), ' ',
-                        COALESCE(var2.title, ''), ' ',
-                        COALESCE(attr2_org.title, '')
-                    )
-                ELSE products.name
-            END AS product_name"),
+                    WHEN products.type = 'variable' THEN
+                        CONCAT(
+                            products.name,
+                            ' ',
+                            COALESCE(var1.title, ''), ' ',
+                            COALESCE(attr1_org.title, ''), ' ',
+                            COALESCE(var2.title, ''), ' ',
+                            COALESCE(attr2_org.title, '')
+                        )
+                    ELSE products.name
+                END AS product_name"),
+                // 'products.name as product_name',
                 'stocks.name as stock_name',
                 'stocks.id as stock_id',
                 'products.type as product_type',
@@ -156,45 +156,50 @@ class ProductController extends Controller
                 'stock_products.attribute_second_id',
                 'units.name as unit_name',
                 DB::raw("CASE
-                WHEN products.type = 'variable' THEN
-                    COALESCE(CONCAT('$urlPrefix', product_variant_images.image), '$imageDefault')
-                ELSE
-                    COALESCE(CONCAT('$urlPrefix', products.image_cover), '$imageDefault')
-            END AS image"),
+                    WHEN products.type = 'variable' THEN
+                        COALESCE(CONCAT('$urlPrefix', product_variant_images.image), '$imageDefault')
+                    ELSE
+                        COALESCE(CONCAT('$urlPrefix', products.image_cover), '$imageDefault')
+                END AS image"),
                 'products.status',
                 DB::raw('(SELECT JSON_ARRAYAGG(JSON_OBJECT(
-                "id", sp2.id,
-                "product_id", sp2.product_id,
-                "attribute_first_id", sp2.attribute_first_id,
-                "attribute_second_id", sp2.attribute_second_id,
-                "sell_price", sp2.sell_price,
-                "purchase", sp2.sell_price,
-                "stock_name", s.name,
-                "attr1_title", attr1.title,
-                "attr2_title", attr2.title,
-                "quantity", sp2.quantity,
-                "stock_id", s.id,
-                "is_stock_default", s.is_default,
-                "sku", sp2.sku
-            ))
-            FROM stock_products sp2
-            JOIN stocks as s ON sp2.stock_id = s.id
-            LEFT JOIN attributes as attr1 ON sp2.attribute_first_id = attr1.id
-            LEFT JOIN attributes as attr2 ON sp2.attribute_second_id = attr2.id
-            WHERE sp2.product_id = stock_products.product_id
-            AND (
-                (sp2.attribute_first_id IS NULL AND stock_products.attribute_first_id IS NULL)
-                OR sp2.attribute_first_id = stock_products.attribute_first_id
-            )
-            AND (
-                (sp2.attribute_second_id IS NULL AND stock_products.attribute_second_id IS NULL)
-                OR sp2.attribute_second_id = stock_products.attribute_second_id
-            )
-            AND sp2.product_type = "variable"
-            ) AS related_variants'),
-                'products.created_at as product_created_at',
-                'stock_products.created_at as stock_product_created_at'
+                    "id", sp2.id,
+                    "product_id", sp2.product_id,
+                    "attribute_first_id", sp2.attribute_first_id,
+                    "attribute_second_id", sp2.attribute_second_id,
+                    "sell_price", sp2.sell_price,
+                    "purchase", sp2.sell_price,
+                    "stock_name", s.name,
+                    "attr1_title", attr1.title,
+                    "attr2_title", attr2.title,
+                    "quantity", sp2.quantity,
+                    "stock_id", s.id,
+                    "is_stock_default", s.is_default,
+                    "sku", sp2.sku
+                ))
+                FROM stock_products sp2
+                JOIN stocks as s ON sp2.stock_id = s.id
+                LEFT JOIN attributes as attr1 ON sp2.attribute_first_id = attr1.id
+                LEFT JOIN attributes as attr2 ON sp2.attribute_second_id = attr2.id
+                WHERE sp2.product_id = stock_products.product_id
+                AND (
+                    (sp2.attribute_first_id IS NULL AND stock_products.attribute_first_id IS NULL)
+                    OR sp2.attribute_first_id = stock_products.attribute_first_id
+                )
+                AND (
+                    (sp2.attribute_second_id IS NULL AND stock_products.attribute_second_id IS NULL)
+                    OR sp2.attribute_second_id = stock_products.attribute_second_id
+                )
+                AND sp2.product_type = "variable"
+                ) AS related_variants')
             ])
+            ->join('products', 'stock_products.product_id', '=', 'products.id')
+            ->join('stocks', function ($join) {
+                $join->on('stock_products.stock_id', '=', 'stocks.id')
+                    ->where('stocks.is_default', 1);
+            })
+            ->leftJoin('units', 'stock_products.unit_id', '=', 'units.id')
+            ->leftJoin('product_variant_images', 'product_variant_images.stock_product_id', '=', 'stock_products.id')
             ->where(function ($q) use ($request) {
                 $q->where(function ($q2) use ($request) {
                     $q2->where('products.type', 'variable')
@@ -205,33 +210,26 @@ class ProductController extends Controller
                             return $q->whereNotIn('stock_products.id', explode(",", $request['excepts_variable']));
                         });
                 })->orWhere(function ($q2) use ($request) {
-                    $q2->where('products.type', 'single')
+                    $q2->whereIn('products.type', ['single'])
                         ->where('stock_products.product_type', 'root_stock')
                         ->when(!empty($request['excepts_single']), function ($q) use ($request) {
                             return $q->whereNotIn('stock_products.id', explode(",", $request['excepts_single']));
                         });
                 });
             });
-
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('products.name', 'like', "%$search%")
                     ->orWhere('stock_products.sku', 'like', "%$search%");
             });
         }
-
         $query->orderByRaw("
-        CASE
-            WHEN products.type = 'variable' THEN stock_products.created_at
-            ELSE products.created_at
-        END DESC
-    ");
-
-        $final = DB::table(DB::raw("({$query->toSql()}) as sub"))
-            ->mergeBindings($query)
-            ->paginate($limit);
-
-        return $this->responseSuccess($final);
+            CASE
+                WHEN products.type = 'variable' THEN stock_products.created_at
+                ELSE products.created_at
+            END DESC
+        ");
+        return $this->responseSuccess($query->paginate($limit));
     }
 
     /**

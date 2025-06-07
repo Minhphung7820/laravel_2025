@@ -68,7 +68,8 @@ export default {
       statusTabs: [
         { key: 'all', label: 'product_status.all', count: 12 },
         { key: 'pending', label: 'product_status.pending', count: 5 },
-        { key: 'approved', label: 'product_status.approved', count: 7 }
+        { key: 'approved', label: 'product_status.approved', count: 7 },
+        { key: 'rejected', label: 'product_status.rejected', count: 7 }
       ],
       pagination: {
         current_page: 1,
@@ -148,7 +149,7 @@ export default {
         limit: this.pagination.per_page
       }
 
-      if (['pending', 'approved'].includes(this.currentStatus)) {
+      if (['pending', 'approved','rejected'].includes(this.currentStatus)) {
         queryObj.status = this.currentStatus
       }
 
@@ -165,7 +166,7 @@ export default {
         limit: this.pagination.per_page
       }
 
-      if (['pending', 'approved'].includes(this.currentStatus)) {
+      if (['pending', 'approved','rejected'].includes(this.currentStatus)) {
         params.status = this.currentStatus
       }
 

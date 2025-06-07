@@ -163,7 +163,8 @@
     "product_status": {
         "all": "All",
         "pending": "Pending approval",
-        "approved": "Approved"
+        "approved": "Approved",
+        "rejected": "Rejected"
     },
     "category": {
         "title": "Category name",

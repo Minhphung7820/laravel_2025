@@ -163,7 +163,8 @@
     "product_status": {
         "all": "Tất cả",
         "pending": "Đang chờ duyệt",
-        "approved": "Đã duyệt"
+        "approved": "Đã duyệt",
+        "rejected": "Bị từ chối"
     },
     "category": {
         "title": "Tên danh mục",

@@ -163,7 +163,8 @@
     "product_status": {
         "all": "全部",
         "pending": "等待审批",
-        "approved": "已审批"
+        "approved": "已审批",
+        "rejected": "已拒绝"
     },
     "category": {
         "title": "分类名称",

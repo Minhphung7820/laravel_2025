@@ -164,7 +164,8 @@
     "product_status": {
         "all": "전체",
         "pending": "승인 대기 중",
-        "approved": "승인됨"
+        "approved": "승인됨",
+        "rejected": "거절됨"
     },
     "category": {
         "title": "카테고리 이름",

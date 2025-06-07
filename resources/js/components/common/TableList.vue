@@ -29,7 +29,7 @@
           v-if="tab.count !== undefined"
           class="ml-1 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold rounded-full shadow-sm ring-2 ring-inset"
           :class="tab.key === currentTab
-            ? 'bg-yellow-400 text-white ring-yellow-500'
+            ? 'bg-white text-blue-700 ring-blue-500'
             : 'bg-gray-200 text-gray-800 ring-gray-300'"
         >
           {{ tab.count }}

@@ -70,17 +70,33 @@
 
           <tr v-for="(variant, index) in variants" :key="index" class="hover:bg-gray-50">
             <td v-for="attr in variant.attributes" :key="attr.value.id" class="px-4 py-2">{{ attr.value.title }}</td>
-            <td class="px-4 py-2 text-center align-middle">
-              <label class="cursor-pointer relative block w-16 h-16 mx-auto border border-gray-300 rounded overflow-hidden hover:shadow">
+            <td class="px-4 py-2 text-center">
+              <div class="relative w-20 h-20 mx-auto border-2 border-dashed rounded-lg overflow-hidden group">
                 <input
                   type="file"
-                  class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  class="absolute inset-0 opacity-0 z-10 cursor-pointer"
                   @change="onImageChange($event, index)"
                   accept="image/*"
                 />
-                <img v-if="variant.image" :src="getImageUrl(variant.image)" class="w-full h-full object-cover" />
-                <img v-else src="https://static.thenounproject.com/png/1077596-200.png" class="w-full h-full object-contain opacity-40" />
-              </label>
+                <img
+                  v-if="variant.image"
+                  :src="getImageUrl(variant.image)"
+                  class="w-full h-full object-cover"
+                />
+                <div v-else class="flex items-center justify-center h-full text-gray-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 16l4-4 4 4m0 0l4-4 4 4M4 4h16v16H4z" />
+                  </svg>
+                </div>
+
+              <button
+                v-if="variant.image"
+                @click="removeImage(index)"
+                class="absolute cursor-pointer top-0 right-0 text-white bg-red-500 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold z-20 hidden group-hover:flex"
+              >X</button>
+              </div>
             </td>
             <td class="px-4 py-2">{{ getStockName(variant.stock_id) }}</td>
             <td class="px-4 py-2">
@@ -188,6 +204,13 @@ export default {
     }
   },
   methods: {
+    removeImage(index) {
+      const variant = this.variants[index]
+      if (typeof variant.image === 'string' && variant.id) {
+        this.$emit('remove:variant-image', variant.id)
+      }
+      variant.image = null
+    },
     handleAddRestore() {
       if (this.isVariantLimitExceeded) {
         Swal.fire({
@@ -323,5 +346,7 @@ table td {
 .custom-scroll::-webkit-scrollbar-thumb:hover {
   background-color: #718096;
 }
-
+.group:hover .group-hover\\:flex {
+  display: flex !important;
+}
 </style>

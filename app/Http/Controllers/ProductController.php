@@ -535,8 +535,10 @@ class ProductController extends Controller
                 'type'        => $request['type'] ?? 'single',
                 'status'      => 'pending'
             ];
-            if ($coverPath) {
+            if ($coverPath || empty($request['remove_cover_image'])) {
                 $data['image_cover'] =  $coverPath;
+            } else {
+                $data['image_cover'] =  null;
             }
             if ($data['type'] === 'variable') {
                 $attributes = $request['variants'] ?? [];
@@ -671,9 +673,15 @@ class ProductController extends Controller
                             }
                         }
                     }
-                    if (!empty($canceledImageVariant)) {
-                        ProductVariantImage::whereIn('stock_product_id', array_column($canceledImageVariant, 'stock_product_id'))
-                            ->whereNotIn('id', array_column($canceledImageVariant, 'id'))
+                    if (!empty($canceledImageVariant) || !empty($request['removed_variant_image_ids'])) {
+                        ProductVariantImage::where(function ($query) use ($canceledImageVariant, $request) {
+                            $query->where(function ($query) use ($canceledImageVariant) {
+                                $query->whereIn('stock_product_id', array_column($canceledImageVariant, 'stock_product_id'))
+                                    ->whereNotIn('id', array_column($canceledImageVariant, 'id'));
+                            })->orWhere(function ($query) use ($request) {
+                                $query->whereIn('stock_product_id', $request['removed_variant_image_ids']);
+                            });
+                        })
                             ->delete();
                     }
                     // Xóa các biến thể không còn sử dụng

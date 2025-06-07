@@ -219,6 +219,7 @@
       @confirm-restore="onRestoreConfirmed"
       @cancel-restore="restoringVariant = null"
       @update:image="onVariantImageChange"
+      @remove:variant-image="onRemoveVariantImage"
     />
     <!-- Submit -->
     <button @click="handleSubmit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded shadow">
@@ -314,7 +315,8 @@ export default {
       showAddStockModal: false,
       remove_stock_ids: [],
       errors: {},
-      loading: true
+      loading: true,
+      removed_variant_image_ids: []
     }
   },
   watch: {
@@ -345,6 +347,11 @@ export default {
     this.loading = false
   },
   methods: {
+    onRemoveVariantImage(variantId) {
+      if (!this.removed_variant_image_ids.includes(variantId)) {
+        this.removed_variant_image_ids.push(variantId)
+      }
+    },
     validateForm() {
       this.errors = {}
 
@@ -981,6 +988,7 @@ export default {
     },
     removeCoverImage() {
       this.form.cover_image = null
+      this.form.remove_cover_image = true
     },
     handleGalleryImages(e) {
       const newFiles = Array.from(e.target.files).map(file => ({
@@ -1091,7 +1099,14 @@ export default {
         if (this.form.type === 'combo') {
           formData.append('combo', JSON.stringify(this.$refs.comboGrid.comboItems))
         }
-
+        if (this.form.remove_cover_image) {
+          formData.append('remove_cover_image', 1)
+        }
+        if (this.removed_variant_image_ids.length) {
+          this.removed_variant_image_ids.forEach(id => {
+            formData.append('removed_variant_image_ids[]', id)
+          })
+        }
         const url = this.mode === 'update'
           ? `/api/warehouse/product/update/${this.id}`
           : '/api/warehouse/product/create'

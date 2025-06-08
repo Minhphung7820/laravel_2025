@@ -330,6 +330,7 @@ export default {
     },
     async fetchProducts(page = 1) {
       this.isLoading = true
+      this.productList = []
       try {
         const res = await window.axios.get('/api/warehouse/product/get-init-combo', {
           params: {

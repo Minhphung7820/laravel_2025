@@ -63,6 +63,7 @@ export default {
   methods: {
     async fetchStocks(page = 1) {
      this.isLoading = true
+     this.stocks = []
      try {
         const except = this.exceptIds.join(',')
         const res = await fetch(`/api/warehouse/stock/list?page=${page}&except_ids=${except}`)

@@ -222,18 +222,21 @@ export default {
         ...this.filters
       }
 
-      if (['pending', 'approved','rejected'].includes(this.currentStatus)) {
+      if (['pending', 'approved', 'rejected'].includes(this.currentStatus)) {
         params.status = this.currentStatus
       }
 
       this.updateUrlQuery(page)
 
-      window.axios.get('/api/warehouse/product/list', { params }).then(res => {
-        this.products = res.data.data.data
-        Object.assign(this.pagination, res.data.data)
-      })
-      window.axios.get('/api/warehouse/product/get-status-count', { params }).then(res => {
-        this.statusTabs = res.data.data
+      Promise.all([
+        window.axios.get('/api/warehouse/product/list', { params }),
+        window.axios.get('/api/warehouse/product/get-status-count', { params })
+      ]).then(([resList, resCount]) => {
+        this.products = resList.data.data.data
+        Object.assign(this.pagination, resList.data.data)
+        this.statusTabs = resCount.data.data
+      }).catch(error => {
+        console.error('Lỗi khi gọi API:', error)
       })
     },
     onSearch(keyword) {

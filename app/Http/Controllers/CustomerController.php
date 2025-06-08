@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class CustomerController extends Controller
@@ -12,13 +13,42 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         try {
-            $customers = Customer::where('is_customer', 1)
-                ->when($request->filled('keyword'), function ($query) use ($request) {
+            $customers = Customer::query()
+                ->join(
+                    'provinces',
+                    DB::raw("CONVERT(customers.province_id USING utf8mb4) COLLATE utf8mb4_unicode_ci"),
+                    '=',
+                    DB::raw("CONVERT(provinces.code USING utf8mb4) COLLATE utf8mb4_unicode_ci")
+                )
+                ->join(
+                    'districts',
+                    DB::raw("CONVERT(customers.district_id USING utf8mb4) COLLATE utf8mb4_unicode_ci"),
+                    '=',
+                    DB::raw("CONVERT(districts.code USING utf8mb4) COLLATE utf8mb4_unicode_ci")
+                )
+                ->join(
+                    'wards',
+                    DB::raw("CONVERT(customers.ward_id USING utf8mb4) COLLATE utf8mb4_unicode_ci"),
+                    '=',
+                    DB::raw("CONVERT(wards.code USING utf8mb4) COLLATE utf8mb4_unicode_ci")
+                )
+                ->where('customers.is_customer', 1)
+                ->when($request->filled('customers.keyword'), function ($query) use ($request) {
                     $query->where(function ($q) use ($request) {
-                        $q->where('name', 'like', '%' . $request['keyword'] . '%')
-                            ->orWhere('email', 'like', '%' . $request['keyword'] . '%');
+                        $q->where('customers.name', 'like', '%' . $request['keyword'] . '%')
+                            ->orWhere('customers.email', 'like', '%' . $request['keyword'] . '%');
                     });
-                })
+                })->select([
+                    'customers.id',
+                    'customers.name',
+                    'customers.avatar',
+                    'customers.email',
+                    'customers.phone',
+                    'customers.address',
+                    'customers.code',
+                    'customers.type',
+                    DB::raw("CONCAT(customers.address, ', ', wards.full_name, ', ', districts.full_name, ', ', provinces.full_name) as address_full")
+                ])
                 ->orderByDesc('created_at')
                 ->paginate($request->input('limit', 10));
 

@@ -9,6 +9,8 @@
       @search="onSearch"
       @page-change="onPageChange"
       :placeholder="'🔍 Tìm kiếm khách hàng...'"
+      :withCheckbox="true"
+      :isLoading="isLoading"
     >
       <template #buttons>
         <button
@@ -53,6 +55,7 @@ export default {
   components: { CommonTable },
   data() {
     return {
+      isLoading : true,
       customers: [],
       pagination: {
         current_page: 1,
@@ -63,17 +66,23 @@ export default {
         per_page: 10
       },
       columns: [
-        { label: 'Tên khách hàng', key: 'name' },
         { label: 'Ảnh', key: 'avatar_url',type : 'image_file' },
+        { label: 'Tên khách hàng', key: 'name' },
+        { label: 'Mã KH', key: 'code' },
         { label: 'Email', key: 'email' },
         { label: 'SĐT', key: 'phone' },
-        { label: 'Địa chỉ', key: 'address' }
+        { label: 'Địa chỉ', key: 'address_full' },
+        { label: 'Loại khách hàng' , key: 'type', classMap: {
+            'company': 'bg-purple-100 text-purple-700 font-semibold px-2 py-1 rounded-full text-xs inline-block',
+            'individual': 'bg-green-100 text-green-700 font-semibold px-2 py-1 rounded-full text-xs inline-block'
+          }
+        }
       ],
       searchKeyword: '',
       dropdownId: null
     }
   },
-  mounted() {
+  async mounted() {
     document.addEventListener('click', this.closeDropdown)
     const encoded = this.$route.query.query
     if (encoded) {
@@ -83,7 +92,7 @@ export default {
       this.pagination.per_page = parseInt(decoded.limit) || 10
     }
 
-    this.fetchCustomers(this.pagination.current_page)
+    await this.fetchCustomers(this.pagination.current_page)
   },
   beforeDestroy() {
      document.removeEventListener('click', this.closeDropdown)
@@ -122,36 +131,44 @@ export default {
         query: { query: encoded }
       })
     },
-    fetchCustomers(page = 1) {
-      const params = {
-        page,
-        keyword: this.searchKeyword,
-        limit: this.pagination.per_page
-      }
+    async fetchCustomers(page = 1) {
+      this.isLoading = true
+      this.customers = []
+      try {
+        const params = {
+          page,
+          keyword: this.searchKeyword,
+          limit: this.pagination.per_page
+        }
 
-      this.updateUrlQuery(page)
+        this.updateUrlQuery(page)
 
-      window.axios.get('/api/customer/list', { params }).then(res => {
-        this.customers = res.data.data.data
+        await window.axios.get('/api/customer/list', { params }).then(res => {
+          this.customers = res.data.data.data
 
-        const {
-          current_page,
-          last_page,
-          from,
-          to,
-          per_page,
-          total
-        } = res.data.data
+          const {
+            current_page,
+            last_page,
+            from,
+            to,
+            per_page,
+            total
+          } = res.data.data
 
-        Object.assign(this.pagination, {
-          current_page,
-          last_page,
-          from,
-          to,
-          per_page,
-          total
+          Object.assign(this.pagination, {
+            current_page,
+            last_page,
+            from,
+            to,
+            per_page,
+            total
+          })
         })
-      })
+      } catch (error) {
+        console.log(error);
+      } finally {
+        this.isLoading = false
+      }
     },
     onSearch(keyword) {
       this.searchKeyword = keyword

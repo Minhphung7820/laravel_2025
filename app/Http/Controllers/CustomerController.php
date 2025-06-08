@@ -40,13 +40,15 @@ class CustomerController extends Controller
                 'required',
                 'string',
                 'max:20',
-                \Illuminate\Validation\Rule::unique('customers', 'phone')->where(fn($q) => $q->where('is_customer', 1)),
+                \Illuminate\Validation\Rule::unique('customers', 'phone')
+                    ->where(fn($q) => $q->where('is_customer', 1)),
             ],
             'code' => [
                 'required',
                 'string',
                 'max:100',
-                \Illuminate\Validation\Rule::unique('customers', 'code')->where(fn($q) => $q->where('is_customer', 1)),
+                \Illuminate\Validation\Rule::unique('customers', 'code')
+                    ->where(fn($q) => $q->where('is_customer', 1)),
             ],
             'email'       => 'nullable|email|max:255',
             'birthday'    => 'nullable|date',
@@ -140,13 +142,17 @@ class CustomerController extends Controller
                 'required',
                 'string',
                 'max:20',
-                \Illuminate\Validation\Rule::unique('customers', 'phone')->where(fn($q) => $q->where('is_customer', 1))->ignore($customer->id),
+                \Illuminate\Validation\Rule::unique('customers', 'phone')
+                    ->where(fn($q) => $q->where('is_customer', 1))
+                    ->ignore($customer->id),
             ],
             'code'        => [
                 'required',
                 'string',
                 'max:100',
-                \Illuminate\Validation\Rule::unique('customers', 'code')->where(fn($q) => $q->where('is_customer', 1))->ignore($customer->id),
+                \Illuminate\Validation\Rule::unique('customers', 'code')
+                    ->where(fn($q) => $q->where('is_customer', 1))
+                    ->ignore($customer->id),
             ],
             'email'       => 'nullable|email|max:255',
             'birthday'    => 'nullable|date',

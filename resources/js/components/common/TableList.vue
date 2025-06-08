@@ -47,7 +47,7 @@
         <thead class="bg-gray-100 sticky top-0 z-10">
           <tr>
             <th v-if="withCheckbox" class="w-12 px-4 py-3">
-              <input type="checkbox" @change="toggleAll" :checked="isAllCheckedOnPage" />
+              <input :disabled="isLoading" type="checkbox" @change="toggleAll" :checked="isAllCheckedOnPage" />
             </th>
             <th
               v-for="col in columns"

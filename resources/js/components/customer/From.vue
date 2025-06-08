@@ -349,7 +349,7 @@
               ]"
             >
               <option value="">-- Chọn tỉnh --</option>
-              <option v-for="item in provinces" :key="item.id" :value="item.id">{{ item.name }}</option>
+              <option v-for="item in provinces" :key="item.code" :value="item.code">{{ item.full_name }}</option>
             </select>
             <p v-if="errors.company_province_id" class="text-sm text-red-600 mt-1">
               {{ errors.company_province_id[0] }}
@@ -362,15 +362,18 @@
               Quận/Huyện (công ty) <span class="text-red-500">*</span>
             </label>
             <select
-              ref="company_district_id"
-              v-model="form.company_district_id"
-              :class="[
-                'w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400',
-                errors.company_district_id ? 'border-red-500' : 'border-gray-300'
-              ]"
-            >
-              <option value="">-- Chọn huyện --</option>
-              <option v-for="item in districts" :key="item.id" :value="item.id">{{ item.name }}</option>
+        ref="company_district_id"
+        v-model="form.company_district_id"
+        :disabled="!form.company_province_id || isCompanyDistrictLoading"
+        :class="[
+          'w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400',
+          errors.company_district_id ? 'border-red-500' : 'border-gray-300'
+        ]"
+      >
+        <option value="">-- Chọn huyện --</option>
+        <option v-for="item in companyDistricts" :key="item.code" :value="item.code">
+          {{ item.full_name }}
+        </option>
             </select>
             <p v-if="errors.company_district_id" class="text-sm text-red-600 mt-1">
               {{ errors.company_district_id[0] }}
@@ -385,13 +388,16 @@
             <select
               ref="company_ward_id"
               v-model="form.company_ward_id"
+              :disabled="!form.company_district_id || isCompanyWardLoading"
               :class="[
                 'w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400',
                 errors.company_ward_id ? 'border-red-500' : 'border-gray-300'
               ]"
             >
               <option value="">-- Chọn phường --</option>
-              <option v-for="item in wards" :key="item.id" :value="item.id">{{ item.name }}</option>
+              <option v-for="item in companyWards" :key="item.code" :value="item.code">
+                {{ item.full_name }}
+              </option>
             </select>
             <p v-if="errors.company_ward_id" class="text-sm text-red-600 mt-1">
               {{ errors.company_ward_id[0] }}
@@ -470,8 +476,6 @@ export default {
           .get('/api/common/districts', { params: { province_code: newVal } })
           .then(res => {
             this.districts = res.data.data
-            console.log(res.data.data);
-
           })
           .finally(() => {
             this.isDistrictLoading = false
@@ -481,7 +485,6 @@ export default {
     'form.district_id'(newVal) {
       this.form.ward_id = ''
       this.wards = []
-
       if (newVal) {
         this.isWardLoading = true
         window.axios
@@ -494,6 +497,38 @@ export default {
           })
       }
     },
+    'form.company_province_id'(newVal) {
+      this.form.company_district_id = ''
+      this.form.company_ward_id = ''
+      this.companyDistricts = []
+      this.companyWards = []
+      if (newVal) {
+        this.isCompanyDistrictLoading = true
+        window.axios
+          .get('/api/common/districts', { params: { province_code: newVal } })
+          .then(res => {
+            this.companyDistricts = res.data.data
+          })
+          .finally(() => {
+            this.isCompanyDistrictLoading = false
+          })
+      }
+    },
+    'form.company_district_id'(newVal) {
+      this.form.company_ward_id = ''
+      this.companyWards = []
+      if (newVal) {
+        this.isCompanyWardLoading = true
+        window.axios
+          .get('/api/common/wards', { params: { district_code: newVal } })
+          .then(res => {
+            this.companyWards = res.data.data
+          })
+          .finally(() => {
+            this.isCompanyWardLoading = false
+          })
+      }
+    }
   },
   data() {
     return {

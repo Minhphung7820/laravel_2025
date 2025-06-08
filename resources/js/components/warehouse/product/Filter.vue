@@ -60,7 +60,7 @@
         <!-- Actions -->
         <div class="flex justify-between items-center pt-4">
           <button @click="onResetFilter" class="text-red-600 hover:underline text-sm cursor-pointer">{{ $t('actions.reset_filter') }}</button>
-          <button @click="$emit('apply', filter)" class="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm">
+          <button @click="onApplyFilter" class="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm">
             {{ $t('actions.filter') }}
           </button>
         </div>
@@ -100,6 +100,10 @@ export default {
   methods: {
     onResetFilter() {
       this.$emit('reset')
+      this.$emit('close')
+    },
+    onApplyFilter() {
+      this.$emit('apply', this.filter)
       this.$emit('close')
     }
   }

@@ -582,17 +582,18 @@ export default {
   },
   async mounted() {
     await this.fetchProvinces()
+
     if (this.mode === 'update' && this.customerId) {
       try {
         const customer = await window.axios.get(`/api/customer/detail/${this.customerId}`)
         const { data } = customer.data
 
         Object.assign(this.form, data)
-
         this.form.birthday = data.birthday ? data.birthday.split('T')[0] : ''
         this.avatarPreview = data.avatar_url || null
 
-        this.loadAllLocationOnUpdate()
+        // Load địa chỉ song song
+        await this.loadAllLocationOnUpdate()
 
         this.originalForm = JSON.stringify(this.form)
       } catch (err) {
@@ -602,6 +603,7 @@ export default {
     } else {
       this.originalForm = JSON.stringify(this.form)
     }
+
     window.addEventListener('beforeunload', this.handleBeforeUnload)
   },
   beforeDestroy() {
@@ -665,29 +667,54 @@ export default {
       }
     },
     async loadAllLocationOnUpdate() {
-      if (this.form.province_id) {
+      const tasks = []
+
+      if (this.form.province_id && this.districts.length === 0) {
         this.isDistrictLoading = true
-        const res = await window.axios.get('/api/common/districts', { params: { province_code: this.form.province_id } })
-        this.districts = res.data.data
-        this.isDistrictLoading = false
-        if (this.form.company_province_id) {
-          this.isCompanyDistrictLoading = true
-          this.companyDistricts = res.data.data
-          this.isCompanyDistrictLoading = false
-        }
-      }
-      if (this.form.district_id) {
-        this.isWardLoading = true
-        const res = await window.axios.get('/api/common/wards', { params: { district_code: this.form.district_id } })
-        this.wards = res.data.data
-        this.isWardLoading = false
-        if(this.form.company_district_id){
-          this.isCompanyWardLoading = true
-          this.companyWards = res.data.data
-          this.isCompanyWardLoading = false
-        }
+        tasks.push(
+          window.axios.get('/api/common/districts', { params: { province_code: this.form.province_id } })
+            .then(res => {
+              this.districts = res.data.data
+            })
+        )
       }
 
+      if (this.form.district_id && this.wards.length === 0) {
+        this.isWardLoading = true
+        tasks.push(
+          window.axios.get('/api/common/wards', { params: { district_code: this.form.district_id } })
+            .then(res => {
+              this.wards = res.data.data
+            })
+        )
+      }
+
+      if (this.form.company_province_id && this.companyDistricts.length === 0) {
+        this.isCompanyDistrictLoading = true
+        tasks.push(
+          window.axios.get('/api/common/districts', { params: { province_code: this.form.company_province_id } })
+            .then(res => {
+              this.companyDistricts = res.data.data
+            })
+        )
+      }
+
+      if (this.form.company_district_id && this.companyWards.length === 0) {
+        this.isCompanyWardLoading = true
+        tasks.push(
+          window.axios.get('/api/common/wards', { params: { district_code: this.form.company_district_id } })
+            .then(res => {
+              this.companyWards = res.data.data
+            })
+        )
+      }
+
+      await Promise.all(tasks)
+
+      this.isDistrictLoading = false
+      this.isWardLoading = false
+      this.isCompanyDistrictLoading = false
+      this.isCompanyWardLoading = false
     },
     async fetchProvinces() {
       const { data } = await window.axios.get('/api/common/provinces')

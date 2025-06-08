@@ -665,7 +665,7 @@ export default {
         e.returnValue = ''
       }
     },
-    async submitForm() {
+    checkValidate(){
       this.errors = {}
 
       if (!this.form.name) this.errors.name = ['Tên khách hàng là bắt buộc']
@@ -691,8 +691,13 @@ export default {
               })
           }
         })
-        return
+        return false
+      } else {
+        return true
       }
+    },
+    async submitForm() {
+      if(!this.checkValidate()) return
       try {
         const formData = new FormData()
         for (const key in this.form) {

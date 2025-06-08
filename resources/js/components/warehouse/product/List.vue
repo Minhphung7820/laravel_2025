@@ -137,7 +137,9 @@ export default {
         }
       ],
       comboList: [],
-      showCombo: false
+      showCombo: false  ,
+      currentTab: 'all',
+      productCache: {}
     }
   },
   mounted() {
@@ -157,6 +159,10 @@ export default {
     document.removeEventListener('click', this.closeDropdown)
   },
   methods: {
+    makeCacheKey(tab = this.currentStatus, page = this.pagination.current_page) {
+      const filtersStr = JSON.stringify(this.filters)
+      return `${tab}__${this.searchKeyword}__page:${page}__filters:${filtersStr}`
+    },
     handleShowCombo(item) {
       this.comboList = item.combo_list || []
       this.showCombo = true
@@ -219,12 +225,26 @@ export default {
     async fetchProducts(page = 1) {
       this.isLoading = true
       this.products = []
+
+      const cacheKey = this.makeCacheKey(this.currentStatus, page)
+
+      if (this.productCache[cacheKey]) {
+        const { products, pagination, statusTabs } = this.productCache[cacheKey]
+        this.products = products
+        this.pagination = { ...pagination }
+        this.statusTabs = statusTabs
+        this.isLoading = false
+        this.updateUrlQuery(page)
+        return
+      }
+
       this.statusTabs = [
         { key: 'all', label: 'product_status.all', count: 0 },
         { key: 'pending', label: 'product_status.pending', count: 0 },
         { key: 'approved', label: 'product_status.approved', count: 0 },
         { key: 'rejected', label: 'product_status.rejected', count: 0 }
       ]
+
       const params = {
         page,
         keyword: this.searchKeyword,
@@ -247,6 +267,12 @@ export default {
         this.products = resList.data.data.data
         Object.assign(this.pagination, resList.data.data)
         this.statusTabs = resCount.data.data
+
+        this.productCache[cacheKey] = {
+          products: this.products,
+          pagination: { ...this.pagination },
+          statusTabs: this.statusTabs
+        }
       } catch (error) {
         console.error('Lỗi khi gọi API:', error)
       } finally {

@@ -38,7 +38,7 @@ class ProductController extends Controller
                 $join->on('st.stock_id', '=', 's.id')
                     ->where('s.is_default', 1);
             })
-            ->leftJoin('units as u', 'st.unit_id', '=', 'u.id')
+            ->leftJoin('units as u', 'products.unit_id', '=', 'u.id')
             ->leftJoin('attributes as attr1', 'st.attribute_first_id', '=', 'attr1.id')
             ->leftJoin('attributes as attr2', 'st.attribute_second_id', '=', 'attr2.id')
             ->leftJoin('variants as var1', 'attr1.variant_id', '=', 'var1.id')
@@ -96,7 +96,7 @@ class ProductController extends Controller
             'products.status',
         ]);
 
-        $query->orderBy("st.id","desc");
+        $query->orderBy("st.id", "desc");
 
         $results = $query->paginate($limit);
 
@@ -123,7 +123,7 @@ class ProductController extends Controller
             ->leftJoin('variants as var2', 'attr2_org.variant_id', '=', 'var2.id')
             ->join('products', 'stock_products.product_id', '=', 'products.id')
             ->join('stocks', 'stock_products.stock_id', '=', 'stocks.id')
-            ->leftJoin('units', 'stock_products.unit_id', '=', 'units.id')
+            ->leftJoin('units as u', 'products.unit_id', '=', 'u.id')
             ->leftJoin('product_variant_images', 'product_variant_images.stock_product_id', '=', 'stock_products.id')
             ->where('stocks.is_default', 1)
             ->select([
@@ -154,7 +154,7 @@ class ProductController extends Controller
                 'stock_products.quantity',
                 'stock_products.attribute_first_id',
                 'stock_products.attribute_second_id',
-                'units.name as unit_name',
+                'u.name as unit_name',
                 DB::raw("CASE
                     WHEN products.type = 'variable' THEN
                         COALESCE(CONCAT('$urlPrefix', product_variant_images.image), '$imageDefault')

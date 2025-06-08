@@ -27,7 +27,7 @@
               {{ getProductName(combo) }}
             </div>
             <div class="text-sm text-gray-600">{{ $t('combo_modal.sku') }}: {{ getSku(combo) }}</div>
-            <div class="text-sm text-gray-600">  {{ $t('combo_modal.quantity_price', { quantity: combo.quantity_combo, price: combo.sell_price_combo }) }}</div>
+            <div class="text-sm text-gray-600"> {{ getComboPriceText(combo) }}</div>
           </div>
         </div>
 
@@ -42,6 +42,8 @@
 </template>
 
 <script>
+import { formatCurrency } from '@/utils/currency'
+
 export default {
   props: {
     comboList: Array,
@@ -65,6 +67,13 @@ export default {
     }
   },
   methods: {
+    formatCurrency,
+    getComboPriceText(combo) {
+      return this.$t('combo_modal.quantity_price', {
+        quantity: combo.quantity_combo,
+        price: this.formatCurrency(combo.sell_price_combo, this.$i18n.locale)
+      })
+    },
     resetData() {
       this.page = 1
       this.comboItems = this.comboList.slice(0, this.perPage)

@@ -9,6 +9,7 @@
       @search="onSearch"
       @page-change="fetchBrands"
       :placeholder="$t('brand.search_placeholder')"
+      :isLoading="isLoading"
     >
       <template #buttons>
         <button
@@ -50,6 +51,7 @@ export default {
   components: { CommonTable },
   data() {
     return {
+      isLoading : true,
       search: '',
       brands: [],
       pagination: {
@@ -83,17 +85,25 @@ export default {
       this.dropdownId = null
     },
     async fetchBrands(page = 1) {
-      const res = await window.axios.get('/api/warehouse/brand/list', {
-        params: { page, keyword: this.search }
-      })
-      this.brands = res.data.data.data
-      this.pagination = {
-        current_page: res.data.data.current_page,
-        last_page: res.data.data.last_page,
-        from: res.data.data.from,
-        to: res.data.data.to,
-        total: res.data.data.total,
-        per_page: res.data.data.per_page
+        this.isLoading = true;
+        this.brands = []
+        try {
+          const res = await window.axios.get('/api/warehouse/brand/list', {
+          params: { page, keyword: this.search }
+        })
+        this.brands = res.data.data.data
+        this.pagination = {
+          current_page: res.data.data.current_page,
+          last_page: res.data.data.last_page,
+          from: res.data.data.from,
+          to: res.data.data.to,
+          total: res.data.data.total,
+          per_page: res.data.data.per_page
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        this.isLoading = false
       }
     },
     onSearch(keyword) {

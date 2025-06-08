@@ -9,6 +9,7 @@
       @page-change="fetchCategories"
       @search="onSearch"
       :placeholder="$t('category.search_placeholder')"
+      :isLoading="isLoading"
     >
       <!-- Nút thêm -->
       <template #buttons>
@@ -53,6 +54,7 @@ export default {
   components: { TableList },
   data() {
     return {
+      isLoading : true,
       categories: [],
       pagination: {
         current_page: 1,
@@ -85,6 +87,8 @@ export default {
       this.dropdownId = this.dropdownId === id ? null : id
     },
     async fetchCategories(page = 1) {
+      this.isLoading = true
+      this.categories = []
       try {
         const res = await window.axios.get('/api/warehouse/category/list', {
           params: { page, keyword: this.keyword }
@@ -99,6 +103,8 @@ export default {
         }
       } catch (e) {
         console.error('Lỗi khi lấy danh sách danh mục:', e)
+      } finally {
+        this.isLoading = false
       }
     },
     onSearch(keyword) {

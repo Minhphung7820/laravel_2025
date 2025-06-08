@@ -180,36 +180,49 @@
       </label>
     </div>
     <!-- Chọn thuộc tính và giá trị con -->
-    <div v-if="form.has_variant && variantAttributes.length" class="space-y-4">
+    <div v-if="form.has_variant" class="space-y-4">
       <h2 class="font-semibold text-blue-600">{{ $t('product.msg_max_attr') }}</h2>
-      <div v-for="(attr, index) in variantAttributes" :key="attr.id" class="p-3 rounded w-fit">
-        <label class="font-semibold block mb-1">
-          <input
-            type="checkbox"
-            :value="attr"
-            v-model="selectedAttributes"
-            :disabled="(!isAttrSelected(attr) && selectedAttributes.length >= 2)"
-            @change="onValueChange($event, attr.id, null)"
-          />
-          {{ attr.title }}
-        </label>
-        <div
-          v-if="isAttrSelected(attr)"
-          class="ml-4 mt-2 inline-flex flex-wrap gap-2 w-auto max-w-full"
-        >
-          <label
-            v-for="opt in attr.attributes"
-            :key="opt.id"
-            class="inline-flex items-center gap-1 bg-gray-100 px-2 py-1 rounded"
-          >
+
+      <!-- Loading vòng xoay -->
+      <div v-if="isLoadingAttributes" class="flex items-center space-x-2 text-gray-500 text-sm">
+        <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+        </svg>
+        <!-- <span>{{ $t('product.loading_attributes') || 'Đang tải thuộc tính...' }}</span> -->
+      </div>
+
+      <!-- Danh sách thuộc tính và value -->
+      <div v-else>
+        <div v-for="(attr, index) in variantAttributes" :key="attr.id" class="p-3 rounded w-fit">
+          <label class="font-semibold block mb-1">
             <input
               type="checkbox"
-              :value="Number(opt.id)"
-              v-model="selectedAttributeValues[attr.id]"
-              @change="onValueChange($event, attr.id, opt.id)"
+              :value="attr"
+              v-model="selectedAttributes"
+              :disabled="(!isAttrSelected(attr) && selectedAttributes.length >= 2)"
+              @change="onValueChange($event, attr.id, null)"
             />
-            <span>{{ opt.title }}</span>
+            {{ attr.title }}
           </label>
+          <div
+            v-if="isAttrSelected(attr)"
+            class="ml-4 mt-2 inline-flex flex-wrap gap-2 w-auto max-w-full"
+          >
+            <label
+              v-for="opt in attr.attributes"
+              :key="opt.id"
+              class="inline-flex items-center gap-1 bg-gray-100 px-2 py-1 rounded"
+            >
+              <input
+                type="checkbox"
+                :value="Number(opt.id)"
+                v-model="selectedAttributeValues[attr.id]"
+                @change="onValueChange($event, attr.id, opt.id)"
+              />
+              <span>{{ opt.title }}</span>
+            </label>
+          </div>
         </div>
       </div>
     </div>
@@ -328,7 +341,8 @@ export default {
       remove_stock_ids: [],
       errors: {},
       loading: true,
-      removed_variant_image_ids: []
+      removed_variant_image_ids: [],
+      isLoadingAttributes: false
     }
   },
   watch: {
@@ -347,19 +361,6 @@ export default {
         this.generateVariantGrid()
       },
       deep: true
-    },
-    'form.category_id'(newVal) {
-      if (!newVal && this.form.has_variant) {
-        this.form.has_variant = false
-        this.type = 'single'
-        this.form.type = 'single'
-        Swal.fire({
-          icon: 'warning',
-          title: this.$t('product.category_required_title'),
-          text: this.$t('product.category_required_msg'),
-          confirmButtonText: 'OK'
-        })
-      }
     }
   },
   async mounted() {
@@ -554,6 +555,19 @@ export default {
       this.previewAttributes = []
       this.form.variants = []
       this.trashVariants = []
+
+      if (!this.form.category_id && this.form.has_variant) {
+        this.form.has_variant = false
+        this.form.type = 'single'
+        Swal.fire({
+          icon: 'warning',
+          title: this.$t('product.category_required_title') || 'Thiếu danh mục',
+          text: this.$t('product.category_required_msg') || 'Vui lòng chọn danh mục trước khi bật biến thể.',
+          confirmButtonText: 'OK'
+        })
+        return
+      }
+
       this.checkAndLoadVariants()
     },
     async onVariantCheckboxChange(e) {
@@ -702,21 +716,28 @@ export default {
       })
     },
     async checkAndLoadVariants(isMappingData = false) {
-      if (this.form.has_variant && this.form.category_id) {
-        const res = await fetch(`/api/warehouse/category/${this.form.category_id}/attributes`)
-        const dataJson = await res.json()
-        this.variantAttributes = dataJson.data
-        if (!isMappingData) {
+      this.isLoadingAttributes = true
+      try {
+        if (this.form.has_variant && this.form.category_id) {
+          const res = await fetch(`/api/warehouse/category/${this.form.category_id}/attributes`)
+          const dataJson = await res.json()
+          this.variantAttributes = dataJson.data
+          if (!isMappingData) {
+            this.selectedAttributes = []
+            this.selectedAttributeValues = {}
+            this.variantAttributes.forEach(attr => {
+              this.selectedAttributeValues[attr.id] = []
+            })
+          }
+        } else {
+          this.variantAttributes = []
           this.selectedAttributes = []
           this.selectedAttributeValues = {}
-          this.variantAttributes.forEach(attr => {
-            this.selectedAttributeValues[attr.id] = []
-          })
         }
-      } else {
-        this.variantAttributes = []
-        this.selectedAttributes = []
-        this.selectedAttributeValues = {}
+      } catch (error) {
+          console.log(error);
+      } finally {
+          this.isLoadingAttributes = false
       }
     },
     generateVariantGrid() {

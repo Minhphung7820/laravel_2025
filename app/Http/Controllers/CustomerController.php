@@ -208,6 +208,21 @@ class CustomerController extends Controller
             $validated['avatar'] = $this->uploadFile($request->file('avatar'), 'avatars');
         }
 
+        if ($validated['type'] === 'individual') {
+            $validated['company_name']        = null;
+            $validated['position']            = null;
+            $validated['website_url']         = null;
+            $validated['number_of_employees'] = null;
+            $validated['revenue_estimate']    = null;
+            $validated['company_address']     = null;
+            $validated['company_province_id'] = null;
+            $validated['company_district_id'] = null;
+            $validated['company_ward_id']     = null;
+            $validated['representative_name'] = null;
+            $validated['company_tax_code']    = null;
+            $validated['founded_at']          = null;
+        }
+
         $customer->update($validated);
 
         return $this->responseSuccess($customer, 'Cập nhật khách hàng thành công');

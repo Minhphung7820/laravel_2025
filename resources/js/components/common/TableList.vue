@@ -44,7 +44,7 @@
     </div>
 
     <div class="rounded-lg border border-gray-200 overflow-visible">
-      <table class="min-w-full divide-y divide-gray-200 min-h-[300px]">
+      <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-100 sticky top-0 z-10">
           <tr>
             <th v-if="withCheckbox" class="w-12 px-4 py-3">
@@ -60,7 +60,7 @@
             <th v-if="hasActions" class="px-4 py-3"></th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-100 bg-white">
+        <tbody class="divide-y divide-gray-100 bg-white" :class="{ 'min-h-[300px]': !isLoading && data.length === 0 }">
           <tr v-if="isLoading">
             <td
               :colspan="(columns.length + (withCheckbox ? 1 : 0) + (hasActions ? 1 : 0))"

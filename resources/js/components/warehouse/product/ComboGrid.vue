@@ -109,19 +109,19 @@
     <!-- Modal -->
     <div v-if="showModal" class="fixed inset-0 flex items-center justify-center z-50">
       <div class="absolute inset-0 bg-gray-200 bg-opacity-90"></div>
-      <div class="bg-white w-[90%] max-w-[1200px] min-h-[600px] rounded-xl shadow-lg z-10 p-6 relative flex flex-col">
+      <div class="bg-white w-[90%] max-w-[1200px] rounded-xl shadow-lg z-10 p-6 relative">
         <h3 class="text-lg font-semibold mb-4">{{ $t('combo_grid.add_quick') }}</h3>
-        <CommonTable
-          :columns="productColumns"
-          :data="productList"
-          :pagination="pagination"
-          :withCheckbox="true"
-          :placeholder="$t('product_list.search_placeholder')"
-          @search="onSearch"
-          @page-change="onPageChange"
-          @selection-change="onSelected"
-          :isLoading="isLoading"
-        />
+          <CommonTable
+            :columns="productColumns"
+            :data="productList"
+            :pagination="pagination"
+            :withCheckbox="true"
+            :placeholder="$t('product_list.search_placeholder')"
+            @search="onSearch"
+            @page-change="onPageChange"
+            @selection-change="onSelected"
+            :isLoading="isLoading"
+          />
         <div class="flex justify-end gap-2 pt-6 mt-auto">
           <button class="px-4 py-1 rounded bg-red-300 text-white hover:bg-red-400" @click="closeModal">{{ $t('combo_grid.cancel') }}</button>
           <button class="px-4 py-1 rounded bg-blue-600 text-white hover:bg-blue-700" @click="onSaveComboItems">

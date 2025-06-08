@@ -218,6 +218,7 @@ export default {
     },
     async fetchProducts(page = 1) {
       this.isLoading = true
+      this.products = []
       const params = {
         page,
         keyword: this.searchKeyword,

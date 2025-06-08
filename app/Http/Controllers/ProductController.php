@@ -30,40 +30,17 @@ class ProductController extends Controller
             'comboList.parent.variantImages:id,image,stock_product_id',
             'comboList:id,sell_price_combo,parent_id,quantity_combo,product_id',
             'comboList.parent:id,sku,product_id,attribute_first_id,attribute_second_id'
-        ])
-            ->join('stock_products as st', function ($join) {
-                $join->on('products.id', '=', 'st.product_id');
-            })
-            ->join('stocks as s', function ($join) {
-                $join->on('st.stock_id', '=', 's.id')
-                    ->where('s.is_default', 1);
-            })
+        ]);
+        $this->applyCommonProductFilters($query, $request, true)
+            ->leftJoin('brands', 'products.brand_id', '=', 'brands.id')
+            ->leftJoin('categories as cat', 'products.category_id', '=', 'cat.id')
+            ->leftJoin('customers as splr', 'products.supplier_id', '=', 'splr.id')
             ->leftJoin('units as u', 'products.unit_id', '=', 'u.id')
             ->leftJoin('attributes as attr1', 'st.attribute_first_id', '=', 'attr1.id')
             ->leftJoin('attributes as attr2', 'st.attribute_second_id', '=', 'attr2.id')
             ->leftJoin('variants as var1', 'attr1.variant_id', '=', 'var1.id')
             ->leftJoin('variants as var2', 'attr2.variant_id', '=', 'var2.id')
-            ->leftJoin('product_variant_images as pvi', 'pvi.stock_product_id', '=', 'st.id')
-            ->where(function ($q) {
-                $q->where(function ($q2) {
-                    $q2->where('products.type', 'variable')
-                        ->where('st.product_type', 'variable');
-                })->orWhere(function ($q2) {
-                    $q2->whereIn('products.type', ['single', 'combo'])
-                        ->where('st.product_type', 'root_stock');
-                });
-            });
-
-        if ($search = $request->input('keyword')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('products.name', 'like', "%{$search}%")
-                    ->orWhere('st.sku', 'like', "%{$search}%");
-            });
-        }
-
-        if ($status = $request->input('status')) {
-            $query->where('products.status', $status);
-        }
+            ->leftJoin('product_variant_images as pvi', 'pvi.stock_product_id', '=', 'st.id');
 
         $query->select([
             'st.id',
@@ -101,6 +78,125 @@ class ProductController extends Controller
         $results = $query->paginate($limit);
 
         return $this->responseSuccess($results);
+    }
+
+    public function getStatusCounts(Request $request)
+    {
+        $query = Product::query()
+            ->leftJoin('brands', 'products.brand_id', '=', 'brands.id')
+            ->leftJoin('categories as cat', 'products.category_id', '=', 'cat.id')
+            ->leftJoin('customers as splr', 'products.supplier_id', '=', 'splr.id')
+            ->leftJoin('units as u', 'products.unit_id', '=', 'u.id');
+        $this->applyCommonProductFilters($query, $request);
+
+        $query->select('products.status', DB::raw('COUNT(*) as total'))
+            ->groupBy('products.status');
+
+        $rawCounts = $query->get()->pluck('total', 'status')->toArray();
+
+        $counts = [
+            [
+                'key' => 'all',
+                'label' => 'product_status.all',
+                'count' => array_sum($rawCounts)
+            ],
+            [
+                'key' => 'pending',
+                'label' => 'product_status.pending',
+                'count' => $rawCounts['pending'] ?? 0
+            ],
+            [
+                'key' => 'approved',
+                'label' => 'product_status.approved',
+                'count' => $rawCounts['approved'] ?? 0
+            ],
+            [
+                'key' => 'rejected',
+                'label' => 'product_status.rejected',
+                'count' => $rawCounts['rejected'] ?? 0
+            ]
+        ];
+
+        return $this->responseSuccess($counts);
+    }
+
+    private function applyCommonProductFilters($query, Request $request, $statusFilter = false)
+    {
+        $query->join('stock_products as st', 'products.id', '=', 'st.product_id')
+            ->join('stocks as s', function ($join) {
+                $join->on('st.stock_id', '=', 's.id')
+                    ->where('s.is_default', 1);
+            })
+            ->where(function ($q) {
+                $q->where(function ($q2) {
+                    $q2->where('products.type', 'variable')
+                        ->where('st.product_type', 'variable');
+                })->orWhere(function ($q2) {
+                    $q2->whereIn('products.type', ['single', 'combo'])
+                        ->where('st.product_type', 'root_stock');
+                });
+            });
+
+        // Search
+        if ($search = $request->input('keyword')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('products.name', 'like', "%{$search}%")
+                    ->orWhere('st.sku', 'like', "%{$search}%");
+            });
+        }
+
+        // Status
+        if ($statusFilter && $request->filled('status')) {
+            $query->where('products.status', $request->input('status'));
+        }
+
+        // Supplier
+        if ($supplier = $request->input('supplier')) {
+            $query->where('splr.name', 'like', "%{$supplier}%");
+        }
+
+        // Brand
+        if ($brand = $request->input('brand')) {
+            $query->where('brands.name', 'like', "%{$brand}%");
+        }
+
+        // Category
+        if ($category = $request->input('category')) {
+            $query->where('cat.title', 'like', "%{$category}%");
+        }
+
+        // Unit
+        if ($unit = $request->input('unit')) {
+            $query->where('u.name', 'like', "%{$unit}%");
+        }
+
+        // From Date
+        if ($fromDate = $request->input('from_date')) {
+            $query->whereDate('products.created_at', '>=', $fromDate);
+        }
+
+        // To Date
+        if ($toDate = $request->input('to_date')) {
+            $query->whereDate('products.created_at', '<=', $toDate);
+        }
+
+        // Time Range (override From/To date)
+        if ($timeRange = $request->input('time_range')) {
+            $now = now();
+            switch ($timeRange) {
+                case 'today':
+                    $query->whereDate('products.created_at', $now->toDateString());
+                    break;
+                case 'this_week':
+                    $query->whereBetween('products.created_at', [$now->startOfWeek(), $now->endOfWeek()]);
+                    break;
+                case 'this_month':
+                    $query->whereBetween('products.created_at', [$now->startOfMonth(), $now->endOfMonth()]);
+                    break;
+            }
+        }
+
+        return $query;
     }
 
     public function getInitCombo(Request $request)

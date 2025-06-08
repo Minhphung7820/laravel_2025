@@ -98,10 +98,10 @@ export default {
       products: [],
       currentStatus: 'all',
       statusTabs: [
-        { key: 'all', label: 'product_status.all', count: 12 },
-        { key: 'pending', label: 'product_status.pending', count: 5 },
-        { key: 'approved', label: 'product_status.approved', count: 7 },
-        { key: 'rejected', label: 'product_status.rejected', count: 7 }
+        // { key: 'all', label: 'product_status.all', count: 12 },
+        // { key: 'pending', label: 'product_status.pending', count: 5 },
+        // { key: 'approved', label: 'product_status.approved', count: 7 },
+        // { key: 'rejected', label: 'product_status.rejected', count: 7 }
       ],
       pagination: {
         current_page: 1,
@@ -219,7 +219,7 @@ export default {
         page,
         keyword: this.searchKeyword,
         limit: this.pagination.per_page,
-        ...this.filters // gửi các field lọc xuống API
+        ...this.filters
       }
 
       if (['pending', 'approved','rejected'].includes(this.currentStatus)) {
@@ -231,6 +231,9 @@ export default {
       window.axios.get('/api/warehouse/product/list', { params }).then(res => {
         this.products = res.data.data.data
         Object.assign(this.pagination, res.data.data)
+      })
+      window.axios.get('/api/warehouse/product/get-status-count', { params }).then(res => {
+        this.statusTabs = res.data.data
       })
     },
     onSearch(keyword) {

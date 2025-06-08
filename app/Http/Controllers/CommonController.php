@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\District;
 use App\Models\Province;
 use App\Models\Ward;

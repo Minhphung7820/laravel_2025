@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Constants\Common;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
@@ -31,7 +30,7 @@ class Product extends Model
 
     protected $casts = [
         'has_variant' => 'boolean',
-        'has_serial' => 'boolean'
+        'has_serial'  => 'boolean'
     ];
     public function stockData()
     {

@@ -106,6 +106,7 @@
             <select
               ref="province_id"
               v-model="form.province_id"
+               @change="onProvinceChange"
               :class="[
                 'w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400',
                 errors.province_id ? 'border-red-500' : 'border-gray-300'
@@ -123,6 +124,7 @@
               ref="district_id"
               v-model="form.district_id"
               :disabled="!form.province_id || isDistrictLoading"
+              @change="onDistrictChange"
               :class="[
                 'w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400',
                 errors.district_id ? 'border-red-500' : 'border-gray-300'
@@ -375,6 +377,7 @@
             <select
               ref="company_province_id"
               v-model="form.company_province_id"
+              @change="onCompanyProvinceChange"
               :class="[
                 'w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400',
                 errors.company_province_id ? 'border-red-500' : 'border-gray-300'
@@ -394,14 +397,15 @@
               Quận/Huyện (công ty) <span class="text-red-500">*</span>
             </label>
             <select
-        ref="company_district_id"
-        v-model="form.company_district_id"
-        :disabled="!form.company_province_id || isCompanyDistrictLoading"
-        :class="[
-          'w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400',
-          errors.company_district_id ? 'border-red-500' : 'border-gray-300'
-        ]"
-      >
+                ref="company_district_id"
+                v-model="form.company_district_id"
+                @change="onCompanyDistrictChange"
+                :disabled="!form.company_province_id || isCompanyDistrictLoading"
+                :class="[
+                  'w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400',
+                  errors.company_district_id ? 'border-red-500' : 'border-gray-300'
+                ]"
+              >
         <option value="">-- Chọn huyện --</option>
         <option v-for="item in companyDistricts" :key="item.code" :value="item.code">
           {{ item.full_name }}
@@ -496,72 +500,6 @@ export default {
       default: null
     }
   },
-  watch: {
-    'form.province_id'(newVal) {
-      this.form.district_id = ''
-      this.form.ward_id = ''
-      this.districts = []
-      this.wards = []
-      if (newVal) {
-        this.isDistrictLoading = true
-        window.axios
-          .get('/api/common/districts', { params: { province_code: newVal } })
-          .then(res => {
-            this.districts = res.data.data
-          })
-          .finally(() => {
-            this.isDistrictLoading = false
-          })
-      }
-    },
-    'form.district_id'(newVal) {
-      this.form.ward_id = ''
-      this.wards = []
-      if (newVal) {
-        this.isWardLoading = true
-        window.axios
-          .get('/api/common/wards', { params: { district_code: newVal } })
-          .then(res => {
-            this.wards = res.data.data
-          })
-          .finally(() => {
-            this.isWardLoading = false
-          })
-      }
-    },
-    'form.company_province_id'(newVal) {
-      this.form.company_district_id = ''
-      this.form.company_ward_id = ''
-      this.companyDistricts = []
-      this.companyWards = []
-      if (newVal) {
-        this.isCompanyDistrictLoading = true
-        window.axios
-          .get('/api/common/districts', { params: { province_code: newVal } })
-          .then(res => {
-            this.companyDistricts = res.data.data
-          })
-          .finally(() => {
-            this.isCompanyDistrictLoading = false
-          })
-      }
-    },
-    'form.company_district_id'(newVal) {
-      this.form.company_ward_id = ''
-      this.companyWards = []
-      if (newVal) {
-        this.isCompanyWardLoading = true
-        window.axios
-          .get('/api/common/wards', { params: { district_code: newVal } })
-          .then(res => {
-            this.companyWards = res.data.data
-          })
-          .finally(() => {
-            this.isCompanyWardLoading = false
-          })
-      }
-    }
-  },
   data() {
     return {
       form: {
@@ -648,10 +586,14 @@ export default {
       try {
         const customer = await window.axios.get(`/api/customer/detail/${this.customerId}`)
         const { data } = customer.data
-        this.form = { ...this.form, ...data }
-        this.form.avatar = null;
+
+        Object.assign(this.form, data)
+
         this.form.birthday = data.birthday ? data.birthday.split('T')[0] : ''
         this.avatarPreview = data.avatar_url || null
+
+        this.loadAllLocationOnUpdate()
+
         this.originalForm = JSON.stringify(this.form)
       } catch (err) {
         alert('Không tìm thấy khách hàng')
@@ -660,13 +602,93 @@ export default {
     } else {
       this.originalForm = JSON.stringify(this.form)
     }
-
     window.addEventListener('beforeunload', this.handleBeforeUnload)
   },
   beforeDestroy() {
     window.removeEventListener('beforeunload', this.handleBeforeUnload)
   },
   methods: {
+    async onProvinceChange() {
+      this.form.district_id = ''
+      this.form.ward_id = ''
+      this.districts = []
+      this.wards = []
+
+      if (this.form.province_id) {
+        this.isDistrictLoading = true
+        const res = await window.axios.get('/api/common/districts', {
+          params: { province_code: this.form.province_id }
+        })
+        this.districts = res.data.data
+        this.isDistrictLoading = false
+      }
+    },
+    async onDistrictChange() {
+      this.form.ward_id = ''
+      this.wards = []
+
+      if (this.form.district_id) {
+        this.isWardLoading = true
+        const res = await window.axios.get('/api/common/wards', {
+          params: { district_code: this.form.district_id }
+        })
+        this.wards = res.data.data
+        this.isWardLoading = false
+      }
+    },
+    async onCompanyProvinceChange() {
+      this.form.company_district_id = ''
+      this.form.company_ward_id = ''
+      this.companyDistricts = []
+      this.companyWards = []
+
+      if (this.form.company_province_id) {
+        this.isCompanyDistrictLoading = true
+        const res = await window.axios.get('/api/common/districts', {
+          params: { province_code: this.form.company_province_id }
+        })
+        this.companyDistricts = res.data.data
+        this.isCompanyDistrictLoading = false
+      }
+    },
+    async onCompanyDistrictChange() {
+      this.form.company_ward_id = ''
+      this.companyWards = []
+
+      if (this.form.company_district_id) {
+        this.isCompanyWardLoading = true
+        const res = await window.axios.get('/api/common/wards', {
+          params: { district_code: this.form.company_district_id }
+        })
+        this.companyWards = res.data.data
+        this.isCompanyWardLoading = false
+      }
+    },
+    async loadAllLocationOnUpdate() {
+      if (this.form.province_id) {
+        this.isDistrictLoading = true
+        const res = await window.axios.get('/api/common/districts', { params: { province_code: this.form.province_id } })
+        this.districts = res.data.data
+        this.isDistrictLoading = false
+        if (this.form.company_province_id) {
+          this.isCompanyDistrictLoading = true
+          this.companyDistricts = res.data.data
+          this.isCompanyDistrictLoading = false
+        }
+      }
+      if (this.form.district_id) {
+        this.isWardLoading = true
+        const res = await window.axios.get('/api/common/wards', { params: { district_code: this.form.district_id } })
+        this.wards = res.data.data
+        this.isWardLoading = false
+        if(this.form.company_district_id){
+          this.isCompanyWardLoading = true
+          this.companyWards = res.data.data
+          this.isCompanyWardLoading = false
+        }
+      }
+
+    },
     async fetchProvinces() {
       const { data } = await window.axios.get('/api/common/provinces')
       this.provinces = data.data
@@ -739,9 +761,11 @@ export default {
     async submitForm() {
       if(!this.checkValidate()) return
       try {
-        const formData = new FormData()
+       const formData = new FormData()
         for (const key in this.form) {
-          formData.append(key, this.form[key] ?? '')
+          if (key !== 'avatar') {
+            formData.append(key, this.form[key] ?? '')
+          }
         }
         if (this.avatarFile) {
           formData.append('avatar', this.avatarFile)

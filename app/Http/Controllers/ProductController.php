@@ -96,22 +96,22 @@ class ProductController extends Controller
 
         $counts = [
             [
-                'key' => 'all',
+                'key'   => 'all',
                 'label' => 'product_status.all',
                 'count' => array_sum($rawCounts)
             ],
             [
-                'key' => 'pending',
+                'key'   => 'pending',
                 'label' => 'product_status.pending',
                 'count' => $rawCounts['pending'] ?? 0
             ],
             [
-                'key' => 'approved',
+                'key'   => 'approved',
                 'label' => 'product_status.approved',
                 'count' => $rawCounts['approved'] ?? 0
             ],
             [
-                'key' => 'rejected',
+                'key'   => 'rejected',
                 'label' => 'product_status.rejected',
                 'count' => $rawCounts['rejected'] ?? 0
             ]
@@ -390,19 +390,19 @@ class ProductController extends Controller
             }
             // Tạo sản phẩm chính
             $product = Product::create([
-                'name'         => $request->input('name') ?? null,
-                'sku'          => $request->input('sku') ?? null,
-                'barcode'      => $request->input('barcode') ?? null,
-                'type'         => $request->input('type') ?? null,
-                'has_variant'  => $request->input('has_variant') ?? 0,
-                'has_serial'   => $request->input('has_serial') ?? 0,
-                'warranty'     => $request->input('warranty') ?? null,
-                'unit_id'      => $request->input('unit_id') ?? null,
-                'brand_id'     => $request->input('brand_id') ?? null,
-                'category_id'  => $request->input('category_id') ?? null,
-                'supplier_id'  => $request->input('supplier_id') ?? null,
-                'image_cover'  => $coverPath ? $coverPath : null,
-                'status'       => 'pending',
+                'name'        => $request->input('name') ?? null,
+                'sku'         => $request->input('sku') ?? null,
+                'barcode'     => $request->input('barcode') ?? null,
+                'type'        => $request->input('type') ?? null,
+                'has_variant' => $request->input('has_variant') ?? 0,
+                'has_serial'  => $request->input('has_serial') ?? 0,
+                'warranty'    => $request->input('warranty') ?? null,
+                'unit_id'     => $request->input('unit_id') ?? null,
+                'brand_id'    => $request->input('brand_id') ?? null,
+                'category_id' => $request->input('category_id') ?? null,
+                'supplier_id' => $request->input('supplier_id') ?? null,
+                'image_cover' => $coverPath ? $coverPath : null,
+                'status'      => 'pending',
             ]);
             // Lưu ảnh chính (gallery_images) hàng loạt
             if ($request->hasFile('gallery_images')) {
@@ -629,9 +629,9 @@ class ProductController extends Controller
                 'status'      => 'pending'
             ];
             if ($coverPath || empty($request['remove_cover_image'])) {
-                $data['image_cover'] =  $coverPath;
+                $data['image_cover'] = $coverPath;
             } else {
-                $data['image_cover'] =  null;
+                $data['image_cover'] = null;
             }
             if ($data['type'] === 'variable') {
                 $attributes = $request['variants'] ?? [];
@@ -657,7 +657,7 @@ class ProductController extends Controller
             $deletedIds = $request->input('deleted_gallery_ids', []);
 
             if (is_array($deletedIds) && count($deletedIds) > 0) {
-                $validIds = array_filter($deletedIds, fn($id) => is_numeric($id));
+                $validIds = array_filter($deletedIds, fn ($id) => is_numeric($id));
                 ProductImage::whereIn('id', $validIds)->delete();
             }
 
@@ -715,7 +715,7 @@ class ProductController extends Controller
                 }
 
                 if ($data['type'] === 'variable') {
-                    $canceledVariant      = [];
+                    $canceledVariant = [];
                     $canceledImageVariant = [];
                     foreach ($attributes as $key => $attribute) {
                         // Xử lý SKU
@@ -759,9 +759,9 @@ class ProductController extends Controller
                                 'image'            => $path,
                             ]);
                             if ($newImageAttr) {
-                                $canceledImageVariant[]  = [
-                                    'id'                 => $newImageAttr['id'],
-                                    'stock_product_id'   => $attributeModel->id
+                                $canceledImageVariant[] = [
+                                    'id'               => $newImageAttr['id'],
+                                    'stock_product_id' => $attributeModel->id
                                 ];
                             }
                         }

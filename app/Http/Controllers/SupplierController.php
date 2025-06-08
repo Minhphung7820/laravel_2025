@@ -40,7 +40,7 @@ class SupplierController extends Controller
                 'string',
                 'max:20',
                 \Illuminate\Validation\Rule::unique('customers', 'phone')
-                    ->where(fn($q) => $q->where('is_customer', 0)),
+                    ->where(fn ($q) => $q->where('is_customer', 0)),
             ],
             'email'            => 'nullable|email|max:255',
             'birthday'         => 'nullable|date',
@@ -92,7 +92,7 @@ class SupplierController extends Controller
                 'string',
                 'max:20',
                 \Illuminate\Validation\Rule::unique('customers')
-                    ->where(fn($q) => $q->where('is_customer', 0))
+                    ->where(fn ($q) => $q->where('is_customer', 0))
                     ->ignore($supplier->id),
             ],
             'email'            => 'nullable|email|max:255',

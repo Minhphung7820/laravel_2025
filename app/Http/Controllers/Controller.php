@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Traits\UploadFileTrait;
 use App\Traits\ApiResponseTrait;
+use App\Traits\UploadFileTrait;
 
 abstract class Controller
 {
-    use UploadFileTrait, ApiResponseTrait;
+    use UploadFileTrait;
+    use ApiResponseTrait;
 }

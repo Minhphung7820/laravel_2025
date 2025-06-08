@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -33,7 +34,7 @@ class CustomerController extends Controller
             $request->merge(['assigned_user_id' => null]);
         }
 
-        $validated = $request->validate([
+        $rules = [
             // Thông tin cơ bản
             'name'  => 'required|string|max:255',
             'phone' => [
@@ -80,16 +81,10 @@ class CustomerController extends Controller
             'contact_frequency_days' => 'nullable|integer|min:1',
 
             // Công ty
-            'company_name'        => 'required_if:type,company|string|max:255',
             'position'            => 'nullable|string|max:100',
             'website_url'         => 'nullable|url|max:255',
             'number_of_employees' => 'nullable|integer|min:0',
             'revenue_estimate'    => 'nullable|numeric|min:0',
-            'company_address'     => 'required_if:type,company|string|max:255',
-            'company_province_id' => 'required_if:type,company|string|max:10',
-            'company_district_id' => 'required_if:type,company|string|max:10',
-            'company_ward_id'     => 'required_if:type,company|string|max:10',
-            'representative_name' => 'required_if:type,company|string|max:255',
             'company_tax_code'    => 'nullable|string|max:100',
             'founded_at'          => 'nullable|date',
 
@@ -103,7 +98,20 @@ class CustomerController extends Controller
 
             // Avatar
             'avatar' => 'nullable|image|max:2048',
-        ]);
+        ];
+        if ($request->type === 'company') {
+            $rules = array_merge($rules, [
+                'company_name'        => 'required|string|max:255',
+                'company_address'     => 'required|string|max:255',
+                'company_province_id' => 'required|string|max:10',
+                'company_district_id' => 'required|string|max:10',
+                'company_ward_id'     => 'required|string|max:10',
+                'representative_name' => 'required|string|max:255',
+            ]);
+        }
+
+        $validated = Validator::make($request->all(), $rules)->validate();
+
         $validated['marketing_consent'] = $validated['marketing_consent'] === 'true' ? 1 : 0;
         $validated['total_orders'] = 0;
         $validated['total_spent'] = 0;
@@ -135,10 +143,10 @@ class CustomerController extends Controller
             $request->merge(['assigned_user_id' => null]);
         }
 
-        $validated = $request->validate([
+        $rules = [
             // Thông tin cơ bản
-            'name'        => 'required|string|max:255',
-            'phone'       => [
+            'name'  => 'required|string|max:255',
+            'phone' => [
                 'required',
                 'string',
                 'max:20',
@@ -146,7 +154,7 @@ class CustomerController extends Controller
                     ->where(fn($q) => $q->where('is_customer', 1))
                     ->ignore($customer->id),
             ],
-            'code'        => [
+            'code' => [
                 'required',
                 'string',
                 'max:100',
@@ -184,16 +192,10 @@ class CustomerController extends Controller
             'contact_frequency_days' => 'nullable|integer|min:1',
 
             // Công ty
-            'company_name'        => 'required_if:type,company|string|max:255',
             'position'            => 'nullable|string|max:100',
             'website_url'         => 'nullable|url|max:255',
             'number_of_employees' => 'nullable|integer|min:0',
             'revenue_estimate'    => 'nullable|numeric|min:0',
-            'company_address'     => 'required_if:type,company|string|max:255',
-            'company_province_id' => 'required_if:type,company|string|max:10',
-            'company_district_id' => 'required_if:type,company|string|max:10',
-            'company_ward_id'     => 'required_if:type,company|string|max:10',
-            'representative_name' => 'required_if:type,company|string|max:255',
             'company_tax_code'    => 'nullable|string|max:100',
             'founded_at'          => 'nullable|date',
 
@@ -207,7 +209,20 @@ class CustomerController extends Controller
 
             // Avatar
             'avatar' => 'nullable|image|max:2048',
-        ]);
+        ];
+
+        if ($request->type === 'company') {
+            $rules = array_merge($rules, [
+                'company_name'        => 'required|string|max:255',
+                'company_address'     => 'required|string|max:255',
+                'company_province_id' => 'required|string|max:10',
+                'company_district_id' => 'required|string|max:10',
+                'company_ward_id'     => 'required|string|max:10',
+                'representative_name' => 'required|string|max:255',
+            ]);
+        }
+
+        $validated = Validator::make($request->all(), $rules)->validate();
 
         $validated['marketing_consent'] = $validated['marketing_consent'] === 'true' ? 1 : 0;
 
@@ -220,18 +235,18 @@ class CustomerController extends Controller
         }
 
         if ($validated['type'] === 'individual') {
-            $validated['company_name']        = null;
-            $validated['position']            = null;
-            $validated['website_url']         = null;
+            $validated['company_name'] = null;
+            $validated['position'] = null;
+            $validated['website_url'] = null;
             $validated['number_of_employees'] = null;
-            $validated['revenue_estimate']    = null;
-            $validated['company_address']     = null;
+            $validated['revenue_estimate'] = null;
+            $validated['company_address'] = null;
             $validated['company_province_id'] = null;
             $validated['company_district_id'] = null;
-            $validated['company_ward_id']     = null;
+            $validated['company_ward_id'] = null;
             $validated['representative_name'] = null;
-            $validated['company_tax_code']    = null;
-            $validated['founded_at']          = null;
+            $validated['company_tax_code'] = null;
+            $validated['founded_at'] = null;
         }
 
         $customer->update($validated);

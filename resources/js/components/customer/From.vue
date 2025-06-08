@@ -816,11 +816,6 @@ export default {
         }
 
         if (this.mode === 'update') {
-          await window.axios.post(`/api/customer/update/${this.customerId}`, formData)
-        } else {
-          await window.axios.post('/api/customer/create', formData)
-        }
-        if (this.mode === 'update') {
             await window.axios.post(`/api/customer/update/${this.customerId}`, formData)
             await Swal.fire({
               icon: 'success',

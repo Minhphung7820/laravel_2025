@@ -844,6 +844,17 @@ export default {
       } catch (err) {
         if (err.response && err.response.status === 422) {
           this.errors = err.response.data.errors || {}
+              const firstErrorKey = Object.keys(this.errors)[0]
+              this.$nextTick(() => {
+                const el = this.$refs[firstErrorKey]
+                if (el && el.scrollIntoView) {
+                  el.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center',
+                    inline: 'nearest'
+                  })
+                }
+              })
         } else {
           await Swal.fire({
             icon: 'error',

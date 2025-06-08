@@ -124,8 +124,8 @@ export default {
             'variable': 'bg-blue-100 text-blue-700 font-semibold px-2 py-1 rounded-full text-xs inline-block'
           }
         },
-        { label: this.$t('product_list.purchase_price'), key: 'purchase_price' },
-        { label: this.$t('product_list.sell_price'), key: 'sell_price' },
+        { label: this.$t('product_list.purchase_price'), key: 'purchase_price' , isMoney : true },
+        { label: this.$t('product_list.sell_price'), key: 'sell_price' , isMoney : true },
         { label: this.$t('product_list.quantity'), key: 'quantity' },
         { label: this.$t('product_list.unit'), key: 'unit_name' },
         { label: this.$t('product_list.status'), key: 'status',  withLang : true  ,keyLang : 'product_status' ,classMap: {

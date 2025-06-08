@@ -102,6 +102,9 @@
                   </button>
                 </div>
               </template>
+              <template v-else-if="col.isMoney">
+                  {{ formatCurrency(getCellText(item, col), $i18n.locale) }}
+              </template>
               <template v-else>
                 <component
                   :is="col.wrapperTag || 'span'"
@@ -174,6 +177,7 @@
 </template>
 
 <script>
+import { formatCurrency } from '@/utils/currency'
 export default {
   name: 'CommonTable',
   props: {
@@ -225,6 +229,7 @@ export default {
     }
   },
   methods: {
+    formatCurrency,
     isSelected(id) {
       return this.selectedIds.includes(id)
     },

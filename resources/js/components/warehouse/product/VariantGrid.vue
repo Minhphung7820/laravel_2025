@@ -10,11 +10,19 @@
     </div>
     <!-- Áp dụng toàn bộ (full hàng, không nền xám) -->
     <div class="grid grid-cols-4 gap-4 mb-4">
-      <input v-model.number="applyToAll.purchase_price" type="number" min="0"
-        class="px-3 py-1 border rounded w-full" :placeholder="$t('variant_grid.placeholder.purchase_price')" />
+      <input
+        :value="formatCurrency(applyToAll.purchase_price)"
+        @input="onApplyAllInput($event, 'purchase_price')"
+        class="px-3 py-1 border rounded w-full"
+        :placeholder="$t('variant_grid.placeholder.purchase_price')"
+      />
 
-      <input v-model.number="applyToAll.sell_price" type="number" min="0"
-        class="px-3 py-1 border rounded w-full" :placeholder="$t('variant_grid.placeholder.sell_price')" />
+      <input
+        :value="formatCurrency(applyToAll.sell_price)"
+        @input="onApplyAllInput($event, 'sell_price')"
+        class="px-3 py-1 border rounded w-full"
+        :placeholder="$t('variant_grid.placeholder.sell_price')"
+      />
 
       <input v-model.number="applyToAll.quantity" type="number" min="0"
         class="px-3 py-1 border rounded w-full" :placeholder="$t('variant_grid.placeholder.quantity')" />
@@ -34,8 +42,8 @@
             <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.image') }}</th>
             <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.stock') }}</th>
             <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.quantity') }}</th>
-            <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.purchase_price') }}</th>
-            <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.sell_price') }}</th>
+            <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.purchase_price') }} (đ)</th>
+            <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.sell_price') }} (đ)</th>
             <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.sku') }}</th>
             <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.barcode') }}</th>
             <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.is_sale') }}</th>
@@ -118,10 +126,18 @@
               <input v-model="variant.quantity" type="number" min="0" class="w-32 px-2 py-1 border rounded" />
             </td>
             <td class="px-4 py-2">
-              <input v-model="variant.purchase_price" type="number" min="0" class="w-32 px-2 py-1 border rounded" />
+              <input
+                :value="formatCurrency(variant.purchase_price)"
+                @input="onCurrencyInput($event, index, 'purchase_price')"
+                class="w-32 px-2 py-1 border rounded"
+              />
             </td>
             <td class="px-4 py-2">
-              <input v-model="variant.sell_price" type="number" min="0" class="w-32 px-2 py-1 border rounded" />
+              <input
+                :value="formatCurrency(variant.sell_price)"
+                @input="onCurrencyInput($event, index, 'sell_price')"
+                class="w-32 px-2 py-1 border rounded"
+              />
             </td>
             <td class="px-4 py-2">
               <input v-model="variant.sku" type="text" class="w-32 px-2 py-1 border rounded" />
@@ -224,6 +240,19 @@ export default {
     }
   },
   methods: {
+    formatCurrency(value) {
+      if (value === null || value === undefined || isNaN(value)) return ''
+      return parseInt(value).toLocaleString('vi-VN') // ép số nguyên
+    },
+    onCurrencyInput(e, index, field) {
+      const raw = e.target.value.replace(/[^\d]/g, '')
+      const value = parseInt(raw || '0')
+      this.variants[index][field] = value
+    },
+    onApplyAllInput(e, field) {
+      const raw = e.target.value.replace(/[^\d]/g, '')
+      this.applyToAll[field] = raw ? parseInt(raw) : ''
+    },
     applyAll() {
       this.variants.forEach((variant) => {
           variant.purchase_price = Number(this.applyToAll.purchase_price) || 0

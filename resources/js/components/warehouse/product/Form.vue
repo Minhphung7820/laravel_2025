@@ -351,6 +351,8 @@ export default {
     'form.category_id'(newVal) {
       if (!newVal && this.form.has_variant) {
         this.form.has_variant = false
+        this.type = 'single'
+        this.form.type = 'single'
         Swal.fire({
           icon: 'warning',
           title: this.$t('product.category_required_title'),

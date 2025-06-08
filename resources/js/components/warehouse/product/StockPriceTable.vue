@@ -46,20 +46,20 @@
           </td>
           <td class="border px-2 py-1 text-center">
             <span v-if="isVariableProduct" class="block w-full py-1 text-xs text-gray-400">—</span>
-            <input
-              v-else
-              v-model.number="localData[stock.stock_id].purchase_price"
-              type="number"
-              class="w-full px-1 py-1 text-xs border border-gray-300 rounded"
+            <input v-else
+              type="text"
+              :value="formatCurrencyInput(localData[stock.stock_id].purchase_price)"
+              @input="onCurrencyInput($event, stock.stock_id, 'purchase_price')"
+              class="w-full px-1 py-1 text-xs border border-gray-300 rounded text-right"
             />
           </td>
           <td class="border px-2 py-1 text-center">
             <span v-if="isVariableProduct" class="block w-full py-1 text-xs text-gray-400">—</span>
-            <input
-              v-else
-              v-model.number="localData[stock.stock_id].sell_price"
-              type="number"
-              class="w-full px-1 py-1 text-xs border border-gray-300 rounded"
+            <input v-else
+              type="text"
+              :value="formatCurrencyInput(localData[stock.stock_id].sell_price)"
+              @input="onCurrencyInput($event, stock.stock_id, 'sell_price')"
+              class="w-full px-1 py-1 text-xs border border-gray-300 rounded text-right"
             />
           </td>
           <td class="border px-2 py-1 text-center">
@@ -119,8 +119,8 @@ export default {
           id: existing.id ?? null,
           stock_id : stock.id,
           quantity: existing.quantity ?? 0,
-          purchase_price: existing.purchase_price ?? 0,
-          sell_price: existing.sell_price ?? 0,
+          purchase_price: this.isVariableProduct ? 0 : (existing.purchase_price ?? 0),
+          sell_price: this.isVariableProduct ? 0 : (existing.sell_price ?? 0),
           max_discount_percent: existing.max_discount_percent ?? 0,
           max_increase_percent: existing.max_increase_percent ?? 0,
           auto_calc: existing.auto_calc ?? false,
@@ -137,6 +137,15 @@ export default {
     }
   },
   methods: {
+    formatCurrencyInput(value) {
+      if (isNaN(value)) return ''
+      return Number(value).toLocaleString('vi-VN')
+    },
+    onCurrencyInput(event, stockId, field) {
+      const input = event.target.value.replace(/[^\d]/g, '')
+      const number = parseInt(input || '0')
+      this.localData[stockId][field] = number
+    },
     removeStock(stockId) {
       const stock = this.localData[stockId]
       if (stock?.is_default) {

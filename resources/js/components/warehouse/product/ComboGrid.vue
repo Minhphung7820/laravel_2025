@@ -20,7 +20,7 @@
             <th class="px-3 py-2">{{ $t('combo_grid.unit') }}</th>
             <th class="px-3 py-2">{{ $t('combo_grid.sell_price') }}</th>
             <th class="px-3 py-2">{{ $t('combo_grid.purchase_price') }}</th>
-            <th class="px-3 py-2">{{ $t('combo_grid.combo_price') }}</th>
+            <th class="px-3 py-2">{{ $t('combo_grid.combo_price') }} (đ)</th>
             <th class="px-3 py-2 text-center">{{ $t('combo_grid.action') }}</th>
           </tr>
         </thead>
@@ -87,14 +87,14 @@
             <td class="px-3 py-2">
               <span class="truncate-cell" :title="item.unit_name">{{ item.unit_name }}</span>
             </td>
-            <td class="px-3 py-2">{{ item.sell_price }}</td>
-            <td class="px-3 py-2">{{ item.purchase_price }}</td>
+            <td class="px-3 py-2">{{ formatCurrency(item.sell_price, $i18n.locale) }}</td>
+            <td class="px-3 py-2">{{ formatCurrency(item.purchase_price, $i18n.locale) }}</td>
             <td class="px-3 py-2">
               <input
-                type="number"
-                min="0"
+                type="text"
+                :value="formatCurrencyInput(item.sell_price_combo)"
+                @input="onCurrencyComboInput($event, index)"
                 class="border px-2 py-1 rounded w-24 text-right"
-                v-model.number="item.sell_price_combo"
                 :placeholder="$t('combo_grid.combo_price')"
               />
             </td>
@@ -135,6 +135,7 @@
 <script>
 import CommonTable from '@/components/common/TableList.vue'
 import Swal from 'sweetalert2'
+import { formatCurrency } from '@/utils/currency'
 
 export default {
   components: { CommonTable },
@@ -166,8 +167,8 @@ export default {
         { label: this.$t('combo_grid.barcode'), key: 'barcode' },
         { label: this.$t('combo_grid.stock'), key: 'stock_name' },
         { label: this.$t('combo_grid.available_stock'), key: 'quantity' },
-        { label: this.$t('combo_grid.sell_price'), key: 'sell_price' },
-        { label: this.$t('combo_grid.purchase_price'), key: 'purchase_price' }
+        { label: this.$t('combo_grid.sell_price'), key: 'sell_price' , isMoney : true},
+        { label: this.$t('combo_grid.purchase_price'), key: 'purchase_price' , isMoney : true }
       ],
       exceptsSingle: [],
       exceptsVariable: []
@@ -190,6 +191,16 @@ export default {
     }
   },
   methods: {
+     formatCurrencyInput(value) {
+      const num = Number(value || 0)
+      return num.toLocaleString('vi-VN')
+    },
+    onCurrencyComboInput(event, index) {
+      const raw = event.target.value.replace(/[^\d]/g, '')
+      const value = parseInt(raw || '0')
+      this.comboItems[index].sell_price_combo = value
+    },
+    formatCurrency,
     refreshSelectedComboStock() {
       this.comboItems.forEach(item => {
         if (item.stock_id) {

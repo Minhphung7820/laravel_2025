@@ -14,6 +14,7 @@
       @page-change="onPageChange"
       :placeholder="$t('product_list.search_placeholder')"
       @show-combo="handleShowCombo"
+      :withCheckbox="true"
     >
       <template #buttons>
         <div class="flex gap-2 justify-end">
@@ -113,8 +114,8 @@ export default {
       searchKeyword: '',
       dropdownId: null,
       columns: [
-        { label: this.$t('product_list.product_name'), key: 'product_name' },
         { label: this.$t('product_list.image'), key: 'image', type: 'image_file' },
+        { label: this.$t('product_list.product_name'), key: 'product_name' },
         { label: this.$t('product_list.sku'), key: 'sku' },
         { label: this.$t('product_list.stock'), key: 'stock_name' },
         { label: this.$t('product_list.type'), key: 'product_type' , withLang : true ,keyLang : 'product_type' ,classMap: {

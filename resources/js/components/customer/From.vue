@@ -89,34 +89,66 @@
           </div>
 
           <div>
-            <label class="block mb-1 text-sm font-semibold text-gray-700">Địa chỉ</label>
-            <input v-model="form.address" type="text"
-              class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            <label class="block mb-1 text-sm font-semibold text-gray-700">Địa chỉ <span class="text-red-500">*</span></label>
+            <input
+              ref="address"
+              v-model="form.address"
+              :class="[
+                'w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400',
+                errors.address ? 'border-red-500' : 'border-gray-300'
+              ]"
+            />
+            <p v-if="errors.address" class="text-sm text-red-600 mt-1">{{ errors.address[0] }}</p>
           </div>
 
           <div>
-            <label class="block mb-1 text-sm font-semibold text-gray-700">Tỉnh/Thành</label>
-            <select v-model="form.province_id"
-              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <label class="block mb-1 text-sm font-semibold text-gray-700">Tỉnh/Thành <span class="text-red-500">*</span></label>
+            <select
+              ref="province_id"
+              v-model="form.province_id"
+              :class="[
+                'w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400',
+                errors.province_id ? 'border-red-500' : 'border-gray-300'
+              ]"
+            >
               <option value="">-- Chọn tỉnh --</option>
               <option v-for="item in provinces" :key="item.code" :value="item.code">{{ item.full_name }}</option>
             </select>
+            <p v-if="errors.province_id" class="text-sm text-red-600 mt-1">{{ errors.province_id[0] }}</p>
           </div>
 
           <div>
-            <label class="block mb-1 text-sm font-semibold text-gray-700">Quận/Huyện</label>
-            <select v-model="form.district_id" :disabled="!form.province_id || isDistrictLoading" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <label class="block mb-1 text-sm font-semibold text-gray-700">Quận/Huyện <span class="text-red-500">*</span></label>
+            <select
+              ref="district_id"
+              v-model="form.district_id"
+              :disabled="!form.province_id || isDistrictLoading"
+              :class="[
+                'w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400',
+                errors.district_id ? 'border-red-500' : 'border-gray-300'
+              ]"
+            >
               <option value="">-- Chọn huyện --</option>
               <option v-for="item in districts" :key="item.code" :value="item.code">{{ item.full_name }}</option>
             </select>
+            <p v-if="errors.district_id" class="text-sm text-red-600 mt-1">{{ errors.district_id[0] }}</p>
           </div>
 
           <div>
-            <label class="block mb-1 text-sm font-semibold text-gray-700">Phường/Xã</label>
-            <select v-model="form.ward_id" :disabled="!form.district_id || isWardLoading" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <label class="block mb-1 text-sm font-semibold text-gray-700">Phường/Xã <span class="text-red-500">*</span></label>
+            <select
+              ref="ward_id"
+              v-model="form.ward_id"
+              :disabled="!form.district_id || isWardLoading"
+              :class="[
+                'w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400',
+                errors.ward_id ? 'border-red-500' : 'border-gray-300'
+              ]"
+            >
               <option value="">-- Chọn phường --</option>
               <option v-for="item in wards" :key="item.code" :value="item.code">{{ item.full_name }}</option>
             </select>
+            <p v-if="errors.ward_id" class="text-sm text-red-600 mt-1">{{ errors.ward_id[0] }}</p>
           </div>
         </div>
       </div>
@@ -665,12 +697,18 @@ export default {
         e.returnValue = ''
       }
     },
-    checkValidate(){
+    checkValidate() {
       this.errors = {}
 
       if (!this.form.name) this.errors.name = ['Tên khách hàng là bắt buộc']
       if (!this.form.phone) this.errors.phone = ['SĐT là bắt buộc']
       if (!this.form.code) this.errors.code = ['Mã KH là bắt buộc']
+
+      if (!this.form.address) this.errors.address = ['Địa chỉ là bắt buộc']
+      if (!this.form.province_id) this.errors.province_id = ['Tỉnh/Thành là bắt buộc']
+      if (!this.form.district_id) this.errors.district_id = ['Quận/Huyện là bắt buộc']
+      if (!this.form.ward_id) this.errors.ward_id = ['Phường/Xã là bắt buộc']
+
       if (this.form.type === 'company') {
         if (!this.form.company_name) this.errors.company_name = ['Tên công ty là bắt buộc']
         if (!this.form.representative_name) this.errors.representative_name = ['Người đại diện là bắt buộc']
@@ -679,16 +717,18 @@ export default {
         if (!this.form.company_district_id) this.errors.company_district_id = ['Quận/Huyện công ty là bắt buộc']
         if (!this.form.company_ward_id) this.errors.company_ward_id = ['Phường/Xã công ty là bắt buộc']
       }
+
+      // Scroll tới lỗi đầu tiên nếu có
       if (Object.keys(this.errors).length > 0) {
         const firstErrorKey = Object.keys(this.errors)[0]
         this.$nextTick(() => {
           const el = this.$refs[firstErrorKey]
           if (el && el.scrollIntoView) {
-              el.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center',
-                inline: 'nearest'
-              })
+            el.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+              inline: 'nearest'
+            })
           }
         })
         return false

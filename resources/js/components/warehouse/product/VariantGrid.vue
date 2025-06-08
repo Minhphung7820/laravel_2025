@@ -14,14 +14,14 @@
         :value="formatCurrency(applyToAll.purchase_price)"
         @input="onApplyAllInput($event, 'purchase_price')"
         class="px-3 py-1 border rounded w-full"
-        :placeholder="$t('variant_grid.placeholder.purchase_price')"
+        :placeholder="$t('variant_grid.placeholder.purchase_price')+' (₫)'"
       />
 
       <input
         :value="formatCurrency(applyToAll.sell_price)"
         @input="onApplyAllInput($event, 'sell_price')"
         class="px-3 py-1 border rounded w-full"
-        :placeholder="$t('variant_grid.placeholder.sell_price')"
+        :placeholder="$t('variant_grid.placeholder.sell_price')+' (₫)'"
       />
 
       <input v-model.number="applyToAll.quantity" type="number" min="0"

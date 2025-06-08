@@ -588,28 +588,32 @@ export default {
     }
   },
   async mounted() {
-      try {
+    try {
+      if (this.mode === 'update' && this.customerId) {
+        const [provinceData, customerRes] = await Promise.all([
+          this.fetchProvinces(),
+          window.axios.get(`/api/customer/detail/${this.customerId}`)
+        ])
+
+        const { data } = customerRes.data
+        Object.assign(this.form, data)
+        this.form.birthday = data.birthday ? data.birthday.split('T')[0] : ''
+        this.avatarPreview = data.avatar_url || null
+
+        await this.loadAllLocationOnUpdate()
+
+        this.originalForm = JSON.stringify(this.form)
+      } else {
         await this.fetchProvinces()
-          if (this.mode === 'update' && this.customerId) {
-          const customer = await window.axios.get(`/api/customer/detail/${this.customerId}`)
-          const { data } = customer.data
-
-          Object.assign(this.form, data)
-          this.form.birthday = data.birthday ? data.birthday.split('T')[0] : ''
-          this.avatarPreview = data.avatar_url || null
-
-          await this.loadAllLocationOnUpdate()
-
-          this.originalForm = JSON.stringify(this.form)
-        } else {
-          this.originalForm = JSON.stringify(this.form)
-        }
-      } catch (err) {
-        this.$router.push('/sale/customer')
-      } finally {
-        this.loading = false
+        this.originalForm = JSON.stringify(this.form)
       }
-      window.addEventListener('beforeunload', this.handleBeforeUnload)
+    } catch (err) {
+      this.$router.push('/sale/customer')
+    } finally {
+      this.loading = false
+    }
+
+    window.addEventListener('beforeunload', this.handleBeforeUnload)
   },
   beforeDestroy() {
     window.removeEventListener('beforeunload', this.handleBeforeUnload)

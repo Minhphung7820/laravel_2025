@@ -1,4 +1,10 @@
 <template>
+  <div v-if="loading" class="fixed inset-0 bg-white bg-opacity-60 z-50 flex items-center justify-center">
+    <svg class="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+    </svg>
+  </div>
   <div class="p-6 bg-white rounded-xl shadow-md w-full">
     <h2 class="text-2xl font-bold mb-6">{{ mode === 'create' ? 'Thêm khách hàng' : 'Chỉnh sửa khách hàng' }}</h2>
 
@@ -502,6 +508,7 @@ export default {
   },
   data() {
     return {
+      loading : true,
       form: {
         // --- Thông tin cơ bản ---
         name: '',
@@ -597,8 +604,9 @@ export default {
 
         this.originalForm = JSON.stringify(this.form)
       } catch (err) {
-        alert('Không tìm thấy khách hàng')
         this.$router.push('/sale/customer')
+      } finally {
+        this.loading = false
       }
     } else {
       this.originalForm = JSON.stringify(this.form)

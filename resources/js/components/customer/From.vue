@@ -99,25 +99,23 @@
             <select v-model="form.province_id"
               class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
               <option value="">-- Chọn tỉnh --</option>
-              <option v-for="item in provinces" :key="item.id" :value="item.id">{{ item.name }}</option>
+              <option v-for="item in provinces" :key="item.code" :value="item.code">{{ item.full_name }}</option>
             </select>
           </div>
 
           <div>
             <label class="block mb-1 text-sm font-semibold text-gray-700">Quận/Huyện</label>
-            <select v-model="form.district_id"
-              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <select v-model="form.district_id" :disabled="!form.province_id || isDistrictLoading" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
               <option value="">-- Chọn huyện --</option>
-              <option v-for="item in districts" :key="item.id" :value="item.id">{{ item.name }}</option>
+              <option v-for="item in districts" :key="item.code" :value="item.code">{{ item.full_name }}</option>
             </select>
           </div>
 
           <div>
             <label class="block mb-1 text-sm font-semibold text-gray-700">Phường/Xã</label>
-            <select v-model="form.ward_id"
-              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <select v-model="form.ward_id" :disabled="!form.district_id || isWardLoading" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
               <option value="">-- Chọn phường --</option>
-              <option v-for="item in wards" :key="item.id" :value="item.id">{{ item.name }}</option>
+              <option v-for="item in wards" :key="item.code" :value="item.code">{{ item.full_name }}</option>
             </select>
           </div>
         </div>
@@ -460,6 +458,43 @@ export default {
       default: null
     }
   },
+  watch: {
+    'form.province_id'(newVal) {
+      this.form.district_id = ''
+      this.form.ward_id = ''
+      this.districts = []
+      this.wards = []
+      if (newVal) {
+        this.isDistrictLoading = true
+        window.axios
+          .get('/api/common/districts', { params: { province_code: newVal } })
+          .then(res => {
+            this.districts = res.data.data
+            console.log(res.data.data);
+
+          })
+          .finally(() => {
+            this.isDistrictLoading = false
+          })
+      }
+    },
+    'form.district_id'(newVal) {
+      this.form.ward_id = ''
+      this.wards = []
+
+      if (newVal) {
+        this.isWardLoading = true
+        window.axios
+          .get('/api/common/wards', { params: { district_code: newVal } })
+          .then(res => {
+            this.wards = res.data.data
+          })
+          .finally(() => {
+            this.isWardLoading = false
+          })
+      }
+    },
+  },
   data() {
     return {
       form: {
@@ -528,15 +563,20 @@ export default {
 
       // Validation error
       errors: {},
-      companyDistricts: [],
-      companyWards: [],
+      customerGroups : [],
       provinces: [],
       districts: [],
       wards: [],
-      customerGroups : []
+      companyDistricts: [],
+      companyWards: [],
+      isDistrictLoading: false,
+      isWardLoading: false,
+      isCompanyDistrictLoading: false,
+      isCompanyWardLoading: false
     }
   },
   async mounted() {
+    await this.fetchProvinces()
     if (this.mode === 'update' && this.customerId) {
       try {
         const customer = await window.axios.get(`/api/customer/detail/${this.customerId}`)
@@ -560,6 +600,10 @@ export default {
     window.removeEventListener('beforeunload', this.handleBeforeUnload)
   },
   methods: {
+    async fetchProvinces() {
+      const { data } = await window.axios.get('/api/common/provinces')
+      this.provinces = data.data
+    },
     clearError(field) {
       if (this.errors[field]) {
         this.$set(this.errors, field, null)

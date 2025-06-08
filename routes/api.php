@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CommonController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReportController;
@@ -13,6 +14,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
+
+    Route::group(['prefix' => 'common'], function () {
+        Route::get('/provinces', [CommonController::class, 'getProvinces']);
+        Route::get('/districts', [CommonController::class, 'getDistricts']);
+        Route::get('/wards', [CommonController::class, 'getWards']);
+    });
 
     Route::group(['prefix' => 'user'], function () {
         Route::get('/', function (Request $request) {

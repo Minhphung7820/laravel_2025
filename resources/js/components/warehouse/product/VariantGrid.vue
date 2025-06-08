@@ -241,8 +241,9 @@ export default {
   },
   methods: {
     formatCurrency(value) {
-      if (value === null || value === undefined || isNaN(value)) return ''
-      return parseInt(value).toLocaleString('vi-VN') // ép số nguyên
+      if (value === null || value === undefined || value === '') return ''
+      const number = Number(value)
+      return isNaN(number) ? '' : number.toLocaleString('vi-VN')
     },
     onCurrencyInput(e, index, field) {
       const raw = e.target.value.replace(/[^\d]/g, '')
@@ -251,7 +252,7 @@ export default {
     },
     onApplyAllInput(e, field) {
       const raw = e.target.value.replace(/[^\d]/g, '')
-      this.applyToAll[field] = raw ? parseInt(raw) : ''
+      this.applyToAll[field] = raw ? Number(raw) : ''
     },
     applyAll() {
       this.variants.forEach((variant) => {

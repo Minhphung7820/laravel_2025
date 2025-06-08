@@ -168,9 +168,9 @@ export default {
       restoringAttributes: [],
       restoringStock: '',
       applyToAll: {
-        purchase_price: 0,
-        sell_price: 0,
-        quantity: 0
+        purchase_price: null,
+        sell_price: null,
+        quantity: null
       }
     }
   },

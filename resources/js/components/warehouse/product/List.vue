@@ -219,6 +219,12 @@ export default {
     async fetchProducts(page = 1) {
       this.isLoading = true
       this.products = []
+      this.statusTabs = [
+        { key: 'all', label: 'product_status.all', count: 0 },
+        { key: 'pending', label: 'product_status.pending', count: 0 },
+        { key: 'approved', label: 'product_status.approved', count: 0 },
+        { key: 'rejected', label: 'product_status.rejected', count: 0 }
+      ]
       const params = {
         page,
         keyword: this.searchKeyword,

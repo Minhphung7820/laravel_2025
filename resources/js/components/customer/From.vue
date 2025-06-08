@@ -305,7 +305,12 @@
           <div>
             <label class="block mb-1 text-sm font-semibold text-gray-700">Website</label>
             <input v-model="form.website_url" type="text"
-              class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                :class="[
+                  'w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400',
+                  errors.website_url ? 'border-red-500' : 'border-gray-300'
+                ]"
+                />
+            <p v-if="errors.website_url" class="text-sm text-red-600 mt-1">{{ errors.website_url[0] }}</p>
           </div>
 
           <!-- Số nhân viên -->
@@ -495,6 +500,8 @@
 </template>
 
 <script>
+import Swal from 'sweetalert2'
+
 export default {
   props: {
     mode: {
@@ -796,6 +803,7 @@ export default {
     },
     async submitForm() {
       if(!this.checkValidate()) return
+      this.loading = true
       try {
        const formData = new FormData()
         for (const key in this.form) {
@@ -812,7 +820,23 @@ export default {
         } else {
           await window.axios.post('/api/customer/create', formData)
         }
-
+        if (this.mode === 'update') {
+            await window.axios.post(`/api/customer/update/${this.customerId}`, formData)
+            await Swal.fire({
+              icon: 'success',
+              title: 'Cập nhật thành công!',
+              timer: 1500,
+              showConfirmButton: false
+            })
+        } else {
+          await window.axios.post('/api/customer/create', formData)
+          await Swal.fire({
+            icon: 'success',
+            title: 'Tạo khách hàng thành công!',
+            timer: 1500,
+            showConfirmButton: false
+          })
+        }
         this.originalForm = JSON.stringify(this.form)
         this.avatarFile = null
 
@@ -821,9 +845,14 @@ export default {
         if (err.response && err.response.status === 422) {
           this.errors = err.response.data.errors || {}
         } else {
-          console.error(err)
-          alert('Gửi thất bại!')
+          await Swal.fire({
+            icon: 'error',
+            title: 'Gửi thất bại!',
+            text: 'Vui lòng thử lại sau hoặc kiểm tra kết nối.'
+          })
         }
+      } finally {
+        this.loading = false
       }
     }
   },

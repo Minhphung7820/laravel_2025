@@ -588,31 +588,28 @@ export default {
     }
   },
   async mounted() {
-    await this.fetchProvinces()
-
-    if (this.mode === 'update' && this.customerId) {
       try {
-        const customer = await window.axios.get(`/api/customer/detail/${this.customerId}`)
-        const { data } = customer.data
+        await this.fetchProvinces()
+          if (this.mode === 'update' && this.customerId) {
+          const customer = await window.axios.get(`/api/customer/detail/${this.customerId}`)
+          const { data } = customer.data
 
-        Object.assign(this.form, data)
-        this.form.birthday = data.birthday ? data.birthday.split('T')[0] : ''
-        this.avatarPreview = data.avatar_url || null
+          Object.assign(this.form, data)
+          this.form.birthday = data.birthday ? data.birthday.split('T')[0] : ''
+          this.avatarPreview = data.avatar_url || null
 
-        // Load địa chỉ song song
-        await this.loadAllLocationOnUpdate()
+          await this.loadAllLocationOnUpdate()
 
-        this.originalForm = JSON.stringify(this.form)
+          this.originalForm = JSON.stringify(this.form)
+        } else {
+          this.originalForm = JSON.stringify(this.form)
+        }
       } catch (err) {
         this.$router.push('/sale/customer')
       } finally {
         this.loading = false
       }
-    } else {
-      this.originalForm = JSON.stringify(this.form)
-    }
-
-    window.addEventListener('beforeunload', this.handleBeforeUnload)
+      window.addEventListener('beforeunload', this.handleBeforeUnload)
   },
   beforeDestroy() {
     window.removeEventListener('beforeunload', this.handleBeforeUnload)

@@ -15,6 +15,7 @@
       :placeholder="$t('product_list.search_placeholder')"
       @show-combo="handleShowCombo"
       :withCheckbox="true"
+      :isLoading="isLoading"
     >
       <template #buttons>
         <div class="flex gap-2 justify-end">
@@ -85,6 +86,7 @@ export default {
   components: { CommonTable, Filter ,FunnelIcon,ComboQuickView },
   data() {
     return {
+      isLoading : true,
       showFilter: false,
       filters: {
         supplier: '',
@@ -214,7 +216,8 @@ export default {
         query: { query: encoded }
       })
     },
-    fetchProducts(page = 1) {
+    async fetchProducts(page = 1) {
+      this.isLoading = true
       const params = {
         page,
         keyword: this.searchKeyword,
@@ -228,16 +231,20 @@ export default {
 
       this.updateUrlQuery(page)
 
-      Promise.all([
-        window.axios.get('/api/warehouse/product/list', { params }),
-        window.axios.get('/api/warehouse/product/get-status-count', { params })
-      ]).then(([resList, resCount]) => {
+      try {
+        const [resList, resCount] = await Promise.all([
+          window.axios.get('/api/warehouse/product/list', { params }),
+          window.axios.get('/api/warehouse/product/get-status-count', { params })
+        ])
+
         this.products = resList.data.data.data
         Object.assign(this.pagination, resList.data.data)
         this.statusTabs = resCount.data.data
-      }).catch(error => {
+      } catch (error) {
         console.error('Lỗi khi gọi API:', error)
-      })
+      } finally {
+        this.isLoading = false
+      }
     },
     onSearch(keyword) {
       this.searchKeyword = keyword

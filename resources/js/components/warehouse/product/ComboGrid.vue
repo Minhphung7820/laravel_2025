@@ -120,6 +120,7 @@
           @search="onSearch"
           @page-change="onPageChange"
           @selection-change="onSelected"
+          :isLoading="isLoading"
         />
         <div class="flex justify-end gap-2 pt-6 mt-auto">
           <button class="px-4 py-1 rounded bg-red-300 text-white hover:bg-red-400" @click="closeModal">{{ $t('combo_grid.cancel') }}</button>
@@ -141,6 +142,7 @@ export default {
   components: { CommonTable },
   data() {
     return {
+      isLoading : true,
       showModal: false,
       searchKeyword: '',
       productList: [],
@@ -327,6 +329,7 @@ export default {
       await this.fetchProducts(1)
     },
     async fetchProducts(page = 1) {
+      this.isLoading = true
       try {
         const res = await window.axios.get('/api/warehouse/product/get-init-combo', {
           params: {
@@ -341,6 +344,8 @@ export default {
         Object.assign(this.pagination, res.data.data)
       } catch (error) {
         console.error('Lỗi khi fetch products:', error)
+      } finally {
+        this.isLoading = false
       }
     },
     onSearch(keyword) {

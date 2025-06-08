@@ -14,6 +14,7 @@
           withCheckbox
           @selection-change="onSelect"
           @page-change="fetchStocks"
+          :isLoading="isLoading"
         />
       </div>
 
@@ -48,6 +49,7 @@ export default {
   },
   data() {
     return {
+      isLoading : true,
       stocks: [],
       selected: [],
       pagination: {
@@ -60,11 +62,18 @@ export default {
   },
   methods: {
     async fetchStocks(page = 1) {
-      const except = this.exceptIds.join(',')
-      const res = await fetch(`/api/warehouse/stock/list?page=${page}&except_ids=${except}`)
-      const json = await res.json()
-      this.stocks = json.data.data
-      this.pagination = json.data
+     this.isLoading = true
+     try {
+        const except = this.exceptIds.join(',')
+        const res = await fetch(`/api/warehouse/stock/list?page=${page}&except_ids=${except}`)
+        const json = await res.json()
+        this.stocks = json.data.data
+        this.pagination = json.data
+     } catch (error) {
+        console.log(error);
+     } finally {
+        this.isLoading = false
+     }
     },
     onSelect(list) {
       this.selected = list

@@ -43,7 +43,7 @@
     </div>
 
     <div class="rounded-lg border border-gray-200 overflow-visible">
-      <table class="min-w-full divide-y divide-gray-200">
+      <table class="min-w-full divide-y divide-gray-200 min-h-[300px]">
         <thead class="bg-gray-100 sticky top-0 z-10">
           <tr>
             <th v-if="withCheckbox" class="w-12 px-4 py-3">
@@ -60,7 +60,24 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 bg-white">
-          <tr v-if="data.length === 0">
+          <tr v-if="isLoading">
+            <td
+              :colspan="(columns.length + (withCheckbox ? 1 : 0) + (hasActions ? 1 : 0))"
+              class="text-center text-gray-400 py-8"
+            >
+              <div class="flex items-center justify-center gap-2">
+                <svg class="animate-spin h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+                  viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10"
+                    stroke="currentColor" stroke-width="4" />
+                  <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8z" />
+                </svg>
+                <!-- {{ $t('table.loading') }} -->
+              </div>
+            </td>
+          </tr>
+          <tr v-else-if="data.length === 0">
             <td
               :colspan="(columns.length + (withCheckbox ? 1 : 0) + (hasActions ? 1 : 0))"
               class="text-center text-gray-500 py-8"
@@ -181,6 +198,7 @@ import { formatCurrency } from '@/utils/currency'
 export default {
   name: 'CommonTable',
   props: {
+    isLoading: { type: Boolean, default: false },
     columns: { type: Array, required: true },
     data: { type: Array, required: true },
     pagination: { type: Object, default: () => ({ current_page: 1, last_page: 1, per_page: 10, from: 0, to: 0, total: 0 }) },

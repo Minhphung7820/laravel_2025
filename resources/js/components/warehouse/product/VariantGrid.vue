@@ -42,8 +42,8 @@
             <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.image') }}</th>
             <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.stock') }}</th>
             <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.quantity') }}</th>
-            <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.purchase_price') }} (đ)</th>
-            <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.sell_price') }} (đ)</th>
+            <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.purchase_price') }} (₫)</th>
+            <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.sell_price') }} (₫)</th>
             <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.sku') }}</th>
             <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.barcode') }}</th>
             <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.is_sale') }}</th>

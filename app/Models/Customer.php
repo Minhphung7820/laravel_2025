@@ -60,6 +60,7 @@ class Customer extends Model
         'representative_name',
         'company_address',
         'company_tax_code',
+        'country_code'
     ];
 
     protected $casts = [

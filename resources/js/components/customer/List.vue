@@ -76,6 +76,7 @@ export default {
       customerCache: {},
       showFilter: false,
       filters: {
+        code: '',
         name: '',
         email: '',
         phone: '',
@@ -144,6 +145,7 @@ export default {
     },
     onResetFilter() {
       this.filters = {
+        code: '',
         name: '',
         email: '',
         phone: '',

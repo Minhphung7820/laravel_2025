@@ -40,6 +40,7 @@ class CustomerController extends Controller
                             ->orWhere('customers.email', 'like', '%' . $request->keyword . '%');
                     });
                 })
+                ->when($request->filled('code'), fn($q) => $q->where('customers.code', 'like', '%' . $request->code . '%'))
 
                 ->when($request->filled('name'), fn($q) => $q->where('customers.name', 'like', '%' . $request->name . '%'))
 

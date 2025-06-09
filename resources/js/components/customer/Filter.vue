@@ -16,6 +16,10 @@
       <!-- Filter Form -->
       <div class="space-y-4 text-sm text-gray-700">
         <div>
+          <label class="block font-medium mb-1">Mã khách hàng</label>
+          <input v-model="localFilter.code" class="border rounded px-3 py-2 w-full shadow-sm text-sm" :placeholder="'Vui lòng nhập mã KH'" />
+        </div>
+        <div>
           <label class="block font-medium mb-1">Tên khách hàng</label>
           <input v-model="localFilter.name" class="border rounded px-3 py-2 w-full shadow-sm text-sm" :placeholder="'Vui lòng nhập tên'" />
         </div>

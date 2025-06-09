@@ -140,7 +140,6 @@ export default {
     },
     onApplyFilter(values) {
       this.filters = values
-      this.customerCache = {}
       this.fetchCustomers(1)
     },
     onResetFilter() {
@@ -153,7 +152,6 @@ export default {
         to_date: '',
         type : ''
       }
-      this.customerCache = {}
       this.fetchCustomers(1)
     },
     closeDropdown() {
@@ -247,7 +245,6 @@ export default {
     },
     onSearch(keyword) {
       this.searchKeyword = keyword
-      this.customerCache = {}
       this.fetchCustomers(1)
     },
     onPageChange(page) {

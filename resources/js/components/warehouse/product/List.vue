@@ -170,7 +170,6 @@ export default {
     },
     onApplyFilter(values) {
       this.filters = values
-      this.productCache = {}
       this.fetchProducts(1)
     },
     onResetFilter() {
@@ -183,7 +182,6 @@ export default {
         to_date: '',
         time_filter: ''
       }
-      this.productCache = {}
       this.fetchProducts(1)
     },
     onChangeTab(status) {

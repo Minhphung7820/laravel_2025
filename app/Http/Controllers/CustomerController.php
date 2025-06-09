@@ -33,12 +33,27 @@ class CustomerController extends Controller
                     DB::raw("CONVERT(wards.code USING utf8mb4) COLLATE utf8mb4_unicode_ci")
                 )
                 ->where('customers.is_customer', 1)
-                ->when($request->filled('customers.keyword'), function ($query) use ($request) {
+
+                ->when($request->filled('keyword'), function ($query) use ($request) {
                     $query->where(function ($q) use ($request) {
-                        $q->where('customers.name', 'like', '%' . $request['keyword'] . '%')
-                            ->orWhere('customers.email', 'like', '%' . $request['keyword'] . '%');
+                        $q->where('customers.name', 'like', '%' . $request->keyword . '%')
+                            ->orWhere('customers.email', 'like', '%' . $request->keyword . '%');
                     });
-                })->select([
+                })
+
+                ->when($request->filled('name'), fn($q) => $q->where('customers.name', 'like', '%' . $request->name . '%'))
+
+                ->when($request->filled('email'), fn($q) => $q->where('customers.email', 'like', '%' . $request->email . '%'))
+
+                ->when($request->filled('phone'), fn($q) => $q->where('customers.phone', 'like', '%' . $request->phone . '%'))
+
+                ->when($request->filled('type'), fn($q) => $q->where('customers.type', $request->type))
+
+                ->when($request->filled('from_date'), fn($q) => $q->whereDate('customers.created_at', '>=', $request->from_date))
+
+                ->when($request->filled('to_date'), fn($q) => $q->whereDate('customers.created_at', '<=', $request->to_date))
+
+                ->select([
                     'customers.id',
                     'customers.name',
                     'customers.avatar',
@@ -49,7 +64,7 @@ class CustomerController extends Controller
                     'customers.type',
                     DB::raw("CONCAT(customers.address, ', ', wards.full_name, ', ', districts.full_name, ', ', provinces.full_name) as address_full")
                 ])
-                ->orderByDesc('created_at')
+                ->orderByDesc('customers.created_at')
                 ->paginate($request->input('limit', 10));
 
             return $this->responseSuccess($customers);

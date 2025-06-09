@@ -17,31 +17,31 @@
       <div class="space-y-4 text-sm text-gray-700">
         <div>
           <label class="block font-medium mb-1">Tên khách hàng</label>
-          <input v-model="filter.name" class="border rounded px-3 py-2 w-full shadow-sm text-sm" :placeholder="'Vui lòng nhập tên'" />
+          <input v-model="localFilter.name" class="border rounded px-3 py-2 w-full shadow-sm text-sm" :placeholder="'Vui lòng nhập tên'" />
         </div>
          <div>
           <label class="block font-medium mb-1">Email</label>
-          <input v-model="filter.email" class="border rounded px-3 py-2 w-full shadow-sm text-sm" :placeholder="'Vui lòng nhập Email'" />
+          <input v-model="localFilter.email" class="border rounded px-3 py-2 w-full shadow-sm text-sm" :placeholder="'Vui lòng nhập Email'" />
         </div>
          <div>
           <label class="block font-medium mb-1">SĐT</label>
-          <input v-model="filter.phone" class="border rounded px-3 py-2 w-full shadow-sm text-sm" :placeholder="'Vui lòng nhập SĐT'" />
+          <input v-model="localFilter.phone" class="border rounded px-3 py-2 w-full shadow-sm text-sm" :placeholder="'Vui lòng nhập SĐT'" />
         </div>
         <div class="flex gap-2">
           <div class="flex-1">
             <label class="block font-medium mb-1">Từ ngày</label>
-            <input v-model="filter.from_date" type="date" class="border rounded px-3 py-2 w-full shadow-sm text-sm" />
+            <input v-model="localFilter.from_date" type="date" class="border rounded px-3 py-2 w-full shadow-sm text-sm" />
           </div>
           <div class="flex-1">
             <label class="block font-medium mb-1">Đến ngày</label>
-            <input v-model="filter.to_date" type="date" class="border rounded px-3 py-2 w-full shadow-sm text-sm" />
+            <input v-model="localFilter.to_date" type="date" class="border rounded px-3 py-2 w-full shadow-sm text-sm" />
           </div>
         </div>
         <div>
           <label class="block font-medium mb-1">Loại khách hàng</label>
-          <select v-model="filter.type" class="border rounded px-3 py-2 w-full shadow-sm text-sm">
+          <select v-model="localFilter.type" class="border rounded px-3 py-2 w-full shadow-sm text-sm">
             <option value="">-- Vui lòng chọn --</option>
-            <option value="today">Công ty</option>
+            <option value="company">Công ty</option>
             <option value="individual">Cá nhân</option>
           </select>
         </div>
@@ -62,29 +62,23 @@
     name: 'Filter',
     props: {
       visible: Boolean,
-      value: Object
-    },
-    data() {
-      return {
-        filter: {
-          name: '',
-          email: '',
-          phone: '',
-          from_date: '',
-          to_date: '',
-          type : ''
-        }
+      filter: {
+        type: Object,
+        required: true
       }
     },
     watch: {
-      value: {
+      filter: {
         immediate: true,
+        deep: true,
         handler(val) {
-          this.filter = {
-            ...this.filter,
-            ...val
-          }
+          this.localFilter = { ...val }
         }
+      }
+    },
+    data() {
+      return {
+        localFilter: { ...this.filter }
       }
     },
     methods: {
@@ -93,7 +87,7 @@
         this.$emit('close')
       },
       onApplyFilter() {
-        this.$emit('apply', this.filter)
+        this.$emit('apply', this.localFilter)
         this.$emit('close')
       }
     }

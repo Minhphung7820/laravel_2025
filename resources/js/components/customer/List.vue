@@ -53,6 +53,7 @@
     </CommonTable>
   </div>
     <Filter
+      :filter="filters"
       :visible="showFilter"
       @close="showFilter = false"
       @apply="onApplyFilter"

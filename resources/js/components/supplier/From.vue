@@ -197,6 +197,13 @@ export default {
     }
   },
   async mounted() {
+    const cacheKey = this.mode === 'update' ? `edit-${this.id}` : this.$route.fullPath
+    const cached = this.$store.getters['cache/getCache']('supplier', cacheKey)
+    if (cached) {
+      this.applyCacheData(cached)
+      this.loading = false
+      return
+    }
     try {
       if (this.mode === 'update' && this.supplierId) {
         this.skipChangeHandler = true
@@ -219,6 +226,7 @@ export default {
         this.originalForm = JSON.stringify(this.form)
         this.skipChangeHandler = false
       }
+      this.setCacheableData()
     } catch (err) {
       this.$router.push('/purchase/supplier')
     } finally {
@@ -231,6 +239,47 @@ export default {
     window.removeEventListener('beforeunload', this.handleBeforeUnload)
   },
   methods: {
+    resetCacheableByKey(){
+      const allKeys = this.$store.getters['cache/getAllCacheKeys']('supplier')
+      const listKeys = allKeys.filter(key =>
+        key.includes('page') &&
+        key.includes('filters') &&
+        !key.includes('/create') &&
+        !key.startsWith('edit-')
+      )
+      listKeys.forEach(key => {
+        this.$store.dispatch('cache/clearCacheKey', {
+          module: 'supplier',
+          key
+        })
+      })
+    },
+    setCacheableData(){
+      const cacheKey = this.mode === 'update' ? `edit-${this.id}` : this.$route.fullPath
+      this.$store.dispatch('cache/setCache', {
+          module: 'supplier',
+          key: cacheKey,
+          data: JSON.parse(JSON.stringify(this.getCacheableData()))
+      })
+    },
+    getCacheableData() {
+      const ignoredKeys = ['loading', 'errors', 'isDistrictLoading', 'isWardLoading']
+      const dataToCache = {}
+      for (const key in this.$data) {
+        if (!ignoredKeys.includes(key)) {
+          dataToCache[key] = this.$data[key]
+        }
+      }
+      return JSON.parse(JSON.stringify(dataToCache))
+    },
+    applyCacheData(data) {
+      const ignoredKeys = ['loading', 'errors', 'isDistrictLoading', 'isWardLoading']
+      for (const key in data) {
+        if (!ignoredKeys.includes(key) && this.$data.hasOwnProperty(key)) {
+          this[key] = data[key]
+        }
+      }
+    },
     async loadAllLocationOnUpdate() {
       const tasks = []
 
@@ -364,6 +413,7 @@ export default {
         } else {
           await window.axios.post('/api/supplier/create', formData)
         }
+        this.resetCacheableByKey()
         this.$router.push('/purchase/supplier')
       } catch (err) {
         if (err.response?.status === 422) {

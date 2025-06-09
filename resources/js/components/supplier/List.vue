@@ -61,19 +61,18 @@
     />
 </template>
 
-
 <script>
 import CommonTable from '../common/TableList.vue'
 import { encodeQuery, decodeQuery } from '@/utils/queryEncoder'
 import { FunnelIcon } from '@heroicons/vue/24/solid'
 import Filter from '@/components/supplier/Filter.vue'
+import { mapActions, mapGetters } from 'vuex'
 
 export default {
   name: 'ListSupplier',
-  components: { CommonTable ,FunnelIcon ,Filter },
+  components: { CommonTable, FunnelIcon, Filter },
   data() {
     return {
-      supplierCache: {},
       showFilter: false,
       filters: {
         code: '',
@@ -92,20 +91,26 @@ export default {
         total: 0,
         per_page: 10
       },
+      searchKeyword: '',
+      dropdownId: null,
+      isLoading: true,
+      moduleKey: 'supplier',
       columns: [
-        { label: 'Ảnh', key: 'avatar_url',type : 'image_file' },
+        { label: 'Ảnh', key: 'avatar_url', type: 'image_file' },
         { label: 'Tên nhà cung cấp', key: 'name' },
         { label: 'Mã nhà cung cấp', key: 'code' },
         { label: 'Email', key: 'email' },
         { label: 'SĐT', key: 'phone' },
         { label: 'Địa chỉ', key: 'address_full' }
-      ],
-      searchKeyword: '',
-      dropdownId: null
+      ]
     }
+  },
+  computed: {
+    ...mapGetters('cache', ['getCache'])
   },
   mounted() {
     document.addEventListener('click', this.closeDropdown)
+
     const encoded = this.$route.query.query
     if (encoded) {
       const decoded = decodeQuery(encoded)
@@ -113,59 +118,29 @@ export default {
       this.pagination.current_page = parseInt(decoded.page) || 1
       this.pagination.per_page = parseInt(decoded.limit) || 10
 
-      this.filters.code = decoded.code || ''
-      this.filters.name = decoded.name || ''
-      this.filters.email = decoded.email || ''
-      this.filters.phone = decoded.phone || ''
-      this.filters.from_date = decoded.from_date || ''
-      this.filters.to_date = decoded.to_date || ''
+      Object.assign(this.filters, {
+        code: decoded.code || '',
+        name: decoded.name || '',
+        email: decoded.email || '',
+        phone: decoded.phone || '',
+        from_date: decoded.from_date || '',
+        to_date: decoded.to_date || ''
+      })
     }
 
     this.fetchSuppliers(this.pagination.current_page)
   },
   beforeDestroy() {
-     document.removeEventListener('click', this.closeDropdown)
+    document.removeEventListener('click', this.closeDropdown)
   },
   methods: {
+    ...mapActions('cache', ['setCache']),
+
     makeCacheKey(page = this.pagination.current_page) {
       const filtersStr = JSON.stringify(this.filters)
       return `${this.searchKeyword}__page:${page}__filters:${filtersStr}`
     },
-    onApplyFilter(values) {
-      this.filters = values
-      this.fetchSuppliers(1)
-    },
-    onResetFilter() {
-      this.filters = {
-        code: '',
-        name: '',
-        email: '',
-        phone: '',
-        from_date: '',
-        to_date: ''
-      }
-      this.fetchSuppliers(1)
-    },
-    closeDropdown() {
-      this.dropdownId = null
-    },
-    toggleDropdown(id) {
-      this.dropdownId = this.dropdownId === id ? null : id
-    },
-    onView(item) {
-      this.$router.push(`/purchase/supplier/${item.id}/detail`)
-      this.dropdownId = null
-    },
-    onEdit(item) {
-      this.$router.push(`/purchase/supplier/${item.id}/edit`)
-      this.dropdownId = null
-    },
-    onDelete(item) {
-      if (confirm(`Xóa nhà cung cấp: ${item.name}?`)) {
-        console.log('Đã xoá:', item)
-      }
-      this.dropdownId = null
-    },
+
     updateUrlQuery(page = 1) {
       const queryObj = {
         page,
@@ -180,15 +155,17 @@ export default {
         query: { query: encoded }
       })
     },
+
     async fetchSuppliers(page = 1) {
       this.isLoading = true
       this.suppliers = []
 
       const cacheKey = this.makeCacheKey(page)
-      if (this.supplierCache[cacheKey]) {
-        const { suppliers, pagination } = this.supplierCache[cacheKey]
-        this.suppliers = suppliers
-        this.pagination = { ...pagination }
+      const cached = this.getCache(this.moduleKey, cacheKey)
+
+      if (cached) {
+        this.suppliers = cached.suppliers
+        this.pagination = { ...cached.pagination }
         this.updateUrlQuery(page)
         this.isLoading = false
         return
@@ -214,7 +191,7 @@ export default {
           to,
           per_page,
           total
-        } = res.data
+        } = res.data.data
 
         Object.assign(this.pagination, {
           current_page,
@@ -225,22 +202,64 @@ export default {
           total
         })
 
-        this.supplierCache[cacheKey] = {
-          suppliers: this.suppliers,
-          pagination: { ...this.pagination }
-        }
+        await this.setCache({
+          module: this.moduleKey,
+          key: cacheKey,
+          data: {
+            suppliers: this.suppliers,
+            pagination: { ...this.pagination }
+          }
+        })
       } catch (error) {
         console.error(error)
       } finally {
         this.isLoading = false
       }
     },
+
+    // UI interactions
     onSearch(keyword) {
       this.searchKeyword = keyword
       this.fetchSuppliers(1)
     },
     onPageChange(page) {
       this.fetchSuppliers(page)
+    },
+    onApplyFilter(values) {
+      this.filters = values
+      this.fetchSuppliers(1)
+    },
+    onResetFilter() {
+      this.filters = {
+        code: '',
+        name: '',
+        email: '',
+        phone: '',
+        from_date: '',
+        to_date: ''
+      }
+      this.fetchSuppliers(1)
+    },
+
+    toggleDropdown(id) {
+      this.dropdownId = this.dropdownId === id ? null : id
+    },
+    closeDropdown() {
+      this.dropdownId = null
+    },
+    onView(item) {
+      this.$router.push(`/purchase/supplier/${item.id}/detail`)
+      this.dropdownId = null
+    },
+    onEdit(item) {
+      this.$router.push(`/purchase/supplier/${item.id}/edit`)
+      this.dropdownId = null
+    },
+    onDelete(item) {
+      if (confirm(`Xóa nhà cung cấp: ${item.name}?`)) {
+        console.log('Đã xoá:', item)
+      }
+      this.dropdownId = null
     }
   }
 }

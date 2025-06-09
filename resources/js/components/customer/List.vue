@@ -64,16 +64,19 @@
 
 <script>
 import CommonTable from '../common/TableList.vue'
+import Filter from '@/components/customer/Filter.vue'
 import { encodeQuery, decodeQuery } from '@/utils/queryEncoder'
 import { FunnelIcon } from '@heroicons/vue/24/solid'
-import Filter from '@/components/customer/Filter.vue'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'ListCustomer',
-  components: { CommonTable,FunnelIcon,Filter },
+  components: { CommonTable, FunnelIcon, Filter },
+  computed: {
+    ...mapGetters('cache', ['getCache'])
+  },
   data() {
     return {
-      customerCache: {},
       showFilter: false,
       filters: {
         code: '',
@@ -82,9 +85,9 @@ export default {
         phone: '',
         from_date: '',
         to_date: '',
-        type : ''
+        type: ''
       },
-      isLoading : true,
+      isLoading: true,
       customers: [],
       pagination: {
         current_page: 1,
@@ -95,15 +98,18 @@ export default {
         per_page: 10
       },
       columns: [
-        { label: 'Ảnh', key: 'avatar_url',type : 'image_file' },
+        { label: 'Ảnh', key: 'avatar_url', type: 'image_file' },
         { label: 'Tên khách hàng', key: 'name' },
         { label: 'Mã KH', key: 'code' },
         { label: 'Email', key: 'email' },
         { label: 'SĐT', key: 'phone' },
         { label: 'Địa chỉ', key: 'address_full' },
-        { label: 'Loại khách hàng' , key: 'type', classMap: {
-            'company': 'bg-purple-100 text-purple-700 font-semibold px-2 py-1 rounded-full text-xs inline-block',
-            'individual': 'bg-green-100 text-green-700 font-semibold px-2 py-1 rounded-full text-xs inline-block'
+        {
+          label: 'Loại khách hàng',
+          key: 'type',
+          classMap: {
+            company: 'bg-purple-100 text-purple-700 font-semibold px-2 py-1 rounded-full text-xs inline-block',
+            individual: 'bg-green-100 text-green-700 font-semibold px-2 py-1 rounded-full text-xs inline-block'
           }
         }
       ],
@@ -111,7 +117,7 @@ export default {
       dropdownId: null
     }
   },
-  async mounted() {
+  mounted() {
     document.addEventListener('click', this.closeDropdown)
     const encoded = this.$route.query.query
     if (encoded) {
@@ -120,6 +126,7 @@ export default {
       this.pagination.current_page = parseInt(decoded.page) || 1
       this.pagination.per_page = parseInt(decoded.limit) || 10
 
+      this.filters.code = decoded.code || ''
       this.filters.name = decoded.name || ''
       this.filters.email = decoded.email || ''
       this.filters.phone = decoded.phone || ''
@@ -128,52 +135,19 @@ export default {
       this.filters.type = decoded.type || ''
     }
 
-    await this.fetchCustomers(this.pagination.current_page)
+    this.fetchCustomers(this.pagination.current_page)
   },
   beforeDestroy() {
-     document.removeEventListener('click', this.closeDropdown)
+    document.removeEventListener('click', this.closeDropdown)
   },
   methods: {
+    ...mapActions('cache', ['setCache', 'clearModuleCache']),
+
     makeCacheKey(page = this.pagination.current_page) {
       const filtersStr = JSON.stringify(this.filters)
       return `${this.searchKeyword}__page:${page}__filters:${filtersStr}`
     },
-    onApplyFilter(values) {
-      this.filters = values
-      this.fetchCustomers(1)
-    },
-    onResetFilter() {
-      this.filters = {
-        code: '',
-        name: '',
-        email: '',
-        phone: '',
-        from_date: '',
-        to_date: '',
-        type : ''
-      }
-      this.fetchCustomers(1)
-    },
-    closeDropdown() {
-      this.dropdownId = null
-    },
-    toggleDropdown(id) {
-      this.dropdownId = this.dropdownId === id ? null : id
-    },
-    onView(item) {
-      this.$router.push(`/sale/customer/${item.id}/detail`)
-      this.dropdownId = null
-    },
-    onEdit(item) {
-      this.$router.push(`/sale/customer/${item.id}/edit`)
-      this.dropdownId = null
-    },
-    onDelete(item) {
-      if (confirm(`Xóa khách hàng: ${item.name}?`)) {
-        console.log('Đã xoá:', item)
-      }
-      this.dropdownId = null
-    },
+
     updateUrlQuery(page = 1) {
       const queryObj = {
         page,
@@ -182,21 +156,22 @@ export default {
         ...this.filters
       }
       const encoded = encodeQuery(queryObj)
-
       this.$router.replace({
         path: this.$route.path,
         query: { query: encoded }
       })
     },
+
     async fetchCustomers(page = 1) {
       this.isLoading = true
       this.customers = []
 
       const cacheKey = this.makeCacheKey(page)
-      if (this.customerCache[cacheKey]) {
-        const { customers, pagination } = this.customerCache[cacheKey]
-        this.customers = customers
-        this.pagination = { ...pagination }
+      const cached = this.getCache('customer', cacheKey)
+
+      if (cached) {
+        this.customers = cached.customers
+        this.pagination = { ...cached.pagination }
         this.updateUrlQuery(page)
         this.isLoading = false
         return
@@ -233,22 +208,73 @@ export default {
           total
         })
 
-        this.customerCache[cacheKey] = {
-          customers: this.customers,
-          pagination: { ...this.pagination }
-        }
+        this.setCache({
+          module: 'customer',
+          key: cacheKey,
+          data: {
+            customers: this.customers,
+            pagination: { ...this.pagination }
+          }
+        })
       } catch (error) {
         console.log(error)
       } finally {
         this.isLoading = false
       }
     },
+
+    onApplyFilter(values) {
+      this.filters = values
+      this.fetchCustomers(1)
+    },
+
+    onResetFilter() {
+      this.filters = {
+        code: '',
+        name: '',
+        email: '',
+        phone: '',
+        from_date: '',
+        to_date: '',
+        type: ''
+      }
+      this.fetchCustomers(1)
+    },
+
     onSearch(keyword) {
       this.searchKeyword = keyword
       this.fetchCustomers(1)
     },
+
     onPageChange(page) {
       this.fetchCustomers(page)
+    },
+
+    onView(item) {
+      this.$router.push(`/sale/customer/${item.id}/detail`)
+      this.dropdownId = null
+    },
+
+    onEdit(item) {
+      this.$router.push(`/sale/customer/${item.id}/edit`)
+      this.dropdownId = null
+    },
+
+    onDelete(item) {
+      if (confirm(`Xóa khách hàng: ${item.name}?`)) {
+        // API xóa tại đây nếu có
+        this.clearModuleCache('customer') // clear toàn bộ cache
+        this.fetchCustomers(this.pagination.current_page)
+      }
+      this.dropdownId = null
+    },
+
+    toggleDropdown(id) {
+      this.dropdownId = this.dropdownId === id ? null : id
+    },
+
+    closeDropdown() {
+      this.dropdownId = null
     }
   }
 }

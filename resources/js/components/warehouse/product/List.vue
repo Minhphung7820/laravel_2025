@@ -78,16 +78,21 @@
 
 <script>
 import CommonTable from '@/components/common/TableList.vue'
-import { encodeQuery, decodeQuery } from '@/utils/queryEncoder'
 import Filter from '@/components/warehouse/product/Filter.vue'
-import { FunnelIcon } from '@heroicons/vue/24/solid'
 import ComboQuickView from '@/components/warehouse/product/ComboQuickView.vue'
+import { FunnelIcon } from '@heroicons/vue/24/solid'
+import { encodeQuery, decodeQuery } from '@/utils/queryEncoder'
+import { mapGetters, mapActions } from 'vuex'
+
 export default {
   name: 'ListProduct',
-  components: { CommonTable, Filter ,FunnelIcon,ComboQuickView },
+  components: { CommonTable, Filter, FunnelIcon, ComboQuickView },
+  computed: {
+    ...mapGetters('cache', ['getCache'])
+  },
   data() {
     return {
-      isLoading : true,
+      isLoading: true,
       showFilter: false,
       filters: {
         supplier: '',
@@ -100,12 +105,7 @@ export default {
       },
       products: [],
       currentStatus: 'all',
-      statusTabs: [
-        // { key: 'all', label: 'product_status.all', count: 12 },
-        // { key: 'pending', label: 'product_status.pending', count: 5 },
-        // { key: 'approved', label: 'product_status.approved', count: 7 },
-        // { key: 'rejected', label: 'product_status.rejected', count: 7 }
-      ],
+      statusTabs: [],
       pagination: {
         current_page: 1,
         last_page: 1,
@@ -121,30 +121,31 @@ export default {
         { label: this.$t('product_list.product_name'), key: 'product_name' },
         { label: this.$t('product_list.sku'), key: 'sku' },
         { label: this.$t('product_list.stock'), key: 'stock_name' },
-        { label: this.$t('product_list.type'), key: 'product_type' , withLang : true ,keyLang : 'product_type' ,classMap: {
-            'combo': 'bg-purple-100 text-purple-700 font-semibold px-2 py-1 rounded-full text-xs inline-block',
-            'single': 'bg-green-100 text-green-700 font-semibold px-2 py-1 rounded-full text-xs inline-block',
-            'variable': 'bg-blue-100 text-blue-700 font-semibold px-2 py-1 rounded-full text-xs inline-block'
+        {
+          label: this.$t('product_list.type'), key: 'product_type', withLang: true, keyLang: 'product_type', classMap: {
+            combo: 'bg-purple-100 text-purple-700 font-semibold px-2 py-1 rounded-full text-xs inline-block',
+            single: 'bg-green-100 text-green-700 font-semibold px-2 py-1 rounded-full text-xs inline-block',
+            variable: 'bg-blue-100 text-blue-700 font-semibold px-2 py-1 rounded-full text-xs inline-block'
           }
         },
-        { label: this.$t('product_list.purchase_price'), key: 'purchase_price' , isMoney : true },
-        { label: this.$t('product_list.sell_price'), key: 'sell_price' , isMoney : true },
+        { label: this.$t('product_list.purchase_price'), key: 'purchase_price', isMoney: true },
+        { label: this.$t('product_list.sell_price'), key: 'sell_price', isMoney: true },
         { label: this.$t('product_list.quantity'), key: 'quantity' },
         { label: this.$t('product_list.unit'), key: 'unit_name' },
-        { label: this.$t('product_list.status'), key: 'status',  withLang : true  ,keyLang : 'product_status' ,classMap: {
-            'pending': 'bg-yellow-100 text-yellow-700 font-semibold px-2 py-1 rounded-full text-xs inline-block',
-            'approved': 'bg-green-100 text-green-700 font-semibold px-2 py-1 rounded-full text-xs inline-block'
+        {
+          label: this.$t('product_list.status'), key: 'status', withLang: true, keyLang: 'product_status', classMap: {
+            pending: 'bg-yellow-100 text-yellow-700 font-semibold px-2 py-1 rounded-full text-xs inline-block',
+            approved: 'bg-green-100 text-green-700 font-semibold px-2 py-1 rounded-full text-xs inline-block'
           }
         }
       ],
       comboList: [],
-      showCombo: false  ,
-      currentTab: 'all',
-      productCache: {}
+      showCombo: false
     }
   },
-  mounted() {
+  async mounted() {
     document.addEventListener('click', this.closeDropdown)
+
     const encoded = this.$route.query.query
     if (encoded) {
       const decoded = decodeQuery(encoded)
@@ -154,24 +155,94 @@ export default {
       this.pagination.per_page = parseInt(decoded.limit) || 10
     }
 
-    this.fetchProducts(this.pagination.current_page)
+    await this.fetchProducts(this.pagination.current_page)
   },
   beforeDestroy() {
     document.removeEventListener('click', this.closeDropdown)
   },
   methods: {
+    ...mapActions('cache', ['setCache', 'clearModuleCache']),
+
     makeCacheKey(tab = this.currentStatus, page = this.pagination.current_page) {
       const filtersStr = JSON.stringify(this.filters)
       return `${tab}__${this.searchKeyword}__page:${page}__filters:${filtersStr}`
     },
-    handleShowCombo(item) {
-      this.comboList = item.combo_list || []
-      this.showCombo = true
+
+    updateUrlQuery(page = 1) {
+      const queryObj = {
+        page,
+        keyword: this.searchKeyword,
+        limit: this.pagination.per_page,
+        ...this.filters
+      }
+
+      if (['pending', 'approved', 'rejected'].includes(this.currentStatus)) {
+        queryObj.status = this.currentStatus
+      }
+
+      const encoded = encodeQuery(queryObj)
+      this.$router.replace({ path: this.$route.path, query: { query: encoded } })
     },
+
+    async fetchProducts(page = 1) {
+      this.isLoading = true
+      this.products = []
+      const cacheKey = this.makeCacheKey(this.currentStatus, page)
+      const cached = this.getCache('product', cacheKey)
+
+      if (cached) {
+        this.products = cached.products
+        this.pagination = { ...cached.pagination }
+        this.statusTabs = cached.statusTabs || []
+        this.updateUrlQuery(page)
+        this.isLoading = false
+        return
+      }
+
+      try {
+        const params = {
+          page,
+          keyword: this.searchKeyword,
+          limit: this.pagination.per_page,
+          ...this.filters
+        }
+
+        if (['pending', 'approved', 'rejected'].includes(this.currentStatus)) {
+          params.status = this.currentStatus
+        }
+
+        const [resList, resCount] = await Promise.all([
+          window.axios.get('/api/warehouse/product/list', { params }),
+          window.axios.get('/api/warehouse/product/get-status-count', { params })
+        ])
+
+        this.products = resList.data.data.data
+        Object.assign(this.pagination, resList.data.data)
+        this.statusTabs = resCount.data.data
+
+        this.setCache({
+          module: 'product',
+          key: cacheKey,
+          data: {
+            products: this.products,
+            pagination: { ...this.pagination },
+            statusTabs: this.statusTabs
+          }
+        })
+
+        this.updateUrlQuery(page)
+      } catch (err) {
+        console.error('Lỗi khi gọi API:', err)
+      } finally {
+        this.isLoading = false
+      }
+    },
+
     onApplyFilter(values) {
       this.filters = values
       this.fetchProducts(1)
     },
+
     onResetFilter() {
       this.filters = {
         supplier: '',
@@ -184,108 +255,49 @@ export default {
       }
       this.fetchProducts(1)
     },
-    onChangeTab(status) {
-      this.currentStatus = status
-      this.fetchProducts(1)
-    },
-    closeDropdown() {
-      this.dropdownId = null
-    },
-    toggleDropdown(id) {
-      this.dropdownId = this.dropdownId === id ? null : id
-    },
-    onView(item) {
-      // this.$route.push(`/warehouse/product/edit/${item.id}/${item.type}`)
-    },
-    onEdit(item) {
-      this.$router.push(`/warehouse/product/edit/${item.product_id}/${item.product_type}`)
-    },
-    onDelete(item) {
-      if (confirm(`${this.$t('actions.confirm_delete')} ${item.product_name}?`)) {
-        alert(this.$t('actions.deleted'))
-      }
-    },
-    updateUrlQuery(page = 1) {
-      const queryObj = {
-        page,
-        keyword: this.searchKeyword,
-        limit: this.pagination.per_page,
-        ...this.filters
-      }
 
-      if (['pending', 'approved','rejected'].includes(this.currentStatus)) {
-        queryObj.status = this.currentStatus
-      }
-
-      const encoded = encodeQuery(queryObj)
-      this.$router.replace({
-        path: this.$route.path,
-        query: { query: encoded }
-      })
-    },
-    async fetchProducts(page = 1) {
-      this.isLoading = true
-      this.products = []
-
-      const cacheKey = this.makeCacheKey(this.currentStatus, page)
-
-      if (this.productCache[cacheKey]) {
-        const { products, pagination, statusTabs } = this.productCache[cacheKey]
-        this.products = products
-        this.pagination = { ...pagination }
-        this.statusTabs = statusTabs
-        this.isLoading = false
-        this.updateUrlQuery(page)
-        return
-      }
-
-      this.statusTabs = [
-        { key: 'all', label: 'product_status.all', count: 0 },
-        { key: 'pending', label: 'product_status.pending', count: 0 },
-        { key: 'approved', label: 'product_status.approved', count: 0 },
-        { key: 'rejected', label: 'product_status.rejected', count: 0 }
-      ]
-
-      const params = {
-        page,
-        keyword: this.searchKeyword,
-        limit: this.pagination.per_page,
-        ...this.filters
-      }
-
-      if (['pending', 'approved', 'rejected'].includes(this.currentStatus)) {
-        params.status = this.currentStatus
-      }
-
-      this.updateUrlQuery(page)
-
-      try {
-        const [resList, resCount] = await Promise.all([
-          window.axios.get('/api/warehouse/product/list', { params }),
-          window.axios.get('/api/warehouse/product/get-status-count', { params })
-        ])
-
-        this.products = resList.data.data.data
-        Object.assign(this.pagination, resList.data.data)
-        this.statusTabs = resCount.data.data
-
-        this.productCache[cacheKey] = {
-          products: this.products,
-          pagination: { ...this.pagination },
-          statusTabs: this.statusTabs
-        }
-      } catch (error) {
-        console.error('Lỗi khi gọi API:', error)
-      } finally {
-        this.isLoading = false
-      }
-    },
     onSearch(keyword) {
       this.searchKeyword = keyword
       this.fetchProducts(1)
     },
+
     onPageChange(page) {
       this.fetchProducts(page)
+    },
+
+    onChangeTab(status) {
+      this.currentStatus = status
+      this.fetchProducts(1)
+    },
+
+    toggleDropdown(id) {
+      this.dropdownId = this.dropdownId === id ? null : id
+    },
+
+    closeDropdown() {
+      this.dropdownId = null
+    },
+
+    handleShowCombo(item) {
+      this.comboList = item.combo_list || []
+      this.showCombo = true
+    },
+
+    onView(item) {
+      // Tuỳ logic
+    },
+
+    onEdit(item) {
+      this.$router.push(`/warehouse/product/edit/${item.product_id}/${item.product_type}`)
+    },
+
+    onDelete(item) {
+      if (confirm(`${this.$t('actions.confirm_delete')} ${item.product_name}?`)) {
+        // API delete
+        alert(this.$t('actions.deleted'))
+        this.clearModuleCache('product') // xóa toàn bộ cache
+        this.fetchProducts(this.pagination.current_page)
+      }
     }
   }
 }

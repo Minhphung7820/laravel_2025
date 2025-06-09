@@ -49,84 +49,76 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label class="block mb-1 text-sm font-semibold text-gray-700">Tên nhà cung cấp <span class="text-red-500">*</span></label>
-            <input
-              v-model="form.name"
-              type="text"
-              @input="clearError('name')"
-              :class="['w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400', errors.name ? 'border-red-500' : 'border-gray-300']"
-            />
+            <input ref="name" v-model="form.name" type="text" @input="clearError('name')" :class="['w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400', errors.name ? 'border-red-500' : 'border-gray-300']" />
             <p v-if="errors.name" class="text-sm text-red-600 mt-1">{{ errors.name[0] }}</p>
           </div>
 
           <div>
-            <label class="block mb-1 text-sm font-semibold text-gray-700">Mã nhà cung cấp</label>
-            <input v-model="form.code" type="text"
-              class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            <label class="block mb-1 text-sm font-semibold text-gray-700">Mã nhà cung cấp <span class="text-red-500">*</span></label>
+            <input ref="code" v-model="form.code" type="text" @input="clearError('code')" :class="['w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400', errors.code ? 'border-red-500' : 'border-gray-300']" />
+            <p v-if="errors.code" class="text-sm text-red-600 mt-1">{{ errors.code[0] }}</p>
           </div>
 
           <div>
-            <label class="block mb-1 text-sm font-semibold text-gray-700">SĐT</label>
-            <input v-model="form.phone" type="text"
-              class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            <label class="block mb-1 text-sm font-semibold text-gray-700">SĐT <span class="text-red-500">*</span></label>
+            <input ref="phone" v-model="form.phone" type="text" @input="clearError('phone')" :class="['w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400', errors.phone ? 'border-red-500' : 'border-gray-300']" />
+            <p v-if="errors.phone" class="text-sm text-red-600 mt-1">{{ errors.phone[0] }}</p>
           </div>
 
           <div>
             <label class="block mb-1 text-sm font-semibold text-gray-700">Email</label>
-            <input v-model="form.email" type="email"
-              class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            <input v-model="form.email" type="email" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
           </div>
 
           <div>
-            <label class="block mb-1 text-sm font-semibold text-gray-700">Địa chỉ chi tiết</label>
-            <input v-model="form.address" type="text"
-              class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            <label class="block mb-1 text-sm font-semibold text-gray-700">Địa chỉ chi tiết <span class="text-red-500">*</span></label>
+            <input ref="address" v-model="form.address" type="text" @input="clearError('address')" :class="['w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400', errors.address ? 'border-red-500' : 'border-gray-300']" />
+            <p v-if="errors.address" class="text-sm text-red-600 mt-1">{{ errors.address[0] }}</p>
           </div>
 
           <div>
             <label class="block mb-1 text-sm font-semibold text-gray-700">Quốc gia</label>
-            <select
-              v-model="form.country_code"
-              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
+            <select v-model="form.country_code" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
               <option value="VN">Việt Nam</option>
               <option value="JP">Nhật Bản</option>
               <option value="US">Hoa Kỳ</option>
               <option value="KR">Hàn Quốc</option>
               <option value="CN">Trung Quốc</option>
-              <!-- Thêm quốc gia khác tùy ý -->
             </select>
           </div>
 
           <template v-if="form.country_code === 'VN'">
             <div>
-              <label class="block mb-1 text-sm font-semibold text-gray-700">Tỉnh / Thành phố</label>
-              <select v-model="form.province_id" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
+              <label class="block mb-1 text-sm font-semibold text-gray-700">Tỉnh / Thành phố <span class="text-red-500">*</span></label>
+              <select @change="onProvinceChange" ref="company_province_id" v-model="form.company_province_id" :class="['w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400', errors.company_province_id ? 'border-red-500' : 'border-gray-300']">
                 <option value="">Chọn tỉnh</option>
-                <option v-for="p in provinces" :key="p.code" :value="p.code">{{ p.name }}</option>
+                <option v-for="p in provinces" :key="p.code" :value="p.code">{{ p.full_name }}</option>
               </select>
+              <p v-if="errors.company_province_id" class="text-sm text-red-600 mt-1">{{ errors.company_province_id[0] }}</p>
             </div>
 
             <div>
-              <label class="block mb-1 text-sm font-semibold text-gray-700">Quận / Huyện</label>
-              <select v-model="form.district_id" :disabled="!form.province_id" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
+              <label class="block mb-1 text-sm font-semibold text-gray-700">Quận / Huyện <span class="text-red-500">*</span></label>
+              <select @change="onDistrictChange" ref="company_district_id" v-model="form.company_district_id" :disabled="!form.company_province_id || isDistrictLoading" :class="['w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400', errors.company_district_id ? 'border-red-500' : 'border-gray-300']">
                 <option value="">Chọn huyện</option>
-                <option v-for="d in districts" :key="d.code" :value="d.code">{{ d.name }}</option>
+                <option v-for="d in districts" :key="d.code" :value="d.code">{{ d.full_name }}</option>
               </select>
+              <p v-if="errors.company_district_id" class="text-sm text-red-600 mt-1">{{ errors.company_district_id[0] }}</p>
             </div>
 
             <div>
-              <label class="block mb-1 text-sm font-semibold text-gray-700">Phường / Xã</label>
-              <select v-model="form.ward_id" :disabled="!form.district_id" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
+              <label class="block mb-1 text-sm font-semibold text-gray-700">Phường / Xã <span class="text-red-500">*</span></label>
+              <select ref="company_ward_id" v-model="form.company_ward_id" :disabled="!form.company_district_id || isWardLoading" :class="['w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400', errors.company_ward_id ? 'border-red-500' : 'border-gray-300']">
                 <option value="">Chọn xã</option>
-                <option v-for="w in wards" :key="w.code" :value="w.code">{{ w.name }}</option>
+                <option v-for="w in wards" :key="w.code" :value="w.code">{{ w.full_name }}</option>
               </select>
+              <p v-if="errors.company_ward_id" class="text-sm text-red-600 mt-1">{{ errors.company_ward_id[0] }}</p>
             </div>
           </template>
 
           <div>
             <label class="block mb-1 text-sm font-semibold text-gray-700">Trạng thái</label>
-            <select v-model="form.status"
-              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <select v-model="form.status" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
               <option value="active">Hoạt động</option>
               <option value="inactive">Ngưng hoạt động</option>
               <option value="blacklist">Black list</option>
@@ -180,58 +172,56 @@
 <script>
 export default {
   props: {
-    mode: {
-      type: String,
-      default: 'create'
-    },
-    supplierId: {
-      type: [String, Number],
-      default: null
-    }
+    mode: { type: String, default: 'create' },
+    supplierId: { type: [String, Number], default: null }
   },
   data() {
     return {
       form: {
-        country_code: 'VN',
-        name: '',
-        phone: '',
-        email: '',
-        birthday: '',
-        gender: '',
-        address: '',
-        type: 'individual',
-        source: '',
-        status: 'active',
-        assigned_user_id: null,
-        facebook_url: '',
-        zalo_phone: '',
-        tax_code: '',
-        debt_amount: 0,
-        credit_limit: 0,
-        note: ''
+        country_code: 'VN', name: '', code: '', phone: '', email: '', address: '',
+        company_province_id: '', company_district_id: '', company_ward_id: '', status: 'active',
+        tax_code: '', debt_amount: 0, credit_limit: 0, note: ''
       },
       avatarFile: null,
       avatarPreview: null,
       originalForm: null,
-      errors: {}
+      errors: {},
+      provinces: [],
+      districts: [],
+      wards: [],
+      loading: true,
+      isDistrictLoading: false,
+      isWardLoading: false,
+      skipChangeHandler: true,
     }
   },
   async mounted() {
-    if (this.mode === 'update' && this.supplierId) {
-      try {
-        const supplier = await window.axios.get(`/api/supplier/detail/${this.supplierId}`)
-        const { data } = supplier.data
-        this.form = { ...this.form, ...data }
-        this.form.avatar = null;
-        this.form.birthday = data.birthday ? data.birthday.split('T')[0] : ''
+    try {
+      if (this.mode === 'update' && this.supplierId) {
+        this.skipChangeHandler = true
+
+        const [provinceData, supplierRes] = await Promise.all([
+          this.fetchProvinces(),
+          window.axios.get(`/api/supplier/detail/${this.supplierId}`)
+        ])
+
+        const { data } = supplierRes.data
+        Object.assign(this.form, data)
         this.avatarPreview = data.avatar_url || null
+
+        await this.loadAllLocationOnUpdate()
+
         this.originalForm = JSON.stringify(this.form)
-      } catch (err) {
-        alert('Không tìm thấy nhà cung cấp')
-        this.$router.push('/purchase/supplier')
+        this.skipChangeHandler = false
+      } else {
+        await this.fetchProvinces()
+        this.originalForm = JSON.stringify(this.form)
+        this.skipChangeHandler = false
       }
-    } else {
-      this.originalForm = JSON.stringify(this.form)
+    } catch (err) {
+      this.$router.push('/purchase/supplier')
+    } finally {
+      this.loading = false
     }
 
     window.addEventListener('beforeunload', this.handleBeforeUnload)
@@ -240,24 +230,79 @@ export default {
     window.removeEventListener('beforeunload', this.handleBeforeUnload)
   },
   methods: {
-    clearError(field) {
-      if (this.errors[field]) {
-        this.$set(this.errors, field, null)
+    async loadAllLocationOnUpdate() {
+      const tasks = []
+
+      if (this.form.company_province_id) {
+        this.isDistrictLoading = true
+        tasks.push(
+          window.axios.get('/api/common/districts', {
+            params: { province_code: this.form.company_province_id }
+          }).then(res => {
+            this.districts = res.data.data
+          })
+        )
       }
+
+      if (this.form.company_district_id) {
+        this.isWardLoading = true
+        tasks.push(
+          window.axios.get('/api/common/wards', {
+            params: { district_code: this.form.company_district_id }
+          }).then(res => {
+            this.wards = res.data.data
+          })
+        )
+      }
+
+      await Promise.all(tasks)
+
+      this.isDistrictLoading = false
+      this.isWardLoading = false
+    },
+    async onProvinceChange() {
+      if (this.skipChangeHandler) return
+      this.form.company_district_id = ''
+      this.form.company_ward_id = ''
+      this.districts = []
+      this.wards = []
+      if (this.form.company_province_id) {
+        this.isDistrictLoading = true
+        const res = await window.axios.get('/api/common/districts', {
+          params: { province_code: this.form.company_province_id }
+        })
+        this.districts = res.data.data
+        this.isDistrictLoading = false
+      }
+    },
+    async onDistrictChange() {
+      if (this.skipChangeHandler) return
+      this.form.company_ward_id = ''
+      this.wards = []
+
+      if (this.form.company_district_id) {
+        this.isWardLoading = true
+        const res = await window.axios.get('/api/common/wards', {
+          params: { district_code: this.form.company_district_id }
+        })
+        this.wards = res.data.data
+        this.isWardLoading = false
+      }
+    },
+    clearError(field) {
+      if (this.errors[field]) this.errors[field] = null
     },
     handleAvatarChange(e) {
       const file = e.target.files[0]
-      if (!file) return
-      this.avatarFile = file
-      this.avatarPreview = URL.createObjectURL(file)
+      if (file) {
+        this.avatarFile = file
+        this.avatarPreview = URL.createObjectURL(file)
+      }
     },
     removeAvatar() {
       this.avatarFile = null
       this.avatarPreview = null
-    },
-    async isFormDirty() {
-      return JSON.stringify(this.form) !== this.originalForm ||
-        this.avatarFile !== null
+      this.$refs.avatarInput.value = null
     },
     handleBeforeUnload(e) {
       if (this.isFormDirty()) {
@@ -265,48 +310,78 @@ export default {
         e.returnValue = ''
       }
     },
-    async submitForm() {
-      try {
-        const formData = new FormData()
-        for (const key in this.form) {
-          formData.append(key, this.form[key] ?? '')
-        }
-        if (this.avatarFile) {
-          formData.append('avatar', this.avatarFile)
-        }
+    isFormDirty() {
+      return JSON.stringify(this.form) !== this.originalForm || this.avatarFile !== null
+    },
+    async fetchProvinces() {
+      const { data } = await window.axios.get('/api/common/provinces')
+      this.provinces = data.data
+    },
+    checkValidate(){
+      this.errors = {}
 
+      if (!this.form.name) this.errors.name = ['Tên nhà cung cấp là bắt buộc']
+      if (!this.form.code) this.errors.code = ['Mã nhà cung cấp là bắt buộc']
+      if (!this.form.phone) this.errors.phone = ['SĐT là bắt buộc']
+      if (!this.form.address) this.errors.address = ['Địa chỉ là bắt buộc']
+      if (this.form.country_code === 'VN') {
+        if (!this.form.company_province_id) this.errors.company_province_id = ['Tỉnh là bắt buộc']
+        if (!this.form.company_district_id) this.errors.company_district_id = ['Huyện là bắt buộc']
+        if (!this.form.company_ward_id) this.errors.company_ward_id = ['Xã là bắt buộc']
+      }
+      if (Object.keys(this.errors).length > 0) {
+        const firstError = Object.keys(this.errors)[0]
+        this.$nextTick(() => {
+          const el = this.$refs[firstError]
+          if (el?.scrollIntoView) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          }
+        })
+        return false
+      } else {
+        return true
+      }
+    },
+    async submitForm() {
+      if(!this.checkValidate()) return
+      const formData = new FormData()
+      for (const key in this.form) {
+        formData.append(key, this.form[key] ?? '')
+      }
+      if (this.avatarFile) formData.append('avatar', this.avatarFile)
+      try {
         if (this.mode === 'update') {
           await window.axios.post(`/api/supplier/update/${this.supplierId}`, formData)
         } else {
           await window.axios.post('/api/supplier/create', formData)
         }
-
-        this.originalForm = JSON.stringify(this.form)
-        this.avatarFile = null
-
         this.$router.push('/purchase/supplier')
       } catch (err) {
-        if (err.response && err.response.status === 422) {
-          this.errors = err.response.data.errors || {}
+        if (err.response?.status === 422) {
+          this.errors = err.response.data.errors
+          const firstError = Object.keys(this.errors)[0]
+          this.$nextTick(() => {
+            const el = this.$refs[firstError]
+            if (el?.scrollIntoView) {
+              el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            }
+          })
         } else {
-          console.error(err)
-          alert('Gửi thất bại!')
+          alert('Có lỗi xảy ra!')
         }
       }
     }
   },
-  async beforeRouteLeave(to, from, next) {
-    const checkIsInputing = await this.isFormDirty();
-    if (checkIsInputing) {
-      const answer = confirm('Bạn có chắc muốn rời trang khi dữ liệu chưa lưu?')
-      next(answer)
+  beforeRouteLeave(to, from, next) {
+    if (this.isFormDirty()) {
+      const confirmLeave = confirm('Bạn có chắc muốn rời trang khi dữ liệu chưa lưu?')
+      next(confirmLeave)
     } else {
       next()
     }
   }
 }
 </script>
-
 <style>
 
 </style>

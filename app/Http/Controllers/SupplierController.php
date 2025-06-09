@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class SupplierController extends Controller
 {
@@ -33,30 +34,43 @@ class SupplierController extends Controller
             $request->merge(['assigned_user_id' => null]);
         }
 
-        $validated = $request->validate([
-            'name'  => 'required|string|max:255',
-            'phone' => [
+        $rules = [
+            'name'    => 'required|string|max:255',
+            'code'    => [
+                'required',
+                'string',
+                'max:100',
+                \Illuminate\Validation\Rule::unique('customers', 'code')
+                    ->where(fn($q) => $q->where('is_customer', 0)),
+            ],
+            'phone'   => [
                 'required',
                 'string',
                 'max:20',
                 \Illuminate\Validation\Rule::unique('customers', 'phone')
-                    ->where(fn ($q) => $q->where('is_customer', 0)),
+                    ->where(fn($q) => $q->where('is_customer', 0)),
             ],
             'email'            => 'nullable|email|max:255',
-            'birthday'         => 'nullable|date',
-            'gender'           => 'nullable|in:male,female,other,unknown',
-            'address'          => 'nullable|string|max:255',
-            'type'             => 'in:individual,company',
+            'address'          => 'required|string|max:255',
             'status'           => 'in:active,inactive,blacklist',
-            'assigned_user_id' => 'nullable|exists:users,id',
-            'facebook_url'     => 'nullable|string|max:255',
-            'zalo_phone'       => 'nullable|string|max:20',
             'tax_code'         => 'nullable|string|max:100',
             'debt_amount'      => 'nullable|numeric',
             'credit_limit'     => 'nullable|numeric',
             'note'             => 'nullable|string',
             'avatar'           => 'nullable|image|max:2048',
-        ]);
+            'country_code'     => 'required|string|max:5',
+            'company_province_id'      => 'nullable|string|max:50',
+            'company_district_id'      => 'nullable|string|max:50',
+            'company_ward_id'          => 'nullable|string|max:50',
+        ];
+
+        if ($request->input('country_code') === 'VN') {
+            $rules['company_province_id'] = 'required|string|max:50';
+            $rules['company_district_id'] = 'required|string|max:50';
+            $rules['company_ward_id']     = 'required|string|max:50';
+        }
+
+        $validated = $request->validate($rules);
 
         $validated['total_orders'] = 0;
         $validated['total_spent'] = 0;
@@ -85,39 +99,58 @@ class SupplierController extends Controller
     {
         $supplier = Customer::findOrFail($id);
 
-        $validated = $request->validate([
-            'name'  => 'required|string|max:255',
-            'phone' => [
+        $rules = [
+            'name'       => 'required|string|max:255',
+            'code'       => [
+                'required',
+                'string',
+                'max:100',
+                \Illuminate\Validation\Rule::unique('customers', 'code')
+                    ->where(fn($q) => $q->where('is_customer', 0))
+                    ->ignore($supplier->id),
+            ],
+            'phone'      => [
                 'required',
                 'string',
                 'max:20',
-                \Illuminate\Validation\Rule::unique('customers')
-                    ->where(fn ($q) => $q->where('is_customer', 0))
+                \Illuminate\Validation\Rule::unique('customers', 'phone')
+                    ->where(fn($q) => $q->where('is_customer', 0))
                     ->ignore($supplier->id),
             ],
-            'email'            => 'nullable|email|max:255',
-            'birthday'         => 'nullable|date',
-            'gender'           => 'nullable|in:male,female,other,unknown',
-            'address'          => 'nullable|string|max:255',
-            'type'             => 'required|in:individual,company',
-            'source'           => 'nullable|string|max:255',
-            'status'           => 'required|in:active,inactive,blacklist',
-            'assigned_user_id' => 'nullable|exists:users,id',
-            'facebook_url'     => 'nullable|string|max:255',
-            'zalo_phone'       => 'nullable|string|max:20',
-            'tax_code'         => 'nullable|string|max:50',
-            'debt_amount'      => 'nullable|numeric|min:0',
-            'credit_limit'     => 'nullable|numeric|min:0',
-            'note'             => 'nullable|string',
-            'avatar'           => 'nullable|image|max:2048',
-        ]);
+            'email'         => 'nullable|email|max:255',
+            'address'       => 'nullable|string|max:255',
+            'company_province_id'   => 'nullable|string|max:20',
+            'company_district_id'   => 'nullable|string|max:20',
+            'company_ward_id'       => 'nullable|string|max:20',
+            'country_code'  => 'nullable|string|max:10',
+            'status'        => 'required|in:active,inactive,blacklist',
+            'tax_code'      => 'nullable|string|max:50',
+            'debt_amount'   => 'nullable|numeric|min:0',
+            'credit_limit'  => 'nullable|numeric|min:0',
+            'note'          => 'nullable|string|max:1000',
+            'avatar'        => 'nullable|image|max:2048',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($request->country_code === 'VN') {
+            $validator->addRules([
+                'company_province_id' => 'required|string|max:20',
+                'company_district_id' => 'required|string|max:20',
+                'company_ward_id'     => 'required|string|max:20',
+            ]);
+        }
+
+        $validated = $validator->validate();
 
         $validated['is_customer'] = 0;
+        $validated['type'] = 'company';
 
         if ($request->hasFile('avatar')) {
             if ($supplier->avatar && Storage::disk('public')->exists(str_replace('/storage/', '', $supplier->avatar))) {
                 Storage::disk('public')->delete(str_replace('/storage/', '', $supplier->avatar));
             }
+
             $validated['avatar'] = $this->uploadFile($request->file('avatar'), 'avatars');
         }
 

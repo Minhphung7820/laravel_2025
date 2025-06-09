@@ -417,10 +417,10 @@
                   errors.company_district_id ? 'border-red-500' : 'border-gray-300'
                 ]"
               >
-        <option value="">-- Chọn huyện --</option>
-        <option v-for="item in companyDistricts" :key="item.code" :value="item.code">
-          {{ item.full_name }}
-        </option>
+              <option value="">-- Chọn huyện --</option>
+              <option v-for="item in companyDistricts" :key="item.code" :value="item.code">
+                {{ item.full_name }}
+              </option>
             </select>
             <p v-if="errors.company_district_id" class="text-sm text-red-600 mt-1">
               {{ errors.company_district_id[0] }}

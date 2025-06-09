@@ -33,7 +33,6 @@ class CustomerController extends Controller
                     DB::raw("CONVERT(wards.code USING utf8mb4) COLLATE utf8mb4_unicode_ci")
                 )
                 ->where('customers.is_customer', 1)
-
                 ->when($request->filled('keyword'), function ($query) use ($request) {
                     $query->where(function ($q) use ($request) {
                         $q->where('customers.name', 'like', '%' . $request->keyword . '%')
@@ -41,19 +40,12 @@ class CustomerController extends Controller
                     });
                 })
                 ->when($request->filled('code'), fn($q) => $q->where('customers.code', 'like', '%' . $request->code . '%'))
-
                 ->when($request->filled('name'), fn($q) => $q->where('customers.name', 'like', '%' . $request->name . '%'))
-
                 ->when($request->filled('email'), fn($q) => $q->where('customers.email', 'like', '%' . $request->email . '%'))
-
                 ->when($request->filled('phone'), fn($q) => $q->where('customers.phone', 'like', '%' . $request->phone . '%'))
-
                 ->when($request->filled('type'), fn($q) => $q->where('customers.type', $request->type))
-
                 ->when($request->filled('from_date'), fn($q) => $q->whereDate('customers.created_at', '>=', $request->from_date))
-
                 ->when($request->filled('to_date'), fn($q) => $q->whereDate('customers.created_at', '<=', $request->to_date))
-
                 ->select([
                     'customers.id',
                     'customers.name',

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -12,14 +13,52 @@ class SupplierController extends Controller
     public function index(Request $request)
     {
         try {
-            $suppliers = Customer::where('is_customer', 0)
+            $suppliers = Customer::where('customers.is_customer', 0)
+                ->join(
+                    'provinces',
+                    DB::raw("CONVERT(customers.company_province_id USING utf8mb4) COLLATE utf8mb4_unicode_ci"),
+                    '=',
+                    DB::raw("CONVERT(provinces.code USING utf8mb4) COLLATE utf8mb4_unicode_ci")
+                )
+                ->join(
+                    'districts',
+                    DB::raw("CONVERT(customers.company_district_id USING utf8mb4) COLLATE utf8mb4_unicode_ci"),
+                    '=',
+                    DB::raw("CONVERT(districts.code USING utf8mb4) COLLATE utf8mb4_unicode_ci")
+                )
+                ->join(
+                    'wards',
+                    DB::raw("CONVERT(customers.company_ward_id USING utf8mb4) COLLATE utf8mb4_unicode_ci"),
+                    '=',
+                    DB::raw("CONVERT(wards.code USING utf8mb4) COLLATE utf8mb4_unicode_ci")
+                )
                 ->when($request->filled('keyword'), function ($query) use ($request) {
-                    $query->where(function ($q) use ($request) {
-                        $q->where('name', 'like', '%' . $request['keyword'] . '%')
-                            ->orWhere('email', 'like', '%' . $request['keyword'] . '%');
+                    $keyword = $request->input('keyword');
+                    $query->where(function ($q) use ($keyword) {
+                        $q->where('customers.name', 'like', "%{$keyword}%")
+                            ->orWhere('customers.email', 'like', "%{$keyword}%")
+                            ->orWhere('customers.phone', 'like', "%{$keyword}%")
+                            ->orWhere('customers.code', 'like', "%{$keyword}%");
                     });
                 })
-                ->orderByDesc('created_at')
+                ->when($request->filled('code'), fn($q) => $q->where('customers.code', 'like', '%' . $request->input('code') . '%'))
+                ->when($request->filled('name'), fn($q) => $q->where('customers.name', 'like', '%' . $request->input('name') . '%'))
+                ->when($request->filled('email'), fn($q) => $q->where('customers.email', 'like', '%' . $request->input('email') . '%'))
+                ->when($request->filled('phone'), fn($q) => $q->where('customers.phone', 'like', '%' . $request->input('phone') . '%'))
+                ->when($request->filled('from_date'), fn($q) => $q->whereDate('customers.created_at', '>=', $request->input('from_date')))
+                ->when($request->filled('to_date'), fn($q) => $q->whereDate('customers.created_at', '<=', $request->input('to_date')))
+                ->select([
+                    'customers.id',
+                    'customers.name',
+                    'customers.avatar',
+                    'customers.email',
+                    'customers.phone',
+                    'customers.address',
+                    'customers.code',
+                    'customers.type',
+                    DB::raw("CONCAT(customers.address, ', ', wards.full_name, ', ', districts.full_name, ', ', provinces.full_name) as address_full")
+                ])
+                ->orderByDesc('customers.created_at')
                 ->paginate($request->input('limit', 10));
 
             return $this->responseSuccess($suppliers);

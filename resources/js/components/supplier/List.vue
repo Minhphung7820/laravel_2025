@@ -9,14 +9,25 @@
       @search="onSearch"
       @page-change="onPageChange"
       :placeholder="'🔍 Tìm kiếm nhà cung cấp...'"
+      :isLoading="isLoading"
+      :withCheckbox="true"
     >
       <template #buttons>
+          <div class="flex gap-2 justify-end">
         <button
           class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 shadow font-semibold cursor-pointer"
           @click="$router.push('/purchase/supplier/create')"
         >
           + Thêm nhà cung cấp
         </button>
+             <button
+                @click="showFilter = true"
+                class="bg-white text-gray-700 px-4 py-2 border rounded-md hover:bg-gray-100 flex items-center gap-2 shadow-sm cursor-pointer"
+              >
+                <FunnelIcon class="w-5 h-5 text-gray-700" />
+                {{ $t('actions.filter') }}
+            </button>
+             </div>
       </template>
       <template #actions="{ item }">
         <div v-if="item && item.id" class="relative" @click.stop>
@@ -41,18 +52,37 @@
       </template>
     </CommonTable>
   </div>
+     <Filter
+      :filter="filters"
+      :visible="showFilter"
+      @close="showFilter = false"
+      @apply="onApplyFilter"
+      @reset="onResetFilter"
+    />
 </template>
 
 
 <script>
 import CommonTable from '../common/TableList.vue'
 import { encodeQuery, decodeQuery } from '@/utils/queryEncoder'
+import { FunnelIcon } from '@heroicons/vue/24/solid'
+import Filter from '@/components/supplier/Filter.vue'
 
 export default {
   name: 'ListSupplier',
-  components: { CommonTable },
+  components: { CommonTable ,FunnelIcon ,Filter },
   data() {
     return {
+      supplierCache: {},
+      showFilter: false,
+      filters: {
+        code: '',
+        name: '',
+        email: '',
+        phone: '',
+        from_date: '',
+        to_date: ''
+      },
       suppliers: [],
       pagination: {
         current_page: 1,
@@ -63,10 +93,12 @@ export default {
         per_page: 10
       },
       columns: [
+        { label: 'Ảnh', key: 'avatar_url',type : 'image_file' },
         { label: 'Tên nhà cung cấp', key: 'name' },
+        { label: 'Mã nhà cung cấp', key: 'code' },
         { label: 'Email', key: 'email' },
         { label: 'SĐT', key: 'phone' },
-        { label: 'Địa chỉ', key: 'address' }
+        { label: 'Địa chỉ', key: 'address_full' }
       ],
       searchKeyword: '',
       dropdownId: null
@@ -80,6 +112,13 @@ export default {
       this.searchKeyword = decoded.keyword || ''
       this.pagination.current_page = parseInt(decoded.page) || 1
       this.pagination.per_page = parseInt(decoded.limit) || 10
+
+      this.filters.code = decoded.code || ''
+      this.filters.name = decoded.name || ''
+      this.filters.email = decoded.email || ''
+      this.filters.phone = decoded.phone || ''
+      this.filters.from_date = decoded.from_date || ''
+      this.filters.to_date = decoded.to_date || ''
     }
 
     this.fetchSuppliers(this.pagination.current_page)
@@ -88,6 +127,25 @@ export default {
      document.removeEventListener('click', this.closeDropdown)
   },
   methods: {
+    makeCacheKey(page = this.pagination.current_page) {
+      const filtersStr = JSON.stringify(this.filters)
+      return `${this.searchKeyword}__page:${page}__filters:${filtersStr}`
+    },
+    onApplyFilter(values) {
+      this.filters = values
+      this.fetchSuppliers(1)
+    },
+    onResetFilter() {
+      this.filters = {
+        code: '',
+        name: '',
+        email: '',
+        phone: '',
+        from_date: '',
+        to_date: ''
+      }
+      this.fetchSuppliers(1)
+    },
     closeDropdown() {
       this.dropdownId = null
     },
@@ -112,7 +170,8 @@ export default {
       const queryObj = {
         page,
         keyword: this.searchKeyword,
-        limit: this.pagination.per_page
+        limit: this.pagination.per_page,
+        ...this.filters
       }
       const encoded = encodeQuery(queryObj)
 
@@ -121,16 +180,31 @@ export default {
         query: { query: encoded }
       })
     },
-    fetchSuppliers(page = 1) {
+    async fetchSuppliers(page = 1) {
+      this.isLoading = true
+      this.suppliers = []
+
+      const cacheKey = this.makeCacheKey(page)
+      if (this.supplierCache[cacheKey]) {
+        const { suppliers, pagination } = this.supplierCache[cacheKey]
+        this.suppliers = suppliers
+        this.pagination = { ...pagination }
+        this.updateUrlQuery(page)
+        this.isLoading = false
+        return
+      }
+
       const params = {
         page,
         keyword: this.searchKeyword,
-        limit: this.pagination.per_page
+        limit: this.pagination.per_page,
+        ...this.filters
       }
 
       this.updateUrlQuery(page)
 
-      window.axios.get('/api/supplier/list', { params }).then(res => {
+      try {
+        const res = await window.axios.get('/api/supplier/list', { params })
         this.suppliers = res.data.data.data
 
         const {
@@ -150,7 +224,16 @@ export default {
           per_page,
           total
         })
-      })
+
+        this.supplierCache[cacheKey] = {
+          suppliers: this.suppliers,
+          pagination: { ...this.pagination }
+        }
+      } catch (error) {
+        console.error(error)
+      } finally {
+        this.isLoading = false
+      }
     },
     onSearch(keyword) {
       this.searchKeyword = keyword

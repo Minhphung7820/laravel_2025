@@ -18,38 +18,38 @@
       <div class="space-y-4 text-sm text-gray-700">
         <div>
           <label class="block font-medium mb-1">{{ $t('product_list.supplier') }}</label>
-          <input v-model="filter.supplier" class="border rounded px-3 py-2 w-full shadow-sm text-sm" :placeholder="$t('product_list.supplier_placeholder')" />
+          <input v-model="localFilter.supplier" class="border rounded px-3 py-2 w-full shadow-sm text-sm" :placeholder="$t('product_list.supplier_placeholder')" />
         </div>
 
         <div>
           <label class="block font-medium mb-1">{{ $t('product_list.brand') }}</label>
-          <input v-model="filter.brand" class="border rounded px-3 py-2 w-full shadow-sm text-sm" :placeholder="$t('product_list.brand_placeholder')" />
+          <input v-model="localFilter.brand" class="border rounded px-3 py-2 w-full shadow-sm text-sm" :placeholder="$t('product_list.brand_placeholder')" />
         </div>
 
         <div>
           <label class="block font-medium mb-1">{{ $t('product_list.category') }}</label>
-          <input v-model="filter.category" class="border rounded px-3 py-2 w-full shadow-sm text-sm" :placeholder="$t('product_list.category_placeholder')" />
+          <input v-model="localFilter.category" class="border rounded px-3 py-2 w-full shadow-sm text-sm" :placeholder="$t('product_list.category_placeholder')" />
         </div>
 
         <div>
           <label class="block font-medium mb-1">{{ $t('product_list.unit') }}</label>
-          <input v-model="filter.unit" class="border rounded px-3 py-2 w-full shadow-sm text-sm" :placeholder="$t('product_list.unit_placeholder')" />
+          <input v-model="localFilter.unit" class="border rounded px-3 py-2 w-full shadow-sm text-sm" :placeholder="$t('product_list.unit_placeholder')" />
         </div>
 
         <div class="flex gap-2">
           <div class="flex-1">
             <label class="block font-medium mb-1">{{ $t('product_list.from_date') }}</label>
-            <input v-model="filter.from_date" type="date" class="border rounded px-3 py-2 w-full shadow-sm text-sm" />
+            <input v-model="localFilter.from_date" type="date" class="border rounded px-3 py-2 w-full shadow-sm text-sm" />
           </div>
           <div class="flex-1">
             <label class="block font-medium mb-1">{{ $t('product_list.to_date') }}</label>
-            <input v-model="filter.to_date" type="date" class="border rounded px-3 py-2 w-full shadow-sm text-sm" />
+            <input v-model="localFilter.to_date" type="date" class="border rounded px-3 py-2 w-full shadow-sm text-sm" />
           </div>
         </div>
 
         <div>
           <label class="block font-medium mb-1">{{ $t('product_list.time_filter') }}</label>
-          <select v-model="filter.time_filter" class="border rounded px-3 py-2 w-full shadow-sm text-sm">
+          <select v-model="localFilter.time_filter" class="border rounded px-3 py-2 w-full shadow-sm text-sm">
             <option value="">{{ $t('product_list.time_filter_placeholder') }}</option>
             <option value="today">{{ $t('product_list.today') }}</option>
             <option value="this_week">{{ $t('product_list.this_week') }}</option>
@@ -74,11 +74,14 @@ export default {
   name: 'Filter',
   props: {
     visible: Boolean,
-    value: Object
+    filter: {
+      type: Object,
+      required: true
+    }
   },
   data() {
     return {
-      filter: {
+      localFilter: {
         supplier: '',
         brand: '',
         category: '',
@@ -90,10 +93,11 @@ export default {
     }
   },
   watch: {
-    value: {
+    filter: {
       immediate: true,
+      deep: true,
       handler(val) {
-        this.filter = { ...this.filter, ...val }
+        this.localFilter = { ...this.localFilter, ...val }
       }
     }
   },
@@ -103,7 +107,7 @@ export default {
       this.$emit('close')
     },
     onApplyFilter() {
-      this.$emit('apply', this.filter)
+      this.$emit('apply', this.localFilter)
       this.$emit('close')
     }
   }

@@ -62,6 +62,7 @@
       </template>
     </CommonTable>
     <Filter
+      :filter="filters"
       :visible="showFilter"
       @close="showFilter = false"
       @apply="onApplyFilter"
@@ -169,6 +170,7 @@ export default {
     },
     onApplyFilter(values) {
       this.filters = values
+      this.productCache = {}
       this.fetchProducts(1)
     },
     onResetFilter() {
@@ -181,6 +183,7 @@ export default {
         to_date: '',
         time_range: ''
       }
+      this.productCache = {}
       this.fetchProducts(1)
     },
     onChangeTab(status) {

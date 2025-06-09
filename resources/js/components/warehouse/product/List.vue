@@ -96,7 +96,7 @@ export default {
         unit: '',
         from_date: '',
         to_date: '',
-        time_range: ''
+        time_filter: ''
       },
       products: [],
       currentStatus: 'all',
@@ -181,7 +181,7 @@ export default {
         unit: '',
         from_date: '',
         to_date: '',
-        time_range: ''
+        time_filter: ''
       }
       this.productCache = {}
       this.fetchProducts(1)

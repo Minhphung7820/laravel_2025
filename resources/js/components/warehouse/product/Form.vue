@@ -267,6 +267,8 @@ import Swal from 'sweetalert2'
 import AddStockModal from '@/components/common/AddStockModal.vue'
 import { XMarkIcon, PlusIcon } from '@heroicons/vue/24/solid'
 import { PhotoIcon } from '@heroicons/vue/24/outline'
+import _ from 'lodash'
+
 export default {
   name: 'ProductForm',
   components: { VariantGrid, ComboGrid, StockPriceTable,AddStockModal ,XMarkIcon, PlusIcon, PhotoIcon },
@@ -820,7 +822,7 @@ export default {
           this.isLoadingAttributes = false
       }
     },
-    generateVariantGrid() {
+    generateVariantGrid: _.debounce(function () {
       const selected = this.selectedAttributes
         .filter(attr => {
           const values = this.selectedAttributeValues[attr.id]
@@ -849,7 +851,7 @@ export default {
 
       combinations.forEach(combo => {
         this.stocks.forEach(stock => {
-          // tìm variant cũ trùng attributes + stock_id
+
           const old = this.form.variants.find(v =>
             v.stock_id === stock.stock_id &&
             this.isSameAttributes(v.attributes, combo)
@@ -877,7 +879,7 @@ export default {
       })
 
       this.form.variants = newVariants
-    },
+    }, 200),
     generateCombinations(attributeValueSets) {
       if (!attributeValueSets.length) return []
       const result = []

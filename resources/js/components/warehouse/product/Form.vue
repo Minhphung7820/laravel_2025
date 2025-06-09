@@ -407,7 +407,7 @@ export default {
         }
       })
     } else {
-      this.setCacheableData()
+      this.setCacheableData(cacheKey)
     }
 
     this.loading = false
@@ -428,8 +428,7 @@ export default {
         })
       })
     },
-    setCacheableData(){
-      const cacheKey = this.mode === 'update' ? `edit-${this.id}` : this.$route.fullPath
+    setCacheableData(cacheKey){
       this.$store.dispatch('cache/setCache', {
           module: 'product',
           key: cacheKey,

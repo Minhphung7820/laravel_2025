@@ -366,18 +366,50 @@ export default {
   async mounted() {
     const cacheKey = this.mode === 'update' ? `edit-${this.id}` : this.$route.fullPath
     const cached = this.$store.getters['cache/getCache']('product', cacheKey)
-    if (cached) {
-      this.applyCacheData(cached)
-      this.loading = false
-      return
+
+    if (this.mode === 'create') {
+      if (cached) {
+        this.units = cached.units || []
+        this.brands = cached.brands || []
+        this.categories = cached.categories || []
+        this.suppliers = cached.suppliers || []
+        this.stocks = cached.stocks || []
+        this.form.stock_data = cached.form_stock_data || {}
+        this.loading = false
+        return
+      }
+    }else{
+      if (cached) {
+        this.applyCacheData(cached)
+        this.loading = false
+        return
+      }
     }
+
     this.form.type = this.type
     const promises = [this.loadInitialData()]
     if (this.mode === 'update' && this.id) {
       promises.push(this.loadProduct())
     }
     await Promise.all(promises)
-    this.setCacheableData()
+
+    if (this.mode === 'create') {
+      this.$store.dispatch('cache/setCache', {
+        module: 'product',
+        key: cacheKey,
+        data: {
+          units: this.units,
+          brands: this.brands,
+          categories: this.categories,
+          suppliers: this.suppliers,
+          stocks: this.stocks,
+          form_stock_data: this.form.stock_data
+        }
+      })
+    } else {
+      this.setCacheableData()
+    }
+
     this.loading = false
   },
   methods: {

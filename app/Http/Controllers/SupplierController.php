@@ -154,6 +154,13 @@ class SupplierController extends Controller
             $validated['avatar'] = $this->uploadFile($request->file('avatar'), 'avatars');
         }
 
+        if ($request->has('remove_avatar') && $request->boolean('remove_avatar')) {
+            if ($supplier->avatar && Storage::disk('public')->exists(str_replace('/storage/', '', $supplier->avatar))) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $supplier->avatar));
+            }
+            $validated['avatar'] = null;
+        }
+
         $supplier->update($validated);
 
         return $this->responseSuccess($supplier, 'Cập nhật nhà cung cấp thành công');

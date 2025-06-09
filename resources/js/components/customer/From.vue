@@ -591,7 +591,8 @@ export default {
       isDistrictLoading: false,
       isWardLoading: false,
       isCompanyDistrictLoading: false,
-      isCompanyWardLoading: false
+      isCompanyWardLoading: false,
+      removeAvatarFlag: false
     }
   },
   async mounted() {
@@ -751,6 +752,7 @@ export default {
       this.avatarFile = null
       this.avatarPreview = null
       this.$refs.avatarInput.value = null
+      this.removeAvatarFlag = true
     },
     async isFormDirty() {
       return JSON.stringify(this.form) !== this.originalForm ||
@@ -814,7 +816,9 @@ export default {
         if (this.avatarFile) {
           formData.append('avatar', this.avatarFile)
         }
-
+        if (this.removeAvatarFlag) {
+          formData.append('remove_avatar', true)
+        }
         if (this.mode === 'update') {
             await window.axios.post(`/api/customer/update/${this.customerId}`, formData)
             await Swal.fire({

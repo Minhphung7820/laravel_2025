@@ -193,6 +193,7 @@ export default {
       isDistrictLoading: false,
       isWardLoading: false,
       skipChangeHandler: true,
+      removeAvatarFlag: false
     }
   },
   async mounted() {
@@ -303,6 +304,7 @@ export default {
       this.avatarFile = null
       this.avatarPreview = null
       this.$refs.avatarInput.value = null
+      this.removeAvatarFlag = true
     },
     handleBeforeUnload(e) {
       if (this.isFormDirty()) {
@@ -346,9 +348,16 @@ export default {
       if(!this.checkValidate()) return
       const formData = new FormData()
       for (const key in this.form) {
-        formData.append(key, this.form[key] ?? '')
+          if (key !== 'avatar') {
+            formData.append(key, this.form[key] ?? '')
+          }
       }
-      if (this.avatarFile) formData.append('avatar', this.avatarFile)
+      if (this.avatarFile instanceof File) {
+        formData.append('avatar', this.avatarFile)
+      }
+      if (this.removeAvatarFlag) {
+        formData.append('remove_avatar', true)
+      }
       try {
         if (this.mode === 'update') {
           await window.axios.post(`/api/supplier/update/${this.supplierId}`, formData)

@@ -280,6 +280,13 @@ class CustomerController extends Controller
             $validated['avatar'] = $this->uploadFile($request->file('avatar'), 'avatars');
         }
 
+        if ($request->has('remove_avatar') && $request->boolean('remove_avatar')) {
+            if ($customer->avatar && Storage::disk('public')->exists(str_replace('/storage/', '', $customer->avatar))) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $customer->avatar));
+            }
+            $validated['avatar'] = null;
+        }
+
         if ($validated['type'] === 'individual') {
             $validated['company_name'] = null;
             $validated['position'] = null;

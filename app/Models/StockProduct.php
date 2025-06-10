@@ -42,6 +42,9 @@ class StockProduct extends Model
 
     public function parent()
     {
+        $imagePrefix = url('/');
+        $imageDefault = env('IMAGE_DEFAULT');
+
         return $this->belongsTo(StockProduct::class, 'parent_id')
             ->select('stock_products.*')
             ->addSelect([
@@ -59,16 +62,26 @@ class StockProduct extends Model
                     "quantity", sp2.quantity,
                     "stock_id", s.id,
                     "is_stock_default", s.is_default,
-                    "sku", sp2.sku
+                    "sku", sp2.sku,
+                    "image", COALESCE(CONCAT("' . $imagePrefix . '", pvi.image), "' . $imageDefault . '")
                 ))
                 FROM stock_products sp2
                 JOIN stocks s ON sp2.stock_id = s.id
                 LEFT JOIN attributes attr1 ON sp2.attribute_first_id = attr1.id
                 LEFT JOIN attributes attr2 ON sp2.attribute_second_id = attr2.id
+                LEFT JOIN (
+                    SELECT t1.*
+                    FROM product_variant_images t1
+                    INNER JOIN (
+                        SELECT stock_product_id, MIN(id) AS min_id
+                        FROM product_variant_images
+                        GROUP BY stock_product_id
+                    ) t2 ON t1.stock_product_id = t2.stock_product_id AND t1.id = t2.min_id
+                ) AS pvi ON pvi.stock_product_id = sp2.id
                 WHERE sp2.product_id = stock_products.product_id
-                  AND (sp2.attribute_first_id <=> stock_products.attribute_first_id)
-                  AND (sp2.attribute_second_id <=> stock_products.attribute_second_id)
-                  AND sp2.product_type = "variable"
+                AND (sp2.attribute_first_id <=> stock_products.attribute_first_id)
+                AND (sp2.attribute_second_id <=> stock_products.attribute_second_id)
+                AND sp2.product_type = "variable"
             ) AS related_variants')
             ]);
     }

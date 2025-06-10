@@ -223,6 +223,7 @@ export default {
           item.stock_name = selected.stock?.name || ''
           item.attr1_title = selected.attr1_title || ''
           item.attr2_title = selected.attr2_title || ''
+          item.image = selected.image || item.image
         }
       } else {
         const selected = (item.product?.stock_data || []).find(
@@ -233,6 +234,7 @@ export default {
           item.purchase_price = selected.purchase_price || 0
           item.quantity = selected.quantity || 0
           item.stock_name = selected.stock?.name || ''
+          item.image = selected.image || item.image
         }
       }
     },

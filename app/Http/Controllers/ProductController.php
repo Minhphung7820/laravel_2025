@@ -258,7 +258,8 @@ class ProductController extends Controller
                         COALESCE(CONCAT('$urlPrefix', products.image_cover), '$imageDefault')
                 END AS image"),
                 'products.status',
-                DB::raw('(SELECT JSON_ARRAYAGG(JSON_OBJECT(
+                DB::raw('(
+                SELECT JSON_ARRAYAGG(JSON_OBJECT(
                     "id", sp2.id,
                     "product_id", sp2.product_id,
                     "attribute_first_id", sp2.attribute_first_id,
@@ -271,12 +272,24 @@ class ProductController extends Controller
                     "quantity", sp2.quantity,
                     "stock_id", s.id,
                     "is_stock_default", s.is_default,
-                    "sku", sp2.sku
+                    "sku", sp2.sku,
+                    "image", COALESCE(CONCAT("' . $urlPrefix . '", pvi.image), "' . $imageDefault . '")
                 ))
                 FROM stock_products sp2
-                JOIN stocks as s ON sp2.stock_id = s.id
-                LEFT JOIN attributes as attr1 ON sp2.attribute_first_id = attr1.id
-                LEFT JOIN attributes as attr2 ON sp2.attribute_second_id = attr2.id
+                JOIN stocks s ON sp2.stock_id = s.id
+                LEFT JOIN attributes attr1 ON sp2.attribute_first_id = attr1.id
+                LEFT JOIN attributes attr2 ON sp2.attribute_second_id = attr2.id
+
+                LEFT JOIN (
+                    SELECT t1.*
+                    FROM product_variant_images t1
+                    INNER JOIN (
+                        SELECT stock_product_id, MIN(id) AS min_id
+                        FROM product_variant_images
+                        GROUP BY stock_product_id
+                    ) t2 ON t1.stock_product_id = t2.stock_product_id AND t1.id = t2.min_id
+                ) AS pvi ON pvi.stock_product_id = sp2.id
+
                 WHERE sp2.product_id = stock_products.product_id
                 AND (
                     (sp2.attribute_first_id IS NULL AND stock_products.attribute_first_id IS NULL)
@@ -287,7 +300,7 @@ class ProductController extends Controller
                     OR sp2.attribute_second_id = stock_products.attribute_second_id
                 )
                 AND sp2.product_type = "variable"
-                ) AS related_variants')
+            ) AS related_variants')
             ])
             ->where(function ($q) use ($request) {
                 $q->where(function ($q2) use ($request) {
@@ -657,7 +670,7 @@ class ProductController extends Controller
             $deletedIds = $request->input('deleted_gallery_ids', []);
 
             if (is_array($deletedIds) && count($deletedIds) > 0) {
-                $validIds = array_filter($deletedIds, fn ($id) => is_numeric($id));
+                $validIds = array_filter($deletedIds, fn($id) => is_numeric($id));
                 ProductImage::whereIn('id', $validIds)->delete();
             }
 

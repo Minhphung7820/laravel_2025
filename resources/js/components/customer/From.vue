@@ -597,13 +597,6 @@ export default {
   },
   async mounted() {
     try {
-      const cacheKey = this.mode === 'update' ? `edit-${this.id}` : this.$route.fullPath
-      const cached = this.$store.getters['cache/getCache']('customer', cacheKey)
-      if (cached) {
-        this.applyCacheData(cached)
-        this.loading = false
-        return
-      }
       if (this.mode === 'update' && this.customerId) {
         const [provinceData, customerRes] = await Promise.all([
           this.fetchProvinces(),
@@ -622,7 +615,6 @@ export default {
         await this.fetchProvinces()
         this.originalForm = JSON.stringify(this.form)
       }
-      this.setCacheableData()
     } catch (err) {
       this.$router.push('/sale/customer')
     } finally {
@@ -635,7 +627,7 @@ export default {
     window.removeEventListener('beforeunload', this.handleBeforeUnload)
   },
   methods: {
-    resetCacheableByKey(){
+    resetCacheableListByKey(){
       const allKeys = this.$store.getters['cache/getAllCacheKeys']('customer')
       const listKeys = allKeys.filter(key =>
         key.includes('page') &&
@@ -649,32 +641,6 @@ export default {
           key
         })
       })
-    },
-    setCacheableData(){
-      const cacheKey = this.mode === 'update' ? `edit-${this.id}` : this.$route.fullPath
-      this.$store.dispatch('cache/setCache', {
-          module: 'customer',
-          key: cacheKey,
-          data: JSON.parse(JSON.stringify(this.getCacheableData()))
-      })
-    },
-    getCacheableData() {
-      const ignoredKeys = ['loading', 'errors', 'isDistrictLoading', 'isWardLoading', 'isCompanyDistrictLoading', 'isCompanyWardLoading']
-      const dataToCache = {}
-      for (const key in this.$data) {
-        if (!ignoredKeys.includes(key)) {
-          dataToCache[key] = this.$data[key]
-        }
-      }
-      return JSON.parse(JSON.stringify(dataToCache))
-    },
-    applyCacheData(data) {
-      const ignoredKeys = ['loading', 'errors', 'isDistrictLoading', 'isWardLoading', 'isCompanyDistrictLoading', 'isCompanyWardLoading']
-      for (const key in data) {
-        if (!ignoredKeys.includes(key) && this.$data.hasOwnProperty(key)) {
-          this[key] = data[key]
-        }
-      }
     },
     async onProvinceChange() {
       this.form.district_id = ''
@@ -888,7 +854,7 @@ export default {
         this.originalForm = JSON.stringify(this.form)
         this.avatarFile = null
 
-        this.resetCacheableByKey()
+        this.resetCacheableListByKey()
         this.$router.push('/sale/customer')
       } catch (err) {
         if (err.response && err.response.status === 422) {

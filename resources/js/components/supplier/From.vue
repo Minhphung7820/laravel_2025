@@ -170,6 +170,8 @@
 </template>
 
 <script>
+import Swal from 'sweetalert2'
+
 export default {
   props: {
     mode: { type: String, default: 'create' },
@@ -197,13 +199,6 @@ export default {
     }
   },
   async mounted() {
-    const cacheKey = this.mode === 'update' ? `edit-${this.id}` : this.$route.fullPath
-    const cached = this.$store.getters['cache/getCache']('supplier', cacheKey)
-    if (cached) {
-      this.applyCacheData(cached)
-      this.loading = false
-      return
-    }
     try {
       if (this.mode === 'update' && this.supplierId) {
         this.skipChangeHandler = true
@@ -226,7 +221,6 @@ export default {
         this.originalForm = JSON.stringify(this.form)
         this.skipChangeHandler = false
       }
-      this.setCacheableData()
     } catch (err) {
       this.$router.push('/purchase/supplier')
     } finally {
@@ -239,7 +233,7 @@ export default {
     window.removeEventListener('beforeunload', this.handleBeforeUnload)
   },
   methods: {
-    resetCacheableByKey(){
+    resetCacheableListByKey(){
       const allKeys = this.$store.getters['cache/getAllCacheKeys']('supplier')
       const listKeys = allKeys.filter(key =>
         key.includes('page') &&
@@ -253,32 +247,6 @@ export default {
           key
         })
       })
-    },
-    setCacheableData(){
-      const cacheKey = this.mode === 'update' ? `edit-${this.id}` : this.$route.fullPath
-      this.$store.dispatch('cache/setCache', {
-          module: 'supplier',
-          key: cacheKey,
-          data: JSON.parse(JSON.stringify(this.getCacheableData()))
-      })
-    },
-    getCacheableData() {
-      const ignoredKeys = ['loading', 'errors', 'isDistrictLoading', 'isWardLoading']
-      const dataToCache = {}
-      for (const key in this.$data) {
-        if (!ignoredKeys.includes(key)) {
-          dataToCache[key] = this.$data[key]
-        }
-      }
-      return JSON.parse(JSON.stringify(dataToCache))
-    },
-    applyCacheData(data) {
-      const ignoredKeys = ['loading', 'errors', 'isDistrictLoading', 'isWardLoading']
-      for (const key in data) {
-        if (!ignoredKeys.includes(key) && this.$data.hasOwnProperty(key)) {
-          this[key] = data[key]
-        }
-      }
     },
     async loadAllLocationOnUpdate() {
       const tasks = []
@@ -395,6 +363,7 @@ export default {
     },
     async submitForm() {
       if(!this.checkValidate()) return
+      this.loading = true
       const formData = new FormData()
       for (const key in this.form) {
           if (key !== 'avatar') {
@@ -413,7 +382,13 @@ export default {
         } else {
           await window.axios.post('/api/supplier/create', formData)
         }
-        this.resetCacheableByKey()
+        this.resetCacheableListByKey()
+        await Swal.fire({
+            icon: 'success',
+            title: 'Tạo nhà cung cấp thành công!',
+            timer: 1500,
+            showConfirmButton: false
+        })
         this.$router.push('/purchase/supplier')
       } catch (err) {
         if (err.response?.status === 422) {
@@ -426,8 +401,14 @@ export default {
             }
           })
         } else {
-          alert('Có lỗi xảy ra!')
+          await Swal.fire({
+            icon: 'error',
+            title: 'Gửi thất bại!',
+            text: 'Vui lòng thử lại sau hoặc kiểm tra kết nối.'
+          })
         }
+      } finally {
+          this.loading = false
       }
     }
   },

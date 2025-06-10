@@ -366,95 +366,15 @@ export default {
     }
   },
   async mounted() {
-    const cacheKey = this.mode === 'update' ? `edit-${this.id}` : this.$route.fullPath
-    const cached = this.$store.getters['cache/getCache']('product', cacheKey)
-
-    if (this.mode === 'create') {
-      if (cached) {
-        this.units = cached.units || []
-        this.brands = cached.brands || []
-        this.categories = cached.categories || []
-        this.suppliers = cached.suppliers || []
-        this.stocks = cached.stocks || []
-        this.form.stock_data = cached.form_stock_data || {}
-        this.loading = false
-        return
-      }
-    }else{
-      if (cached) {
-        this.applyCacheData(cached)
-        this.loading = false
-        return
-      }
-    }
-
     this.form.type = this.type
     const promises = [this.loadInitialData()]
     if (this.mode === 'update' && this.id) {
       promises.push(this.loadProduct())
     }
     await Promise.all(promises)
-
-    if (this.mode === 'create') {
-      this.$store.dispatch('cache/setCache', {
-        module: 'product',
-        key: cacheKey,
-        data: {
-          units: this.units,
-          brands: this.brands,
-          categories: this.categories,
-          suppliers: this.suppliers,
-          stocks: this.stocks,
-          form_stock_data: this.form.stock_data
-        }
-      })
-    } else {
-      this.setCacheableData(cacheKey)
-    }
-
     this.loading = false
   },
   methods: {
-    resetCacheableByKey(){
-      const allKeys = this.$store.getters['cache/getAllCacheKeys']('product')
-      const listKeys = allKeys.filter(key =>
-        key.includes('page') &&
-        key.includes('filters') &&
-        !key.includes('/create') &&
-        !key.startsWith('edit-')
-      )
-      listKeys.forEach(key => {
-        this.$store.dispatch('cache/clearCacheKey', {
-          module: 'product',
-          key
-        })
-      })
-    },
-    setCacheableData(cacheKey){
-      this.$store.dispatch('cache/setCache', {
-          module: 'product',
-          key: cacheKey,
-          data: JSON.parse(JSON.stringify(this.getCacheableData()))
-      })
-    },
-    getCacheableData() {
-      const ignoredKeys = ['loading', 'errors', 'showAddStockModal', 'isLoadingAttributes', 'isMappingVariantData', 'restoringVariant']
-      const dataToCache = {}
-      for (const key in this.$data) {
-        if (!ignoredKeys.includes(key)) {
-          dataToCache[key] = this.$data[key]
-        }
-      }
-      return JSON.parse(JSON.stringify(dataToCache))
-    },
-    applyCacheData(data) {
-      const ignoredKeys = ['loading', 'errors', 'showAddStockModal', 'isLoadingAttributes', 'isMappingVariantData', 'restoringVariant']
-      for (const key in data) {
-        if (!ignoredKeys.includes(key) && this.$data.hasOwnProperty(key)) {
-          this[key] = data[key]
-        }
-      }
-    },
     onRemoveVariantImage(variantId) {
       if (!this.removed_variant_image_ids.includes(variantId)) {
         this.removed_variant_image_ids.push(variantId)
@@ -1264,7 +1184,6 @@ export default {
         showConfirmButton: false,
         timer: 1500
       })
-      this.resetCacheableByKey()
       this.$router.push('/warehouse/product')
       } catch (err) {
         const res = err?.response?.data || {}

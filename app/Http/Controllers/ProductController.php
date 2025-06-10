@@ -641,10 +641,10 @@ class ProductController extends Controller
                 'type'        => $request['type'] ?? 'single',
                 'status'      => 'pending'
             ];
-            if ($coverPath || empty($request['remove_cover_image'])) {
-                $data['image_cover'] = $coverPath;
-            } else {
+            if (!empty($request['remove_cover_image'])) {
                 $data['image_cover'] = null;
+            } elseif ($coverPath) {
+                $data['image_cover'] = $coverPath;
             }
             if ($data['type'] === 'variable') {
                 $attributes = $request['variants'] ?? [];

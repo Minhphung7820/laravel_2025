@@ -375,6 +375,21 @@ export default {
     this.loading = false
   },
   methods: {
+    resetCacheableListByKey(){
+      const allKeys = this.$store.getters['cache/getAllCacheKeys']('product')
+      const listKeys = allKeys.filter(key =>
+        key.includes('page') &&
+        key.includes('filters') &&
+        !key.includes('/create') &&
+        !key.startsWith('edit-')
+      )
+      listKeys.forEach(key => {
+        this.$store.dispatch('cache/clearCacheKey', {
+          module: 'product',
+          key
+        })
+      })
+    },
     onRemoveVariantImage(variantId) {
       if (!this.removed_variant_image_ids.includes(variantId)) {
         this.removed_variant_image_ids.push(variantId)
@@ -1184,6 +1199,7 @@ export default {
         showConfirmButton: false,
         timer: 1500
       })
+      this.resetCacheableListByKey()
       this.$router.push('/warehouse/product')
       } catch (err) {
         const res = err?.response?.data || {}

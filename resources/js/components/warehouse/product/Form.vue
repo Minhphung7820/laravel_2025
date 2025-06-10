@@ -511,15 +511,12 @@ export default {
       }
     },
     onRestoreConfirmed(variant) {
-      // Tìm lại biến thể đã xóa trong trashVariants
       const original = this.trashVariants.find(v =>
         v.stock_id === variant.stock_id &&
         this.isSameAttributes(v.attributes, variant.attributes)
       )
-
-      // Nếu có dữ liệu gốc thì dùng lại toàn bộ thông tin cũ
       const restored = original
-        ? { ...original }
+        ? JSON.parse(JSON.stringify(original))
         : {
             ...variant,
             quantity: 0,

@@ -640,38 +640,57 @@ export default {
     },
     onCategoryChange() {
       this.isMappingVariantData = this.mode === 'create';
-      this.selectedAttributes = []
-      this.selectedAttributeValues = {}
-      this.previewAttributes = []
-      this.form.variants = []
-      this.trashVariants = []
 
       if (!this.form.category_id && this.form.has_variant) {
-        this.form.has_variant = false
-        this.form.type = 'single'
+        this.form.has_variant = false;
+        this.form.type = 'single';
         Swal.fire({
           icon: 'warning',
           title: this.$t('product.category_required_title') || 'Thiếu danh mục',
           text: this.$t('product.category_required_msg') || 'Vui lòng chọn danh mục trước khi bật biến thể.',
           confirmButtonText: 'OK'
-        })
-        return
+        });
+        return;
       }
 
-      this.checkAndLoadVariants()
+      // Nếu là tạo mới thì reset hoàn toàn
+      if (this.mode === 'create') {
+        this.resetVariantData(); // 👈 gọi lại
+      }
+
+      this.checkAndLoadVariants();
+    },
+    resetVariantData() {
+      this.form.custom_attributes = [];
+      this.selectedAttributes = [];
+      Object.keys(this.selectedAttributeValues).forEach(attrId => {
+        this.selectedAttributeValues[attrId] = []
+      });
+      this.form.variants = [];
+      this.trashVariants = [];
+      this.previewAttributes = [];
     },
     async onChangeVariantInputMode(e){
-      if(e.target.value === 'from_category' && !this.form.category_id){
-          await Swal.fire({
-                icon: 'warning',
-                title: 'Thiếu danh mục',
-                text:'Vui lòng chọn danh mục trước khi chọn "Lấy từ danh mục"',
-                confirmButtonText: 'OK'
-          });
-          this.form.variant_input_mode = 'create'
-          return;
+      const newMode = e.target.value;
+
+      if (newMode === 'from_category' && !this.form.category_id) {
+        await Swal.fire({
+          icon: 'warning',
+          title: 'Thiếu danh mục',
+          text:'Vui lòng chọn danh mục trước khi chọn "Lấy từ danh mục"',
+          confirmButtonText: 'OK'
+        });
+        this.form.variant_input_mode = 'create';
+        return;
       }
-      this.generateVariantGrid()
+
+      this.form.variant_input_mode = newMode;
+
+      if (this.mode === 'create') {
+        this.resetVariantData();
+      }
+
+      this.generateVariantGrid();
     },
     async onVariantCheckboxChange(e) {
       const willUncheck = !e.target.checked;

@@ -179,6 +179,53 @@
       {{ $t('product.has_variant') }}
       </label>
     </div>
+
+    <div v-if="form.has_variant" class="mt-4 space-y-2">
+      <label class="font-semibold">Tải biến thể từ:</label>
+      <select v-model="form.variant_input_mode" class="w-full px-3 py-2 border rounded">
+        <option value="create">Tạo mới biến thể</option>
+        <option value="from_category">Load từ danh mục</option>
+      </select>
+    </div>
+
+      <div v-if="form.has_variant && form.variant_input_mode === 'create'" class="mt-4 space-y-4">
+    <div
+      v-for="(attr, index) in form.custom_attributes"
+      :key="attr.id"
+      class="bg-gray-50 p-4 border rounded space-y-2"
+    >
+      <div class="flex items-center space-x-2">
+        <input
+          v-model="attr.title"
+          placeholder="Tên thuộc tính (VD: Màu)"
+          class="px-3 py-1 border rounded w-full"
+        />
+        <button @click="removeCustomAttribute(index)" class="text-red-500 font-bold">X</button>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <div v-for="(val, i) in attr.values" :key="val.id" class="flex items-center gap-1">
+          <input
+            v-model="val.title"
+            placeholder="Giá trị"
+            class="px-2 py-1 border rounded"
+          />
+          <button @click="removeAttributeValue(index, i)" class="text-red-500 font-bold">×</button>
+        </div>
+        <button
+          v-if="attr.values.length < 10"
+          @click="addAttributeValue(index)"
+          class="px-2 py-1 border border-blue-500 text-blue-500 rounded hover:bg-blue-50"
+        >+ Giá trị</button>
+      </div>
+    </div>
+
+    <!-- Thêm mới thuộc tính -->
+    <button
+      v-if="form.custom_attributes.length < 2"
+      @click="addCustomAttribute"
+      class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+    >+ Thêm thuộc tính</button>
+  </div>
     <!-- Chọn thuộc tính và giá trị con -->
     <div v-if="form.has_variant" class="space-y-4">
       <h2 class="font-semibold text-blue-600">{{ $t('product.msg_max_attr') }}</h2>
@@ -233,7 +280,7 @@
      />
     <!-- Lưới biến thể -->
     <VariantGrid
-      v-if="form.has_variant && form.category_id"
+      v-if="form.has_variant && (form.variant_input_mode === 'create' || form.variant_input_mode === 'from_category')"
       :variants="form.variants"
       :stocks="stocks"
       :preview-attributes="previewAttributes"
@@ -324,7 +371,9 @@ export default {
         stock_data: [],
         cover_image: null,
         gallery_images: [],
-        deleted_gallery_ids : []
+        deleted_gallery_ids : [],
+      variant_input_mode: 'create',
+      custom_attributes: []
       },
       units: [],
       brands: [],
@@ -371,10 +420,37 @@ export default {
     if (this.mode === 'update' && this.id) {
       promises.push(this.loadProduct())
     }
+      this.$watch(
+    () => JSON.stringify(this.form.custom_attributes),
+    () => {
+      this.trashVariants = [];
+      this.generateVariantGrid();
+    },
+    { deep: true }
+  );
     await Promise.all(promises)
     this.loading = false
   },
   methods: {
+      addCustomAttribute() {
+    const id = `attr#${Date.now()}-${Math.random().toString(36).substring(2, 5)}`
+    this.form.custom_attributes.push({
+      id,
+      title: '',
+      values: [] // mỗi value có: { id, title }
+    })
+  },
+  removeCustomAttribute(index) {
+    this.form.custom_attributes.splice(index, 1)
+  },
+  addAttributeValue(attrIndex) {
+    const attr = this.form.custom_attributes[attrIndex]
+    const id = `val#${Date.now()}-${Math.random().toString(36).substring(2, 5)}`
+    attr.values.push({ id, title: '' })
+  },
+  removeAttributeValue(attrIndex, valueIndex) {
+    this.form.custom_attributes[attrIndex].values.splice(valueIndex, 1)
+  },
     resetCacheableListByKey(){
       const allKeys = this.$store.getters['cache/getAllCacheKeys']('product')
       const listKeys = allKeys.filter(key =>
@@ -587,7 +663,7 @@ export default {
     async onVariantCheckboxChange(e) {
       const willUncheck = !e.target.checked;
 
-      if (!this.form.category_id) {
+      if (this.form.variant_input_mode === 'from_category' && !this.form.category_id) {
         this.form.has_variant = false;
         await Swal.fire({
           icon: 'warning',
@@ -755,15 +831,30 @@ export default {
       }
     },
     generateVariantGrid: _.debounce(function () {
-      const selected = this.selectedAttributes
-        .filter(attr => {
-          const values = this.selectedAttributeValues[attr.id]
-          return attr && attr.id && Array.isArray(values) && values.length > 0
-        })
-        .map(attr => ({
-          attr,
-          values: this.selectedAttributeValues[attr.id]
-        }))
+      let selected = []
+
+      if (this.form.variant_input_mode === 'from_category') {
+        selected = this.selectedAttributes
+          .filter(attr => {
+            const values = this.selectedAttributeValues[attr.id]
+            return attr && attr.id && Array.isArray(values) && values.length > 0
+          })
+          .map(attr => ({
+            attr,
+            values: this.selectedAttributeValues[attr.id]
+          }))
+      } else {
+        selected = this.form.custom_attributes
+          .filter(attr => attr.title.trim() && attr.values.length > 0)
+          .map(attr => ({
+            attr: {
+              id: attr.id,
+              title: attr.title,
+              attributes: attr.values
+            },
+            values: attr.values.map(v => v.id)
+          }))
+      }
 
       if (selected.length === 0) {
         this.form.variants = []
@@ -771,8 +862,9 @@ export default {
         return
       }
 
-      this.previewAttributes = selected.map(item => item.attr.title)
-      const combinations = this.generateCombinations(
+      this.previewAttributes = selected.map(s => s.attr.title)
+
+       const combinations = this.generateCombinations(
         selected.map(item => ({
           attribute: item.attr,
           values: item.values
@@ -783,16 +875,14 @@ export default {
 
       combinations.forEach(combo => {
         this.stocks.forEach(stock => {
-
           const old = this.form.variants.find(v =>
-            v.stock_id === stock.stock_id &&
-            this.isSameAttributes(v.attributes, combo)
+            v.stock_id === stock.stock_id && this.isSameAttributes(v.attributes, combo)
           )
 
           const isTrashed = this.trashVariants.some(tv =>
-            tv.stock_id === stock.stock_id &&
-            this.isSameAttributes(tv.attributes, combo)
+            tv.stock_id === stock.stock_id && this.isSameAttributes(tv.attributes, combo)
           )
+
           if (!isTrashed) {
             newVariants.push({
               id: old?.id ?? null,

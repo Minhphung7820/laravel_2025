@@ -198,22 +198,37 @@
         <input
           v-model="attr.title"
           placeholder="Tên thuộc tính (VD: Màu)"
-          class="px-3 py-1 border rounded w-full"
+          @blur="validateAttributeTitle(index)"
+          :class="[
+            'px-3 py-1 border rounded w-full',
+            attributeErrors[`attr_${attr.id}`] ? 'border-red-500' : 'border-gray-300'
+          ]"
         />
+        <p v-if="attributeErrors[`attr_${attr.id}`]" class="text-sm text-red-500 mt-1">
+          {{ attributeErrors[`attr_${attr.id}`] }}
+        </p>
         <button @click="removeCustomAttribute(index)" class="text-red-500 font-bold">X</button>
       </div>
       <div class="flex flex-wrap gap-2">
         <div v-for="(val, i) in attr.values" :key="val.id" class="flex items-center gap-1">
-          <input
-            v-model="val.title"
-            placeholder="Giá trị"
-            class="px-2 py-1 border rounded"
-          />
+        <input
+          v-model="val.title"
+          placeholder="Giá trị"
+          @blur="validateAttributeValue(index, i, val.id)"
+          :class="[
+            'px-2 py-1 border rounded',
+            attributeErrors[`val_${val.id}`] ? 'border-red-500' : 'border-gray-300'
+          ]"
+        />
+        <p v-if="attributeErrors[`val_${val.id}`]" class="text-sm text-red-500 mt-1">
+          {{ attributeErrors[`val_${val.id}`] }}
+        </p>
           <button @click="removeAttributeValue(index, i)" class="text-red-500 font-bold">×</button>
         </div>
         <button
           v-if="attr.values.length < 10"
           @click="addAttributeValue(index)"
+          :disabled="hasAnyValidationError()"
           class="px-2 py-1 border border-blue-500 text-blue-500 rounded hover:bg-blue-50"
         >+ Giá trị</button>
       </div>
@@ -223,6 +238,7 @@
     <button
       v-if="form.custom_attributes.length < 2"
       @click="addCustomAttribute"
+      :disabled="hasAnyValidationError()"
       class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
     >+ Thêm thuộc tính</button>
   </div>
@@ -393,7 +409,8 @@ export default {
       errors: {},
       loading: true,
       removed_variant_image_ids: [],
-      isLoadingAttributes: false
+      isLoadingAttributes: false,
+      attributeErrors: {}
     }
   },
   watch: {
@@ -432,21 +449,80 @@ export default {
     this.loading = false
   },
   methods: {
+   hasAnyValidationError() {
+      return Object.keys(this.attributeErrors).length > 0
+    },
+    validateAttributeTitle(index) {
+      const attr = this.form.custom_attributes[index]
+      const key = `attr_${attr.id}`
+      const title = attr.title.trim()
+
+      const clone = { ...this.attributeErrors }
+
+      if (!title) {
+        clone[key] = 'Tên thuộc tính không được để trống'
+      } else if (title.length > 30) {
+        clone[key] = 'Tên thuộc tính tối đa 30 ký tự'
+      } else {
+        delete clone[key]
+      }
+
+      this.attributeErrors = clone
+    },
+    validateAttributeValue(attrIndex, valIndex, valId) {
+      const val = this.form.custom_attributes[attrIndex].values[valIndex]
+      const key = `val_${valId}`
+      const title = val.title.trim()
+
+      const clone = { ...this.attributeErrors }
+
+      if (!title) {
+        clone[key] = 'Giá trị không được để trống'
+      } else if (title.length > 20) {
+        clone[key] = 'Giá trị tối đa 20 ký tự'
+      } else {
+        delete clone[key]
+      }
+
+      this.attributeErrors = clone
+    },
     addCustomAttribute() {
+      if (this.hasAnyValidationError()) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Vui lòng điền đầy đủ tất cả trước khi thêm mới',
+          confirmButtonText: 'OK'
+        })
+        return
+      }
+
       const id = `attr#${Date.now()}-${Math.random().toString(36).substring(2, 5)}`
       this.form.custom_attributes.push({
         id,
         title: '',
         values: []
       })
+
+      this.attributeErrors[`attr_${id}`] = 'Tên thuộc tính không được để trống'
     },
     removeCustomAttribute(index) {
       this.form.custom_attributes.splice(index, 1)
     },
     addAttributeValue(attrIndex) {
+      if (this.hasAnyValidationError()) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Vui lòng điền đầy đủ tất cả trước khi thêm mới',
+          confirmButtonText: 'OK'
+        })
+        return
+      }
+
       const attr = this.form.custom_attributes[attrIndex]
       const id = `val#${Date.now()}-${Math.random().toString(36).substring(2, 5)}`
       attr.values.push({ id, title: '' })
+
+      this.attributeErrors[`val_${id}`] = 'Giá trị không được để trống'
     },
     removeAttributeValue(attrIndex, valueIndex) {
       this.form.custom_attributes[attrIndex].values.splice(valueIndex, 1)

@@ -181,10 +181,10 @@
     </div>
 
     <div v-if="form.has_variant" class="mt-4 space-y-2">
-      <label class="font-semibold">Tải biến thể từ:</label>
+      <label class="font-semibold">Nguồn biến thể</label>
       <select v-model="form.variant_input_mode" class="w-full px-3 py-2 border rounded">
-        <option value="create">Tạo mới biến thể</option>
-        <option value="from_category">Load từ danh mục</option>
+        <option value="create">Tạo mới (Mặc định)</option>
+        <option value="from_category">Lấy từ danh mục</option>
       </select>
     </div>
 
@@ -227,7 +227,7 @@
     >+ Thêm thuộc tính</button>
   </div>
     <!-- Chọn thuộc tính và giá trị con -->
-    <div v-if="form.has_variant" class="space-y-4">
+    <div v-if="form.has_variant && form.variant_input_mode === 'from_category'" class="space-y-4">
       <h2 class="font-semibold text-blue-600">{{ $t('product.msg_max_attr') }}</h2>
 
       <!-- Loading vòng xoay -->
@@ -372,8 +372,8 @@ export default {
         cover_image: null,
         gallery_images: [],
         deleted_gallery_ids : [],
-      variant_input_mode: 'create',
-      custom_attributes: []
+        variant_input_mode: 'create',
+        custom_attributes: []
       },
       units: [],
       brands: [],

@@ -653,9 +653,8 @@ export default {
         return;
       }
 
-      // Nếu là tạo mới thì reset hoàn toàn
       if (this.mode === 'create') {
-        this.resetVariantData(); // 👈 gọi lại
+        this.resetVariantData();
       }
 
       this.checkAndLoadVariants();

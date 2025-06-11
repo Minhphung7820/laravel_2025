@@ -29,6 +29,8 @@
         "promotion": "プロモーション"
     },
     "product": {
+        "limit_gallery_title": "画像制限",
+        "limit_gallery_text": "ギャラリーには最大9枚の画像を選択できます。",
         "update_title": "商品を更新",
         "create_title": "新しい商品を追加",
         "name": "商品名",

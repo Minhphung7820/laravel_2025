@@ -29,6 +29,8 @@
         "promotion": "Khuyến mãi"
     },
     "product": {
+        "limit_gallery_title": "Giới hạn ảnh",
+        "limit_gallery_text": "Bạn chỉ được chọn tối đa 9 ảnh trong gallery.",
         "update_title": "Cập nhật sản phẩm",
         "create_title": "Thêm sản phẩm mới",
         "name": "Tên sản phẩm",

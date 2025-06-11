@@ -29,6 +29,8 @@
         "promotion": "프로모션"
     },
     "product": {
+        "limit_gallery_title": "이미지 제한",
+        "limit_gallery_text": "갤러리에는 최대 9장의 이미지만 선택할 수 있습니다.",
         "update_title": "상품 수정",
         "create_title": "신규 상품 추가",
         "name": "상품명",

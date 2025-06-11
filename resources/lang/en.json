@@ -29,6 +29,8 @@
         "promotion": "Promotion"
     },
     "product": {
+        "limit_gallery_title": "Image Limit",
+        "limit_gallery_text": "You can select up to 9 images in the gallery only.",
         "update_title": "Update Product",
         "create_title": "Add New Product",
         "name": "Product Name",

@@ -1063,11 +1063,25 @@ export default {
       this.form.remove_cover_image = true
     },
     handleGalleryImages(e) {
+      const maxGalleryImages = 9;
       const newFiles = Array.from(e.target.files).map(file => ({
         file,
         isOld: false
-      }))
-      this.form.gallery_images.push(...newFiles)
+      }));
+
+      const totalImages = this.form.gallery_images.length + newFiles.length;
+
+      if (totalImages > maxGalleryImages) {
+        Swal.fire({
+          icon: 'error',
+          title: this.$t('product.limit_gallery_title') || 'Vượt quá giới hạn',
+          text: this.$t('product.limit_gallery_text') || `Bạn chỉ được chọn tối đa ${maxGalleryImages} ảnh.`,
+          confirmButtonText: 'OK'
+        });
+        return;
+      }
+
+      this.form.gallery_images.push(...newFiles);
     },
     removeGalleryImage(index) {
       const img = this.form.gallery_images[index]

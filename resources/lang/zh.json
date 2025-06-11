@@ -29,6 +29,8 @@
         "promotion": "促销"
     },
     "product": {
+        "limit_gallery_title": "图片限制",
+        "limit_gallery_text": "图库最多只能选择9张图片。",
         "update_title": "更新产品",
         "create_title": "新增产品",
         "name": "产品名称",

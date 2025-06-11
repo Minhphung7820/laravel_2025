@@ -182,7 +182,7 @@
 
     <div v-if="form.has_variant" class="mt-4 space-y-2">
       <label class="font-semibold">Nguồn biến thể</label>
-      <select v-model="form.variant_input_mode" class="w-full px-3 py-2 border rounded">
+      <select @change="onChangeVariantInputMode" v-model="form.variant_input_mode" class="w-full px-3 py-2 border rounded">
         <option value="create">Tạo mới (Mặc định)</option>
         <option value="from_category">Lấy từ danh mục</option>
       </select>
@@ -660,6 +660,18 @@ export default {
 
       this.checkAndLoadVariants()
     },
+    async onChangeVariantInputMode(e){
+      if(e.target.value === 'from_category' && !this.form.category_id){
+          await Swal.fire({
+                icon: 'warning',
+                title: 'Thiếu danh mục',
+                text:'Vui lòng chọn danh mục trước khi chọn "Lấy từ danh mục"',
+                confirmButtonText: 'OK'
+          });
+          this.form.variant_input_mode = 'create'
+          return;
+      }
+    },
     async onVariantCheckboxChange(e) {
       const willUncheck = !e.target.checked;
 
@@ -674,7 +686,7 @@ export default {
         return;
       }
 
-      if (this.mode === 'update' && this.hasVariantInitial && willUncheck) {
+      if (this.mode === 'update' && this.hasVariantInitial && willUncheck && this.form.variant_input_mode ===   'from_category') {
         const result = await Swal.fire({
           title: this.$t('product.confirm_remove_variant_title'),
           text: this.$t('product.confirm_remove_variant_text'),
@@ -693,6 +705,7 @@ export default {
       this.onToggleVariantLogic();
     },
     onToggleVariantLogic() {
+      this.form.variant_input_mode = 'create'
       this.isMappingVariantData = this.mode === 'create';
       this.form.type = this.form.has_variant ? 'variable' : 'single'
       this.selectedAttributes = []

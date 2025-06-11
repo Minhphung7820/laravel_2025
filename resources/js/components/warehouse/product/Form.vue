@@ -671,6 +671,7 @@ export default {
           this.form.variant_input_mode = 'create'
           return;
       }
+      this.generateVariantGrid()
     },
     async onVariantCheckboxChange(e) {
       const willUncheck = !e.target.checked;

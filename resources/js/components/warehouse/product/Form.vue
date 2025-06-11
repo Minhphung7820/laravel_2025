@@ -432,25 +432,25 @@ export default {
     this.loading = false
   },
   methods: {
-      addCustomAttribute() {
-    const id = `attr#${Date.now()}-${Math.random().toString(36).substring(2, 5)}`
-    this.form.custom_attributes.push({
-      id,
-      title: '',
-      values: [] // mỗi value có: { id, title }
-    })
-  },
-  removeCustomAttribute(index) {
-    this.form.custom_attributes.splice(index, 1)
-  },
-  addAttributeValue(attrIndex) {
-    const attr = this.form.custom_attributes[attrIndex]
-    const id = `val#${Date.now()}-${Math.random().toString(36).substring(2, 5)}`
-    attr.values.push({ id, title: '' })
-  },
-  removeAttributeValue(attrIndex, valueIndex) {
-    this.form.custom_attributes[attrIndex].values.splice(valueIndex, 1)
-  },
+    addCustomAttribute() {
+      const id = `attr#${Date.now()}-${Math.random().toString(36).substring(2, 5)}`
+      this.form.custom_attributes.push({
+        id,
+        title: '',
+        values: []
+      })
+    },
+    removeCustomAttribute(index) {
+      this.form.custom_attributes.splice(index, 1)
+    },
+    addAttributeValue(attrIndex) {
+      const attr = this.form.custom_attributes[attrIndex]
+      const id = `val#${Date.now()}-${Math.random().toString(36).substring(2, 5)}`
+      attr.values.push({ id, title: '' })
+    },
+    removeAttributeValue(attrIndex, valueIndex) {
+      this.form.custom_attributes[attrIndex].values.splice(valueIndex, 1)
+    },
     resetCacheableListByKey(){
       const allKeys = this.$store.getters['cache/getAllCacheKeys']('product')
       const listKeys = allKeys.filter(key =>

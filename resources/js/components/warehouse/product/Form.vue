@@ -677,6 +677,11 @@ export default {
       this.attributeErrors[`val_${newId}`] = 'Giá trị không được để trống'
     },
     removeAttributeValue(attrIndex, valueIndex) {
+      const val = this.form.custom_attributes[attrIndex].values[valueIndex]
+      const valKey = `val_${val.id}`
+      if (this.attributeErrors[valKey]) {
+        delete this.attributeErrors[valKey]
+      }
       this.form.custom_attributes[attrIndex].values.splice(valueIndex, 1)
     },
     resetCacheableListByKey(){

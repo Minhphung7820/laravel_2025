@@ -446,7 +446,8 @@ export default {
       loading: true,
       removed_variant_image_ids: [],
       isLoadingAttributes: false,
-      attributeErrors: {}
+      attributeErrors: {},
+      variant_input_mode_original: null
     }
   },
   watch: {
@@ -909,23 +910,44 @@ export default {
       this.trashVariants = [];
       this.previewAttributes = [];
     },
-    async onChangeVariantInputMode(e){
+    async onChangeVariantInputMode(e) {
       const newMode = e.target.value;
 
       if (newMode === 'from_category' && !this.form.category_id) {
         await Swal.fire({
           icon: 'warning',
           title: 'Thiếu danh mục',
-          text:'Vui lòng chọn danh mục trước khi chọn "Lấy từ danh mục"',
+          text: 'Vui lòng chọn danh mục trước khi chọn "Lấy từ danh mục"',
           confirmButtonText: 'OK'
         });
         this.form.variant_input_mode = 'create';
         return;
       }
 
+      // Nếu là form update → cảnh báo
+      if (this.mode === 'update' && newMode !== this.variant_input_mode_original) {
+        const confirm = await Swal.fire({
+          icon: 'warning',
+          title: 'Thay đổi nguồn biến thể',
+          text: 'Việc chuyển nguồn biến thể sẽ làm mất dữ liệu hiện tại. Bạn có chắc chắn không?',
+          showCancelButton: true,
+          confirmButtonText: 'Đồng ý',
+          cancelButtonText: 'Huỷ'
+        });
+
+        if (!confirm.isConfirmed) {
+          // Rollback lại select
+          this.$nextTick(() => {
+            this.form.variant_input_mode = this.variant_input_mode_original;
+          });
+          return;
+        }
+      }
+
       this.form.variant_input_mode = newMode;
 
-      if (this.mode === 'create') {
+      // Nếu đang tạo hoặc đã xác nhận reset
+      if (this.mode === 'create' || this.mode === 'update') {
         this.resetVariantData();
       }
 
@@ -1273,6 +1295,7 @@ export default {
 
         const product = data.product
         this.form.custom_attributes = product.custom_attributes
+        this.variant_input_mode_original = product.variant_input_mode
         Object.assign(this.form, {
           name: product.name,
           sku: product.sku,

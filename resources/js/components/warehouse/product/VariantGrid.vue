@@ -13,19 +13,19 @@
       <input
         :value="formatCurrency(applyToAll.purchase_price)"
         @input="onApplyAllInput($event, 'purchase_price')"
-        class="px-3 py-1 border rounded w-full"
+        class="px-3 py-1 border rounded w-full variant-input"
         :placeholder="$t('variant_grid.placeholder.purchase_price')+' (₫)'"
       />
 
       <input
         :value="formatCurrency(applyToAll.sell_price)"
         @input="onApplyAllInput($event, 'sell_price')"
-        class="px-3 py-1 border rounded w-full"
+        class="px-3 py-1 border rounded w-full variant-input"
         :placeholder="$t('variant_grid.placeholder.sell_price')+' (₫)'"
       />
 
       <input v-model.number="applyToAll.quantity" type="number" min="0"
-        class="px-3 py-1 border rounded w-full" :placeholder="$t('variant_grid.placeholder.quantity')" />
+        class="px-3 py-1 border rounded w-full variant-input" :placeholder="$t('variant_grid.placeholder.quantity')" />
 
       <button @click="applyAll"
         class="w-full px-4 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer">
@@ -129,14 +129,14 @@
               <input
                 :value="formatCurrency(variant.purchase_price)"
                 @input="onCurrencyInput($event, index, 'purchase_price')"
-                class="w-32 px-2 py-1 border rounded"
+                class="w-32 px-2 py-1 border rounded variant-input"
               />
             </td>
             <td class="px-4 py-2">
               <input
                 :value="formatCurrency(variant.sell_price)"
                 @input="onCurrencyInput($event, index, 'sell_price')"
-                class="w-32 px-2 py-1 border rounded"
+                class="w-32 px-2 py-1 border rounded variant-input"
               />
             </td>
             <td class="px-4 py-2">
@@ -400,6 +400,50 @@ export default {
 </script>
 
 <style scoped>
+.variant-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.variant-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+input[type="text"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus {
+  outline: none;
+  border-color: #3b82f6; /* blue-500 */
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+select:disabled {
+  background-color: #f9fafb;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 table th,
 table td {
   white-space: nowrap;

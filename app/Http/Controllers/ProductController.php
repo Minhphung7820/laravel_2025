@@ -461,6 +461,7 @@ class ProductController extends Controller
                 $attributeMap = [];
                 $valueMap = [];
 
+                $variantCreate = $variantInputMode === 'create';
                 foreach ($variants as $i => $variant) {
                     $attr1 = $variant['attributes'][0] ?? null;
                     $attr2 = $variant['attributes'][1] ?? null;
@@ -470,14 +471,15 @@ class ProductController extends Controller
                         &$valueMap,
                         $variantInputMode,
                         $product,
-                        $customAttributes
+                        $customAttributes,
+                        $variantCreate
                     ) {
                         if (!$attr) return null;
 
                         $attrId = $attr['attribute_id'];
                         $valId  = $attr['value_id'];
 
-                        if ($variantInputMode === 'create') {
+                        if ($variantCreate) {
                             // Tạo attribute nếu là chuỗi tạm
                             if (Str::startsWith($attrId, 'attr#') && !isset($attributeMap[$attrId])) {
                                 $attrTitle = collect($customAttributes)
@@ -514,8 +516,8 @@ class ProductController extends Controller
                         return $valId;
                     };
 
-                    $firstId  = $resolveValueId($attr1);
-                    $secondId = $resolveValueId($attr2);
+                    $firstId  = $variantCreate ? $resolveValueId($attr1) : ($variant['attributes'][0]['value_id'] ?? null);
+                    $secondId = $variantCreate ? $resolveValueId($attr2) : ($variant['attributes'][1]['value_id'] ?? null);
 
                     $variantStock = StockProduct::create([
                         'stock_id'            => $variant['stock_id'],
@@ -688,196 +690,283 @@ class ProductController extends Controller
     {
         DB::beginTransaction();
         try {
-            $coverPath = null;
-            if ($request->hasFile('cover_image')) {
-                $coverPath = $this->uploadFile($request->file('cover_image'), 'products/cover');
-            }
-            $data = [
-                'name'        => $request['name'],
-                'sku'         => $request['sku'] ?? '',
-                'barcode'     => $request['barcode'] ?? '',
-                'has_serial'  => $request['has_serial'] ?? 0,
-                'warranty'    => $request['warranty'] ?? null,
-                'unit_id'     => $request['unit_id'] ?? null,
-                'brand_id'    => $request['brand_id'] ?? null,
-                'category_id' => $request['category_id'] ?? null,
-                'supplier_id' => $request['supplier_id'] ?? null,
-                'description' => $request['description'] ?? '',
-                'has_variant' => $request['has_variant'] ?? 0,
-                'type'        => $request['type'] ?? 'single',
-                'status'      => 'pending'
-            ];
-            if (!empty($request['remove_cover_image'])) {
-                $data['image_cover'] = null;
-            } elseif ($coverPath) {
-                $data['image_cover'] = $coverPath;
-            }
-            if ($data['type'] === 'variable') {
-                $attributes = $request['variants'] ?? [];
-                if (empty($attributes)) {
-                    throw new Exception(__('common.product.missing_variant'));
-                }
-            }
-            $stocks = json_decode($request['stock_data'], true);
-            if (empty($stocks)) {
-                throw new Exception(__('common.product.missing_stock'));
-            }
             $product = Product::findOrFail($id);
             if (!$product) {
                 throw new Exception(__('common.product.not_found'));
             }
-            if ($product['type'] === 'variable' && $data['type'] === 'single') {
+            $oldModeVariant = $product['variant_input_mode'];
+            // 1. Cập nhật dữ liệu cơ bản
+            $coverPath = $request->hasFile('cover_image')
+                ? $this->uploadFile($request->file('cover_image'), 'products/cover')
+                : null;
+            $variantInputMode = $request->input('variant_input_mode', 'create');
+            $data = [
+                'name'        => $request->input('name'),
+                'sku'         => $request->input('sku', ''),
+                'barcode'     => $request->input('barcode', ''),
+                'has_serial'  => $request->input('has_serial', 0),
+                'warranty'    => $request->input('warranty'),
+                'unit_id'     => $request->input('unit_id'),
+                'brand_id'    => $request->input('brand_id'),
+                'category_id' => $request->input('category_id'),
+                'supplier_id' => $request->input('supplier_id'),
+                'description' => $request->input('description', ''),
+                'has_variant' => $request->input('has_variant', 0),
+                'type'        => $request->input('type', 'single'),
+                'status'      => 'pending',
+                'variant_input_mode' => ($product->type === 'variable' && $request['type'] === 'single') ? null : $variantInputMode
+            ];
+
+            if ($request->boolean('remove_cover_image')) {
+                $data['image_cover'] = null;
+            } elseif ($coverPath) {
+                $data['image_cover'] = $coverPath;
+            }
+
+            if ($product->type === 'variable' && $data['type'] === 'single') {
                 $data['has_variant'] = 0;
-                StockProduct::where('product_id', $product['id'])
+                StockProduct::where('product_id', $product->id)
                     ->where('product_type', 'variable')
                     ->delete();
             }
-            $result = $product->update($data);
+
+            $product->update($data);
+
+            // 2. Gallery ảnh
             $deletedIds = $request->input('deleted_gallery_ids', []);
 
-            if (is_array($deletedIds) && count($deletedIds) > 0) {
-                $validIds = array_filter($deletedIds, fn($id) => is_numeric($id));
-                ProductImage::whereIn('id', $validIds)->delete();
+            if (is_string($deletedIds)) {
+                $decoded = json_decode($deletedIds, true);
+                $deletedIds = is_array($decoded) ? $decoded : [];
+            }
+
+            $deletedIds = array_filter($deletedIds, 'is_numeric');
+            if (count($deletedIds) > 0) {
+                ProductImage::whereIn('id', $deletedIds)->delete();
             }
 
             if ($request->hasFile('gallery_images')) {
-                $imagesData = [];
                 foreach ($request->file('gallery_images') as $file) {
-                    $path = $this->uploadFile($file, 'products/gallery');
-                    $imagesData[] = [
+                    ProductImage::create([
                         'product_id' => $product->id,
-                        'image'      => $path,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
+                        'image'      => $this->uploadFile($file, 'products/gallery'),
+                    ]);
                 }
-                ProductImage::insert($imagesData);
             }
 
-            if ($result) {
-                $stockData = [];
+            // 3. Stock gốc
+            $stocks = json_decode($request->input('stock_data'), true);
+            if (empty($stocks)) throw new Exception(__('common.product.missing_stock'));
 
-                foreach ($stocks as $stock) {
-                    $stockData[] = [
-                        'id'                   => $stock['id'] ?? null,
-                        'product_id'           => $id,
-                        'stock_id'             => $stock['stock_id'] ?? null,
-                        'quantity'             => $stock['quantity'] ?? 0,
-                        'max_discount_percent' => $stock['max_discount_percent'] ?? 0,
-                        'max_increase_percent' => $stock['max_increase_percent'] ?? 0,
-                        'auto_calc'            => $stock['auto_calc'] ?? 1,
-                        'product_type'         => 'root_stock',
-                        'sell_price'           => $stock['sell_price'] ?? 0,
-                        'purchase_price'       => $stock['purchase_price'] ?? 0,
-                    ];
+            foreach ($stocks as $stock) {
+                $data = [
+                    'id'                   => $stock['id'] ?? null,
+                    'product_id'           => $product->id,
+                    'stock_id'             => $stock['stock_id'],
+                    'quantity'             => $stock['quantity'] ?? 0,
+                    'purchase_price'       => $stock['purchase_price'] ?? 0,
+                    'sell_price'           => $stock['sell_price'] ?? 0,
+                    'max_discount_percent' => $stock['max_discount_percent'] ?? 0,
+                    'max_increase_percent' => $stock['max_increase_percent'] ?? 0,
+                    'auto_calc'            => $stock['auto_calc'] ?? 0,
+                    'product_type'         => 'root_stock',
+                ];
+                if ($data['id']) {
+                    StockProduct::find($data['id'])?->update($data);
+                } else {
+                    StockProduct::create($data);
                 }
+            }
+            $removeIds = (array) $request->input('remove_stock_ids', []);
+            if (count($removeIds) > 0) {
+                StockProduct::where('product_id', $product->id)
+                    ->where('product_type', 'root_stock')
+                    ->whereIn('stock_id', $removeIds)
+                    ->delete();
+            }
 
-                batch()->update(new StockProduct(), array_filter(array_map(function ($item) {
-                    $item['updated_at'] = now();
-                    return $item;
-                }, $stockData), function ($item) {
-                    return !is_null($item['id']);
-                }), 'id');
+            // 4. Biến thể
+            if ($request->input('type') === 'variable') {
+                $variants = $request->input('variants', []);
+                if (empty($variants)) throw new Exception(__('common.product.missing_variant'));
 
-                StockProduct::insert(array_filter(array_map(function ($item) {
-                    $item['created_at'] = now();
-                    return $item;
-                }, $stockData), function ($item) {
-                    return is_null($item['id']);
-                }));
+                $customAttributes = json_decode($request->input('custom_attributes'), true) ?? [];
 
-                if (!empty($request['remove_stock_ids'])) {
-                    StockProduct::where('product_id', $id)
-                        ->where('product_type', 'root_stock')
-                        ->whereIn('stock_id', $request['remove_stock_ids'])
+                $attributeMap = [];
+                $valueMap = [];
+
+                $keptIds = [];
+                $imageTracked = [];
+                $variantKeptIds = [];
+                $attributeKeptIds = [];
+                $variantCreate = $variantInputMode === 'create';
+
+                if ($oldModeVariant === 'from_category' && $request['variant_input_mode'] === 'create') {
+                    StockProduct::where('product_id', $product['id'])
+                        ->where('product_type', 'variable')
                         ->delete();
                 }
+                foreach ($variants as $i => $variant) {
+                    $attr1 = $variant['attributes'][0] ?? null;
+                    $attr2 = $variant['attributes'][1] ?? null;
 
-                if ($data['type'] === 'variable') {
-                    $canceledVariant = [];
-                    $canceledImageVariant = [];
-                    foreach ($attributes as $key => $attribute) {
-                        // Xử lý SKU
-                        $sku = $attribute['sku'] ?: $this->generateUniqueSku($request->input('sku') ?? 'SP', $attribute['id'] ?? null);
-                        // Chuẩn bị dữ liệu cập nhật
-                        $fillAttribute = [
-                            'id'                   => $attribute['id'] ?? null,
-                            'product_id'           => $id,
-                            'stock_id'             => $attribute['stock_id'] ?? null,
-                            'quantity'             => $attribute['quantity'] ?? 0,
-                            'sell_price'           => $attribute['sell_price'] ?? 0,
-                            'purchase_price'       => $attribute['purchase_price'] ?? 0,
-                            'sku'                  => $sku,
-                            'barcode'              => $attribute['barcode'] ?? '',
-                            'is_sale'              => $attribute['is_sale'] ?? 1,
-                            'max_discount_percent' => $attribute['max_discount_percent'] ?? 0,
-                            'max_increase_percent' => $attribute['max_increase_percent'] ?? 0,
-                            'auto_calc'            => $attribute['auto_calc'] ?? 1,
-                            'is_using'             => $attribute['is_using'] ?? 1,
-                            'attribute_first_id'   => $attribute['attributes'][0]['value_id'] ?? null,
-                            'attribute_second_id'  => $attribute['attributes'][1]['value_id'] ?? null,
-                            'product_type'         => 'variable',
-                            'is_product_variant'   => 1
-                        ];
+                    $resolve = function ($attr) use (
+                        $variantInputMode,
+                        $product,
+                        &$attributeMap,
+                        &$valueMap,
+                        $customAttributes,
+                        &$variantKeptIds,
+                        &$attributeKeptIds,
+                        $variantCreate
+                    ) {
+                        if (!$attr) return null;
 
-                        // Tạo mới hoặc cập nhật
-                        $attributeModel = is_null($fillAttribute['id'])
-                            ? StockProduct::create($fillAttribute)
-                            : tap(StockProduct::findOrFail($fillAttribute['id']))->update($fillAttribute);
+                        $attrId = $attr['attribute_id'];
+                        $valId  = $attr['value_id'];
+                        // Nếu đang dùng create mode (tạo thuộc tính/giá trị mới)
+                        if ($variantCreate) {
+                            // === TẠO HOẶC CẬP NHẬT ATTRIBUTE ===
+                            if (Str::startsWith($attrId, 'attr#')) {
+                                if (!isset($attributeMap[$attrId])) {
+                                    $title = collect($customAttributes)->firstWhere('id', $attrId)['title'] ?? 'Thuộc tính';
+                                    $attributeMap[$attrId] = Variant::create([
+                                        'title' => $title,
+                                        'product_id' => $product->id,
+                                    ])->id;
+                                    if (!in_array($attributeMap[$attrId], $variantKeptIds)) {
+                                        $variantKeptIds[] = $attributeMap[$attrId];
+                                    }
+                                }
+                            } elseif (is_numeric($attrId)) {
+                                // Nếu là int (edit) → update title nếu có
+                                $item = collect($customAttributes)->firstWhere('id', (int) $attrId);
+                                if ($item && isset($item['title'])) {
+                                    Variant::where('id', $attrId)->update(['title' => $item['title']]);
+                                    if (!in_array($attrId, $variantKeptIds)) {
+                                        $variantKeptIds[] = $attrId;
+                                    }
+                                }
+                            }
 
-                        if (!$attributeModel) {
-                            throw new Exception(__('common.product.variant_create_failed'));
+                            $realAttrId = $attributeMap[$attrId] ?? $attrId;
+
+                            // === TẠO HOẶC CẬP NHẬT VALUE ===
+                            if (Str::startsWith($valId, 'val#')) {
+                                if (!isset($valueMap[$valId])) {
+                                    $valList = collect($customAttributes)->firstWhere('id', $attrId)['values'] ?? [];
+                                    $title = collect($valList)->firstWhere('id', $valId)['title'] ?? 'Giá trị';
+                                    $valueMap[$valId] = Attribute::create([
+                                        'title'        => $title,
+                                        'variant_id'   => $realAttrId,
+                                    ])->id;
+                                    if (!in_array($valueMap[$valId], $attributeKeptIds)) {
+                                        $attributeKeptIds[] = $valueMap[$valId];
+                                    }
+                                }
+                            } elseif (is_numeric($valId)) {
+                                $values = collect($customAttributes)->firstWhere('id', $attrId)['values'] ?? [];
+                                $item = collect($values)->firstWhere('id', (int) $valId);
+                                if ($item && isset($item['title'])) {
+                                    Attribute::where('id', $valId)->update([
+                                        'title'        => $item['title']
+                                    ]);
+                                    if (!in_array($valId, $attributeKeptIds)) {
+                                        $attributeKeptIds[] = $valId;
+                                    }
+                                }
+                            }
+
+                            return $valueMap[$valId] ?? $valId;
                         }
-                        $canceledVariant[] = $attributeModel->id;
-                        // Xử lý ảnh nếu có
-                        if ($request->hasFile("variants.$key.image")) {
-                            $file = $request->file("variants.$key.image");
-                            $path = $this->uploadFile($file, 'products/variants');
-                            $newImageAttr = ProductVariantImage::create([
-                                'stock_product_id' => $attributeModel->id,
-                                'image'            => $path,
-                            ]);
-                            if ($newImageAttr) {
-                                $canceledImageVariant[] = [
-                                    'id'               => $newImageAttr['id'],
-                                    'stock_product_id' => $attributeModel->id
-                                ];
-                            }
-                        }
-                    }
-                    if (!empty($canceledImageVariant) || !empty($request['removed_variant_image_ids'])) {
-                        ProductVariantImage::where(function ($query) use ($canceledImageVariant, $request) {
-                            if (!empty($canceledImageVariant)) {
-                                $query->where(function ($subQuery) use ($canceledImageVariant) {
-                                    $subQuery->whereIn('stock_product_id', array_column($canceledImageVariant, 'stock_product_id'))
-                                        ->whereNotIn('id', array_column($canceledImageVariant, 'id'));
-                                });
-                            }
 
-                            if (!empty($request['removed_variant_image_ids'])) {
-                                $query->orWhere(function ($subQuery) use ($request) {
-                                    $subQuery->whereIn('stock_product_id', $request['removed_variant_image_ids']);
-                                });
-                            }
-                        })->delete();
-                    }
+                        return $valId;
+                    };
 
-                    // Xóa các biến thể không còn sử dụng
-                    if (!empty($canceledVariant)) {
-                        StockProduct::where('product_id', $id)
-                            ->where('product_type', 'variable')
-                            ->whereNotIn('id', $canceledVariant)
-                            ->delete();
+                    $firstId  = $variantCreate ? $resolve($attr1) : ($variant['attributes'][0]['value_id'] ?? null);
+                    $secondId = $variantCreate ? $resolve($attr2) : ($variant['attributes'][1]['value_id'] ?? null);
+
+                    $sku = $variant['sku'] ?: $this->generateUniqueSku($request->input('sku') ?? 'SP', $variant['id'] ?? null);
+
+                    $data = [
+                        'id'                   => $variant['id'] ?? null,
+                        'product_id'           => $product->id,
+                        'stock_id'             => $variant['stock_id'],
+                        'quantity'             => $variant['quantity'] ?? 0,
+                        'sell_price'           => $variant['sell_price'] ?? 0,
+                        'purchase_price'       => $variant['purchase_price'] ?? 0,
+                        'sku'                  => $sku,
+                        'barcode'              => $variant['barcode'] ?? '',
+                        'is_sale'              => $variant['is_sale'] ?? 1,
+                        'max_discount_percent' => $variant['max_discount_percent'] ?? 0,
+                        'max_increase_percent' => $variant['max_increase_percent'] ?? 0,
+                        'auto_calc'            => $variant['auto_calc'] ?? 1,
+                        'is_using'             => $variant['is_using'] ?? 1,
+                        'attribute_first_id'   => $firstId,
+                        'attribute_second_id'  => $secondId,
+                        'product_type'         => 'variable',
+                        'is_product_variant'   => 1,
+                    ];
+
+                    $variantModel = $data['id']
+                        ? tap(StockProduct::findOrFail($data['id']))->update($data)
+                        : StockProduct::create($data);
+
+                    $keptIds[] = $variantModel->id;
+
+                    // Ảnh biến thể
+                    if ($request->hasFile("variants.$i.image")) {
+                        $imgPath = $this->uploadFile($request->file("variants.$i.image"), 'products/variants');
+                        $img = ProductVariantImage::create([
+                            'stock_product_id' => $variantModel->id,
+                            'image'            => $imgPath,
+                        ]);
+                        if ($img) $imageTracked[] = $img->id;
                     }
                 }
-                if ($data['type'] === 'combo') {
-                    $combos = json_decode($request['combo'], true) ?? [];
-                    $combosPrepare = $this->getPrepareCombo($product['id'], $combos);
-                    $syncCombo = $this->syncProductsCombo($product['id'], $combosPrepare);
-                    if (! $syncCombo) {
-                        DB::rollBack();
-                        return $this->responseError(__('common.product.save_combo_failed'));
-                    }
+
+                if (!empty($variantKeptIds)) {
+                    Variant::where('product_id', $product['id'])
+                        ->whereNotIn('id', $variantKeptIds)
+                        ->delete();
+                }
+                if (!empty($attributeKeptIds)) {
+                    Attribute::whereHas('variant', function ($q) use ($product) {
+                        $q->where('product_id', $product['id']);
+                    })
+                        ->whereNotIn('id', $attributeKeptIds)
+                        ->delete();
+                }
+                if ($oldModeVariant === 'create' && $request['variant_input_mode'] === 'from_category') {
+                    Variant::where('product_id', $product['id'])
+                        ->delete();
+                }
+                // Xoá ảnh thừa
+                $removedImageIds = $request->input('removed_variant_image_ids', []);
+
+                if (is_string($removedImageIds)) {
+                    $removedImageIds = json_decode($removedImageIds, true) ?? [];
+                }
+                $removedImageIds = array_filter($removedImageIds, 'is_numeric');
+
+                ProductVariantImage::whereNotIn('id', $imageTracked)
+                    ->whereIn('stock_product_id', $removedImageIds)
+                    ->delete();
+
+                // Xoá biến thể không còn dùng
+                StockProduct::where('product_id', $product->id)
+                    ->where('product_type', 'variable')
+                    ->whereNotIn('id', $keptIds)
+                    ->delete();
+            }
+
+            // 5. Combo
+            if ($request->input('type') === 'combo') {
+                $combos = json_decode($request->input('combo'), true) ?? [];
+                $syncData = $this->getPrepareCombo($product->id, $combos);
+                if (!$this->syncProductsCombo($product->id, $syncData)) {
+                    DB::rollBack();
+                    return $this->responseError(__('common.product.save_combo_failed'));
                 }
             }
 
@@ -885,7 +974,8 @@ class ProductController extends Controller
             return $this->responseSuccess(true, __('common.product.update_success'));
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->responseError(__('common.product.update_failed'), 500);
+            return $this->responseError($e, 500);
+            // return $this->responseError(__('common.product.update_failed'), 500);
         }
     }
 

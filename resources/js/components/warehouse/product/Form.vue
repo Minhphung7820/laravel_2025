@@ -298,11 +298,11 @@
    </div>
      <!-- Nút thêm thuộc tính -->
    <button
-        v-if="form.custom_attributes.length < 2"
+        v-if="form.type === 'variable' && form.custom_attributes.length < 2 && form.variant_input_mode === 'create' && form.has_variant"
         @click="addCustomAttribute"
         :disabled="hasAnyValidationError()"
         class="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-    >+ Thêm thuộc tính {{ form.custom_attributes.length + 1 }}</button>
+    >+ Thêm thuộc tính {{ form.custom_attributes.length + 1 }}</button> <br>
     <!-- Chọn thuộc tính và giá trị con -->
     <div v-if="form.has_variant && form.variant_input_mode === 'from_category'" class="space-y-4">
       <h2 class="font-semibold text-blue-600">{{ $t('product.msg_max_attr') }}</h2>
@@ -499,15 +499,17 @@ export default {
     if (this.mode === 'update' && this.id) {
       promises.push(this.loadProduct())
     }
-    this.$watch(
-    () => JSON.stringify(this.form.custom_attributes),
-    () => {
-          this.trashVariants = [];
-          this.generateVariantGrid();
-    },
-    { deep: true }
-    );
     await Promise.all(promises)
+    if(this.form.variant_input_mode === 'create'){
+      this.$watch(
+      () => JSON.stringify(this.form.custom_attributes),
+      () => {
+            this.trashVariants = [];
+            this.generateVariantGrid();
+      },
+      { deep: true }
+      );
+    }
     this.loading = false
   },
   methods: {
@@ -1339,6 +1341,7 @@ export default {
           description: product.description || '',
           type: product.type,
           has_variant: Boolean(product.has_variant),
+          variant_input_mode: product.variant_input_mode
         })
 
         this.hasVariantInitial = this.form.has_variant

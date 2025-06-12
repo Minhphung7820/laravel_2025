@@ -182,7 +182,7 @@
 
     <div v-if="form.has_variant" class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
       <div>
-        <label class="block font-semibold">Nguồn biến thể</label>
+        <label class="block font-semibold">Cách tạo biến thể</label>
         <select
           @change="onChangeVariantInputMode"
           v-model="form.variant_input_mode"
@@ -194,90 +194,115 @@
       </div>
     </div>
 
-      <div v-if="form.has_variant && form.variant_input_mode === 'create'" class="mt-4 space-y-4">
-    <div
-      v-for="(attr, index) in form.custom_attributes"
-      :key="attr.id"
-      class="bg-gray-50 p-4 rounded space-y-2"
-    >
-      <div class="relative w-fit">
-        <label class="block font-semibold">Tên thuộc tính</label>
-        <input
-          v-model="attr.title"
-          placeholder="VD: Màu, Size..."
-          @blur="validateAttributeTitle(index)"
-          :class="[
-            'w-64 px-4 py-2 border rounded shadow-sm focus:outline-none pr-8',
-            attributeErrors[`attr_${attr.id}`]
-              ? 'border-red-500 focus:ring-red-500'
-              : 'border-gray-300 focus:ring-blue-500'
-          ]"
-        />
-        <p v-if="attributeErrors[`attr_${attr.id}`]" class="text-sm text-red-500 mt-1">
-          {{ attributeErrors[`attr_${attr.id}`] }}
-        </p>
-        <button
-          @click="removeCustomAttribute(index)"
-          class="absolute top-9 right-2 text-red-500 font-bold text-lg leading-none"
-          title="Xoá thuộc tính"
-        >×</button>
-      </div>
+    <div v-if="form.has_variant && form.variant_input_mode === 'create'" class="mt-4 space-y-6">
+      <!-- Mỗi thuộc tính -->
+      <div
+        v-for="(attr, index) in form.custom_attributes"
+        :key="attr.id"
+        class="bg-gray-100 border border-dashed border-blue-300 rounded-xl shadow-sm p-6 space-y-4"
+      >
+        <!-- Tên thuộc tính -->
+        <div class="relative w-full">
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Tên thuộc tính {{index + 1}}</label>
 
-      <div>
-        <label class="block font-semibold">Giá trị</label>
-        <div class="flex flex-wrap gap-2 items-center">
-          <div
-            v-for="(val, i) in attr.values"
-            :key="val.id"
-            class="relative"
-          >
-            <input
-              v-model="val.title"
-              placeholder="VD: Đỏ, Xanh, L"
-              @blur="validateAttributeValue(index, i, val.id)"
-              :class="[
-                'w-51 px-3 py-2 border rounded shadow-sm focus:outline-none',
-                attributeErrors[`val_${val.id}`]
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'border-gray-300 focus:ring-blue-500'
-              ]"
-            />
-            <button
-              @click="removeAttributeValue(index, i)"
-              class="absolute top-2 right-2 text-red-500 font-bold"
-            >x</button>
-          </div>
+          <!-- Input -->
+          <input
+            v-model="attr.title"
+            maxlength="30"
+            @input="validateAttributeTitle(index)"
+            placeholder="VD: Màu, Size..."
+            :class="[
+              'w-full px-4 py-2 border rounded shadow-sm focus:outline-none pr-28 bg-white',
+              attributeErrors[`attr_${attr.id}`]
+                ? 'border-red-500 focus:ring-red-500'
+                : 'border-gray-300 focus:ring-blue-500'
+            ]"
+          />
 
-          <!-- Nút thêm -->
+          <!-- Char counter -->
+          <span
+            class="absolute top-9.5 right-10 text-xs"
+            :class="attr.title.length > 30 ? 'text-red-500' : 'text-gray-500'"
+          >{{ attr.title.length }}/30</span>
+
+          <!-- Nút xoá -->
           <button
-            v-if="attr.values.length < 10"
-            @click="addAttributeValue(index)"
-            :disabled="hasAnyValidationError()"
-            class="px-2 py-1 border border-blue-500 text-blue-500 rounded hover:bg-blue-50 ml-2"
-          >+ Giá trị</button>
-        </div>
+            @click="removeCustomAttribute(index)"
+            class="cursor-pointer absolute top-8.5 right-2 w-6 h-6 rounded-full bg-red-500 text-white text-sm font-bold flex items-center justify-center"
+            title="Xoá thuộc tính"
+          ><XMarkIcon class="w-6 h-6 text-white-500" /></button>
 
-        <!-- Hiển thị lỗi -->
-        <div v-for="(val, i) in attr.values" :key="'err_' + val.id">
-          <p
-            v-if="attributeErrors[`val_${val.id}`]"
-            class="text-sm text-red-500 mt-1"
-          >
-            {{ attributeErrors[`val_${val.id}`] }}
+          <!-- Lỗi -->
+          <p v-if="attributeErrors[`attr_${attr.id}`]" class="text-sm text-red-500 mt-1">
+            {{ attributeErrors[`attr_${attr.id}`] }}
           </p>
         </div>
+
+
+        <!-- Giá trị -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Giá trị</label>
+          <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+            <div
+              v-for="(val, i) in attr.values"
+              :key="val.id"
+              class="relative"
+            >
+              <input
+                v-model="val.title"
+                maxlength="20"
+                placeholder="VD: Đỏ, Xanh, L"
+                @input="validateAttributeValue(index, i, val.id)"
+                :class="[
+                  'w-full px-3 py-2 border rounded shadow-sm focus:outline-none pr-28 bg-white',
+                  attributeErrors[`val_${val.id}`]
+                    ? 'border-red-500 focus:ring-red-500'
+                    : 'border-gray-300 focus:ring-blue-500'
+                ]"
+              />
+
+              <!-- Char counter -->
+              <span
+                class="absolute top-3.5 right-10 text-xs"
+                :class="val.title.length > 20 ? 'text-red-500' : 'text-gray-500'"
+              >{{ val.title.length }}/20</span>
+
+              <!-- Nút X xoá -->
+              <button
+                @click="removeAttributeValue(index, i)"
+                class="cursor-pointer absolute top-2.5 right-2 w-6 h-6 rounded-full bg-red-500 text-white text-sm font-bold flex items-center justify-center"
+                title="Xoá giá trị"
+              ><XMarkIcon class="w-6 h-6 text-white-500" /></button>
+
+              <!-- Lỗi -->
+              <p
+                v-if="attributeErrors[`val_${val.id}`]"
+                class="text-sm text-red-500 mt-1"
+              >
+                {{ attributeErrors[`val_${val.id}`] }}
+              </p>
+            </div>
+            <!-- Nút thêm giá trị -->
+            <div v-if="attr.values.length < 10" class="col-span-2">
+              <button
+                @click="addAttributeValue(index)"
+                :disabled="hasAnyValidationError()"
+                class="cursor-pointer w-full border border-dashed border-blue-500 text-blue-500 bg-white py-2 rounded hover:bg-blue-50 transition"
+              >+ Giá trị</button>
+            </div>
+          </div>
+        </div>
       </div>
 
+      <!-- Nút thêm thuộc tính -->
+      <button
+        v-if="form.custom_attributes.length < 2"
+        @click="addCustomAttribute"
+        :disabled="hasAnyValidationError()"
+        class="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+      >+ Thêm thuộc tính {{ form.custom_attributes.length + 1 }}</button>
     </div>
 
-    <!-- Thêm mới thuộc tính -->
-    <button
-      v-if="form.custom_attributes.length < 2"
-      @click="addCustomAttribute"
-      :disabled="hasAnyValidationError()"
-      class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-    >+ Thêm thuộc tính</button>
-  </div>
     <!-- Chọn thuộc tính và giá trị con -->
     <div v-if="form.has_variant && form.variant_input_mode === 'from_category'" class="space-y-4">
       <h2 class="font-semibold text-blue-600">{{ $t('product.msg_max_attr') }}</h2>

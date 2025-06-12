@@ -36,7 +36,11 @@
       <table class="min-w-full divide-y divide-gray-200 text-sm">
         <thead class="bg-gray-100 sticky top-0 z-20">
           <tr>
-            <th v-for="(attrName, index) in previewAttributes" :key="index" class="px-4 py-2 text-left font-semibold">
+            <th
+              v-for="(attrName, index) in previewAttributes"
+              :key="index"
+              class="px-4 py-2 font-semibold text-center break-words whitespace-normal max-w-[8rem] w-[8rem]"
+            >
               {{ attrName }}
             </th>
             <th class="px-4 py-2 font-semibold">{{ $t('variant_grid.image') }}</th>
@@ -400,6 +404,14 @@ export default {
 </script>
 
 <style scoped>
+table th:nth-child(n+1):nth-child(-n+5),
+table td:nth-child(n+1):nth-child(-n+5) {
+  text-align: center;
+  vertical-align: middle;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.4;
+}
 .variant-input {
   width: 100%;
   padding: 0.5rem 0.75rem;
@@ -444,10 +456,6 @@ select:disabled {
   opacity: 0.7;
 }
 
-table th,
-table td {
-  white-space: nowrap;
-}
 .custom-scroll::-webkit-scrollbar {
   width: 8px;
 }

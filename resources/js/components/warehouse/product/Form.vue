@@ -789,7 +789,7 @@ export default {
         return;
       }
 
-      if (this.mode === 'create') {
+      if (this.mode === 'create' && this.form.variant_input_mode === 'from_category') {
         this.resetVariantData();
       }
 

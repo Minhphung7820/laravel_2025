@@ -194,7 +194,7 @@
       </div>
     </div>
 
-    <div v-if="form.has_variant && form.variant_input_mode === 'create'" class="space-y-6">
+   <div v-if="form.has_variant && form.variant_input_mode === 'create'" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
       <!-- Mỗi thuộc tính -->
       <div
         v-for="(attr, index) in form.custom_attributes"
@@ -288,21 +288,19 @@
                 @click="addAttributeValue(index)"
                 :disabled="hasAnyValidationError()"
                 class="cursor-pointer w-full border border-dashed border-blue-500 text-blue-500 py-2 rounded bg-blue-50"
-              >+ Giá trị</button>
+              >+ Thêm giá trị</button>
             </div>
           </div>
         </div>
       </div>
-
-      <!-- Nút thêm thuộc tính -->
-      <button
+   </div>
+     <!-- Nút thêm thuộc tính -->
+   <button
         v-if="form.custom_attributes.length < 2"
         @click="addCustomAttribute"
         :disabled="hasAnyValidationError()"
         class="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-      >+ Thêm thuộc tính {{ form.custom_attributes.length + 1 }}</button>
-    </div>
-
+    >+ Thêm thuộc tính {{ form.custom_attributes.length + 1 }}</button>
     <!-- Chọn thuộc tính và giá trị con -->
     <div v-if="form.has_variant && form.variant_input_mode === 'from_category'" class="space-y-4">
       <h2 class="font-semibold text-blue-600">{{ $t('product.msg_max_attr') }}</h2>

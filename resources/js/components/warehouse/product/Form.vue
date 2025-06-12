@@ -203,7 +203,7 @@
       >
         <!-- Tên thuộc tính -->
         <div class="relative w-full">
-          <label class="block text-sm font-semibold text-gray-700 mb-1">Tên thuộc tính {{index + 1}}</label>
+          <label class="block text-lg font-semibold text-gray-700 mb-1">Tên thuộc tính {{index + 1}}</label>
 
           <!-- Input -->
           <input
@@ -221,14 +221,14 @@
 
           <!-- Char counter -->
           <span
-            class="absolute top-9.5 right-10 text-xs"
+            class="absolute top-11.5 right-10 text-xs"
             :class="attr.title.length > 30 ? 'text-red-500' : 'text-gray-500'"
           >{{ attr.title.length }}/30</span>
 
           <!-- Nút xoá -->
           <button
             @click="removeCustomAttribute(index)"
-            class="cursor-pointer absolute top-8.5 right-2 w-6 h-6 rounded-full bg-red-500 text-white text-sm font-bold flex items-center justify-center"
+            class="cursor-pointer absolute top-10.5 right-2 w-6 h-6 rounded-full bg-red-500 text-white text-sm font-bold flex items-center justify-center"
             title="Xoá thuộc tính"
           ><XMarkIcon class="w-6 h-6 text-white-500" /></button>
 

@@ -220,7 +220,7 @@ export default {
 
       const selectedKey = this.restoringAttributes
         .map((valueId, index) => {
-          const attr = this.$parent.selectedAttributes[index]
+          const attr = this.getSelectedAttributes()[index]
           return `${attr.id}:${valueId}`
         })
         .sort()
@@ -240,6 +240,18 @@ export default {
     }
   },
   methods: {
+    getSelectedAttributes() {
+      const form = this.$parent.form || {}
+      if (form.variant_input_mode === 'from_category') {
+        return this.$parent.selectedAttributes || []
+      }
+
+      return (form.custom_attributes || []).map(attr => ({
+        id: attr.id,
+        title: attr.title,
+        attributes: attr.values || []
+      }))
+    },
     formatCurrency(value) {
       if (value === null || value === undefined || value === '') return ''
       const number = Number(value)
@@ -304,7 +316,7 @@ export default {
     },
     getDeletedAttributeOptions(index) {
       const attrTitle = this.previewAttributes[index]
-      const attrObj = this.$parent.selectedAttributes.find(a => a.title === attrTitle)
+      const attrObj = this.getSelectedAttributes().find(a => a.title === attrTitle)
       if (!attrObj) return []
 
       const used = []
@@ -317,7 +329,7 @@ export default {
 
       if (index > 0 && this.restoringAttributes[index - 1]) {
         const prevAttr = this.previewAttributes[index - 1]
-        const prevAttrObj = this.$parent.selectedAttributes.find(a => a.title === prevAttr)
+        const prevAttrObj = this.getSelectedAttributes().find(a => a.title === prevAttr)
         const prevVal = this.restoringAttributes[index - 1]
 
         return attrObj.attributes.filter(a => {
@@ -355,7 +367,7 @@ export default {
         return
       }
       const attributes = this.restoringAttributes.map((valueId, index) => {
-        const attr = this.$parent.selectedAttributes[index]
+        const attr = this.getSelectedAttributes()[index]
         const value = attr.attributes.find(a => a.id == valueId)
         return {
           attribute: {

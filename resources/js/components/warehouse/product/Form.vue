@@ -992,7 +992,7 @@ export default {
         return;
       }
 
-      if (this.mode === 'update' && this.hasVariantInitial && willUncheck && this.form.variant_input_mode ===   'from_category') {
+      if (this.mode === 'update' && this.hasVariantInitial && willUncheck) {
         const result = await Swal.fire({
           title: this.$t('product.confirm_remove_variant_title'),
           text: this.$t('product.confirm_remove_variant_text'),

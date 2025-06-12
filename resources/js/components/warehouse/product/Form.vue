@@ -241,7 +241,7 @@
 
         <!-- Giá trị -->
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Giá trị</label>
+          <label class="block text-lg font-semibold text-gray-700 mb-2">Giá trị</label>
           <div class="grid grid-cols-2 gap-x-4 gap-y-3">
             <div
               v-for="(val, i) in attr.values"

@@ -228,9 +228,9 @@
           <!-- Nút xoá -->
           <button
             @click="removeCustomAttribute(index)"
-            class="cursor-pointer absolute top-10.5 right-2 w-6 h-6 rounded-full bg-red-500 text-white text-sm font-bold flex items-center justify-center"
+            class="cursor-pointer absolute top-10.5 right-2 w-6 h-6 text-gray-400 text-sm font-bold flex items-center justify-center"
             title="Xoá thuộc tính"
-          ><XMarkIcon class="w-6 h-6 text-white-500" /></button>
+          ><TrashIcon class="w-5 h-5" /></button>
 
           <!-- Lỗi -->
           <p v-if="attributeErrors[`attr_${attr.id}`]" class="text-sm text-red-500 mt-1">
@@ -270,9 +270,9 @@
               <!-- Nút X xoá -->
               <button
                 @click="removeAttributeValue(index, i)"
-                class="cursor-pointer absolute top-2.5 right-2 w-6 h-6 rounded-full bg-red-500 text-white text-sm font-bold flex items-center justify-center"
+                class="cursor-pointer absolute top-2.5 right-2 w-6 h-6 text-gray-400 text-sm font-bold flex items-center justify-center"
                 title="Xoá giá trị"
-              ><XMarkIcon class="w-6 h-6 text-white-500" /></button>
+              ><TrashIcon class="w-5 h-5" /></button>
 
               <!-- Lỗi -->
               <p
@@ -389,13 +389,13 @@ import ComboGrid from './ComboGrid.vue'
 import StockPriceTable from './StockPriceTable.vue'
 import Swal from 'sweetalert2'
 import AddStockModal from '@/components/common/AddStockModal.vue'
-import { XMarkIcon, PlusIcon } from '@heroicons/vue/24/solid'
+import { XMarkIcon, PlusIcon, TrashIcon } from '@heroicons/vue/24/solid'
 import { PhotoIcon } from '@heroicons/vue/24/outline'
 import _ from 'lodash'
 
 export default {
   name: 'ProductForm',
-  components: { VariantGrid, ComboGrid, StockPriceTable,AddStockModal ,XMarkIcon, PlusIcon, PhotoIcon },
+  components: { VariantGrid, ComboGrid, StockPriceTable,AddStockModal ,XMarkIcon, PlusIcon, PhotoIcon, TrashIcon },
   props: {
     type: { type: String, default: 'single' },
     mode: { type: String, default: 'create' },

@@ -1435,7 +1435,9 @@ export default {
             })
           })
 
-          this.previewAttributes = this.selectedAttributes.map(a => a.title)
+          this.previewAttributes = (product.variant_input_mode === 'from_Category')
+          ? this.selectedAttributes.map(a => a.title)
+          : this.form.custom_attributes.map(a => a.title)
         }
 
     },

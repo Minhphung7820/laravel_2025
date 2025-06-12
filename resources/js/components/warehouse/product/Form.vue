@@ -287,7 +287,7 @@
               <button
                 @click="addAttributeValue(index)"
                 :disabled="hasAnyValidationError()"
-                class="cursor-pointer w-full border border-dashed border-blue-500 text-blue-500 bg-white py-2 rounded hover:bg-blue-50 transition"
+                class="cursor-pointer w-full border border-dashed border-blue-500 text-blue-500 py-2 rounded bg-blue-50"
               >+ Giá trị</button>
             </div>
           </div>

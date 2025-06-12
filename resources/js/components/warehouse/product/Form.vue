@@ -182,7 +182,7 @@
 
     <div v-if="form.has_variant" class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
       <div>
-        <label class="block font-semibold">{{ $t('product.variant_source') || 'Nguồn biến thể' }}</label>
+        <label class="block font-semibold">Nguồn biến thể</label>
         <select
           @change="onChangeVariantInputMode"
           v-model="form.variant_input_mode"
@@ -200,44 +200,74 @@
       :key="attr.id"
       class="bg-gray-50 p-4 border rounded space-y-2"
     >
-      <div class="flex items-center space-x-2">
+      <div class="relative w-fit">
+        <label class="block font-semibold">Tên thuộc tính</label>
         <input
           v-model="attr.title"
-          placeholder="Tên thuộc tính (VD: Màu)"
+          placeholder="VD: Màu, Size..."
           @blur="validateAttributeTitle(index)"
           :class="[
-            'px-3 py-1 border rounded w-64',
-            attributeErrors[`attr_${attr.id}`] ? 'border-red-500' : 'border-gray-300'
+            'w-64 px-4 py-2 border rounded shadow-sm focus:outline-none pr-8',
+            attributeErrors[`attr_${attr.id}`]
+              ? 'border-red-500 focus:ring-red-500'
+              : 'border-gray-300 focus:ring-blue-500'
           ]"
         />
         <p v-if="attributeErrors[`attr_${attr.id}`]" class="text-sm text-red-500 mt-1">
           {{ attributeErrors[`attr_${attr.id}`] }}
         </p>
-        <button @click="removeCustomAttribute(index)" class="text-red-500 font-bold">X</button>
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <div v-for="(val, i) in attr.values" :key="val.id" class="flex items-center gap-1">
-        <input
-          v-model="val.title"
-          placeholder="Giá trị"
-          @blur="validateAttributeValue(index, i, val.id)"
-          :class="[
-            'px-2 py-1 border rounded',
-            attributeErrors[`val_${val.id}`] ? 'border-red-500' : 'border-gray-300'
-          ]"
-        />
-        <p v-if="attributeErrors[`val_${val.id}`]" class="text-sm text-red-500 mt-1">
-          {{ attributeErrors[`val_${val.id}`] }}
-        </p>
-          <button @click="removeAttributeValue(index, i)" class="text-red-500 font-bold">×</button>
-        </div>
         <button
-          v-if="attr.values.length < 10"
-          @click="addAttributeValue(index)"
-          :disabled="hasAnyValidationError()"
-          class="px-2 py-1 border border-blue-500 text-blue-500 rounded hover:bg-blue-50"
-        >+ Giá trị</button>
+          @click="removeCustomAttribute(index)"
+          class="absolute top-9 right-2 text-red-500 font-bold text-lg leading-none"
+          title="Xoá thuộc tính"
+        >×</button>
       </div>
+
+      <div>
+        <label class="block font-semibold">Giá trị</label>
+        <div class="flex flex-wrap gap-2 items-center">
+          <div
+            v-for="(val, i) in attr.values"
+            :key="val.id"
+            class="relative"
+          >
+            <input
+              v-model="val.title"
+              placeholder="VD: Đỏ, Xanh, L"
+              @blur="validateAttributeValue(index, i, val.id)"
+              :class="[
+                'w-51 px-3 py-2 border rounded shadow-sm focus:outline-none',
+                attributeErrors[`val_${val.id}`]
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'border-gray-300 focus:ring-blue-500'
+              ]"
+            />
+            <button
+              @click="removeAttributeValue(index, i)"
+              class="absolute top-2 right-2 text-red-500 font-bold"
+            >x</button>
+          </div>
+
+          <!-- Nút thêm -->
+          <button
+            v-if="attr.values.length < 10"
+            @click="addAttributeValue(index)"
+            :disabled="hasAnyValidationError()"
+            class="px-2 py-1 border border-blue-500 text-blue-500 rounded hover:bg-blue-50 ml-2"
+          >+ Giá trị</button>
+        </div>
+
+        <!-- Hiển thị lỗi -->
+        <div v-for="(val, i) in attr.values" :key="'err_' + val.id">
+          <p
+            v-if="attributeErrors[`val_${val.id}`]"
+            class="text-sm text-red-500 mt-1"
+          >
+            {{ attributeErrors[`val_${val.id}`] }}
+          </p>
+        </div>
+      </div>
+
     </div>
 
     <!-- Thêm mới thuộc tính -->
@@ -512,6 +542,20 @@ export default {
       this.attributeErrors[`attr_${id}`] = 'Tên thuộc tính không được để trống'
     },
     removeCustomAttribute(index) {
+      const attr = this.form.custom_attributes[index]
+      const attrKey = `attr_${attr.id}`
+
+      if (this.attributeErrors[attrKey]) {
+        delete this.attributeErrors[attrKey]
+      }
+
+      attr.values.forEach(v => {
+        const valKey = `val_${v.id}`
+        if (this.attributeErrors[valKey]) {
+          delete this.attributeErrors[valKey]
+        }
+      })
+
       this.form.custom_attributes.splice(index, 1)
     },
     addAttributeValue(attrIndex) {
@@ -564,7 +608,17 @@ export default {
         this.errors.supplier_id = this.$t('product.required_supplier')
       }
 
-      // Scroll tới field đầu tiên bị lỗi
+      if (this.form.has_variant && Object.keys(this.attributeErrors).length > 0) {
+        this.$nextTick(() => {
+          const firstError = document.querySelector('.border-red-500')
+          if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          }
+        })
+
+        return false
+      }
+
       this.$nextTick(() => {
         const firstErrorField = document.querySelector('.is-invalid')
         if (firstErrorField) {
@@ -1299,23 +1353,6 @@ export default {
     },
     async handleSubmit() {
       if (!this.validateForm()) return
-
-      if (this.hasAnyValidationError()) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Thiếu thông tin biến thể',
-          text: 'Vui lòng nhập đầy đủ tên thuộc tính và giá trị trước khi lưu.',
-          confirmButtonText: 'OK'
-        })
-        this.$nextTick(() => {
-          const firstError = document.querySelector('.border-red-500')
-          if (firstError) {
-            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' })
-          }
-        })
-        return
-      }
-
       this.loading = true
       try {
         const formData = new FormData()

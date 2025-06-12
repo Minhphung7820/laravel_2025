@@ -4,13 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ProductAttributesResource;
 use App\Http\Resources\ProductComboResource;
+use App\Models\Attribute;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ProductVariantImage;
 use App\Models\StockProduct;
+use App\Models\Variant;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -396,81 +399,140 @@ class ProductController extends Controller
     {
         DB::beginTransaction();
         try {
-            // Ảnh bìa
+            // 1. Upload ảnh bìa
             $coverPath = null;
             if ($request->hasFile('cover_image')) {
                 $coverPath = $this->uploadFile($request->file('cover_image'), 'products/cover');
             }
-            // Tạo sản phẩm chính
+
+            $variantInputMode = $request->input('variant_input_mode', 'create');
+
+            // 2. Tạo sản phẩm chính
             $product = Product::create([
-                'name'        => $request->input('name') ?? null,
-                'sku'         => $request->input('sku') ?? null,
-                'barcode'     => $request->input('barcode') ?? null,
-                'type'        => $request->input('type') ?? null,
-                'has_variant' => $request->input('has_variant') ?? 0,
-                'has_serial'  => $request->input('has_serial') ?? 0,
-                'warranty'    => $request->input('warranty') ?? null,
-                'unit_id'     => $request->input('unit_id') ?? null,
-                'brand_id'    => $request->input('brand_id') ?? null,
-                'category_id' => $request->input('category_id') ?? null,
-                'supplier_id' => $request->input('supplier_id') ?? null,
-                'image_cover' => $coverPath ? $coverPath : null,
-                'status'      => 'pending',
+                'name'               => $request->input('name'),
+                'sku'                => $request->input('sku'),
+                'barcode'            => $request->input('barcode'),
+                'type'               => $request->input('type'),
+                'has_variant'        => $request->boolean('has_variant'),
+                'has_serial'         => $request->boolean('has_serial'),
+                'warranty'           => $request->input('warranty'),
+                'unit_id'            => $request->input('unit_id'),
+                'brand_id'           => $request->input('brand_id'),
+                'category_id'        => $request->input('category_id'),
+                'supplier_id'        => $request->input('supplier_id'),
+                'image_cover'        => $coverPath,
+                'variant_input_mode' => $variantInputMode,
+                'status'             => 'pending',
             ]);
-            // Lưu ảnh chính (gallery_images) hàng loạt
+
+            // 3. Lưu ảnh gallery
             if ($request->hasFile('gallery_images')) {
-                $imagesData = [];
                 foreach ($request->file('gallery_images') as $file) {
                     $path = $this->uploadFile($file, 'products/gallery');
-                    $imagesData[] = [
+                    ProductImage::create([
                         'product_id' => $product->id,
                         'image'      => $path,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
+                    ]);
                 }
-                ProductImage::insert($imagesData);
             }
-            // Lưu stock_data hàng loạt
+
+            // 4. Lưu stock_data (gốc)
             $stockData = json_decode($request->input('stock_data'), true);
-            if (is_array($stockData)) {
-                $stockInsert = [];
-                foreach ($stockData as $stockId => $item) {
-                    $stockInsert[] = [
-                        'stock_id'             => $item['stock_id'],
-                        'product_id'           => $product->id,
-                        'quantity'             => $item['quantity'] ?? 0,
-                        'purchase_price'       => $item['purchase_price'] ?? 0,
-                        'sell_price'           => $item['sell_price'] ?? 0,
-                        'max_discount_percent' => $item['max_discount_percent'] ?? 0,
-                        'max_increase_percent' => $item['max_increase_percent'] ?? 0,
-                        'auto_calc'            => $item['auto_calc'] ?? false,
-                        'is_product_variant'   => 0,
-                        'product_type'         => 'root_stock',
-                        'created_at'           => now(),
-                        'updated_at'           => now(),
-                    ];
-                }
-                StockProduct::insert($stockInsert);
+            foreach ($stockData as $item) {
+                StockProduct::create([
+                    'stock_id'             => $item['stock_id'],
+                    'product_id'           => $product->id,
+                    'quantity'             => $item['quantity'] ?? 0,
+                    'purchase_price'       => $item['purchase_price'] ?? 0,
+                    'sell_price'           => $item['sell_price'] ?? 0,
+                    'max_discount_percent' => $item['max_discount_percent'] ?? 0,
+                    'max_increase_percent' => $item['max_increase_percent'] ?? 0,
+                    'auto_calc'            => $item['auto_calc'] ?? false,
+                    'is_product_variant'   => 0,
+                    'product_type'         => 'root_stock',
+                ]);
             }
-            // Lưu biến thể (dùng create do cần lấy ID)
+
+            // 5. Xử lý biến thể
             if ($request->has('variants')) {
-                foreach ($request->input('variants') as $i => $variant) {
+                $variants = $request->input('variants');
+                $customAttributes = json_decode($request->input('custom_attributes'), true) ?? [];
+
+                $attributeMap = [];
+                $valueMap = [];
+
+                foreach ($variants as $i => $variant) {
+                    $attr1 = $variant['attributes'][0] ?? null;
+                    $attr2 = $variant['attributes'][1] ?? null;
+
+                    $resolveValueId = function ($attr) use (
+                        &$attributeMap,
+                        &$valueMap,
+                        $variantInputMode,
+                        $product,
+                        $customAttributes
+                    ) {
+                        if (!$attr) return null;
+
+                        $attrId = $attr['attribute_id'];
+                        $valId  = $attr['value_id'];
+
+                        if ($variantInputMode === 'create') {
+                            // Tạo attribute nếu là chuỗi tạm
+                            if (Str::startsWith($attrId, 'attr#') && !isset($attributeMap[$attrId])) {
+                                $attrTitle = collect($customAttributes)
+                                    ->firstWhere('id', $attrId)['title'] ?? 'Thuộc tính';
+                                $createdAttr = Variant::create([
+                                    'title' => $attrTitle,
+                                    'product_id' => $product->id,
+                                ]);
+                                $attributeMap[$attrId] = $createdAttr->id;
+                            }
+
+                            $realAttrId = $attributeMap[$attrId] ?? $attrId;
+
+                            // Tạo value nếu là chuỗi tạm
+                            if (Str::startsWith($valId, 'val#') && !isset($valueMap[$valId])) {
+                                $valList = collect($customAttributes)
+                                    ->firstWhere('id', $attrId)['values'] ?? [];
+
+                                $valTitle = collect($valList)
+                                    ->firstWhere('id', $valId)['title'] ?? 'Giá trị';
+
+                                $createdVal = Attribute::create([
+                                    'attribute_id' => $realAttrId,
+                                    'title'        => $valTitle,
+                                    'variant_id'   => $realAttrId,
+                                ]);
+                                $valueMap[$valId] = $createdVal->id;
+                            }
+
+                            return $valueMap[$valId] ?? null;
+                        }
+
+                        // from_category → dùng luôn ID thật
+                        return $valId;
+                    };
+
+                    $firstId  = $resolveValueId($attr1);
+                    $secondId = $resolveValueId($attr2);
+
                     $variantStock = StockProduct::create([
                         'stock_id'            => $variant['stock_id'],
                         'product_id'          => $product->id,
-                        'attribute_first_id'  => $variant['attributes'][0]['value_id'] ?? null,
-                        'attribute_second_id' => $variant['attributes'][1]['value_id'] ?? null,
+                        'attribute_first_id'  => $firstId,
+                        'attribute_second_id' => $secondId,
                         'quantity'            => $variant['quantity'],
                         'sell_price'          => $variant['sell_price'],
                         'purchase_price'      => $variant['purchase_price'],
-                        'sku'                 => $variant['sku'] ?: $this->generateUniqueSku($request->input('sku') ?? 'SP'),
+                        'sku'                 => $variant['sku'] ?: $this->generateUniqueSku($product->sku ?? 'SP'),
                         'barcode'             => $variant['barcode'],
                         'is_sale'             => $variant['is_sale'],
                         'is_product_variant'  => 1,
-                        'product_type'        => 'variable'
+                        'product_type'        => 'variable',
                     ]);
-                    // Lưu ảnh cho biến thể
+
+                    // Ảnh biến thể
                     if ($request->hasFile("variants.$i.image")) {
                         $file = $request->file("variants.$i.image");
                         $path = $this->uploadFile($file, 'products/variants');
@@ -481,19 +543,22 @@ class ProductController extends Controller
                     }
                 }
             }
+
+            // 6. Xử lý combo (nếu có)
             if ($request->input('type') === 'combo') {
-                $combos = json_decode($request['combo'], true) ?? [];
-                $combosPrepare = $this->getPrepareCombo($product['id'], $combos);
-                $syncCombo = $this->syncProductsCombo($product['id'], $combosPrepare);
-                if (! $syncCombo) {
+                $combos = json_decode($request->input('combo'), true) ?? [];
+                $comboData = $this->getPrepareCombo($product->id, $combos);
+                if (!$this->syncProductsCombo($product->id, $comboData)) {
                     DB::rollBack();
                     return $this->responseError(__('common.product.save_combo_failed'), 500);
                 }
             }
+
             DB::commit();
             return $this->responseSuccess(true, __('common.product.create_success'), 201);
         } catch (\Exception $e) {
             DB::rollBack();
+            report($e);
             return $this->responseError(__('common.product.create_failed'), 500);
         }
     }
@@ -570,6 +635,7 @@ class ProductController extends Controller
                         'attributes.attributeFirst.variant',
                         'attributes.attributeSecond.variant',
                         'attributes.variantImages',
+                        'custom_attributes.values'
                     ]));
 
                     return $this->responseSuccess([

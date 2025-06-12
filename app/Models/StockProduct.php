@@ -27,8 +27,7 @@ class StockProduct extends Model
         'is_using',
         'quantity_combo',
         'sell_price_combo',
-        'parent_id',
-        'variant_input_mode'
+        'parent_id'
     ];
 
     public function stock()

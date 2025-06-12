@@ -21,7 +21,8 @@ class Product extends Model
         'brand_id',
         'supplier_id',
         'warranty',
-        'description'
+        'description',
+        'variant_input_mode'
     ];
 
     protected $appends = [
@@ -36,6 +37,11 @@ class Product extends Model
     {
         return $this->hasMany(StockProduct::class, 'product_id')
             ->where('product_type', 'root_stock');
+    }
+
+    public function custom_attributes()
+    {
+        return $this->hasMany(Variant::class, 'product_id');
     }
 
     public function getImageCoverUrlAttribute()

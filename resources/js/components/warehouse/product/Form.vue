@@ -1272,7 +1272,7 @@ export default {
         const data = dataJson.data
 
         const product = data.product
-
+        this.form.custom_attributes = product.custom_attributes
         Object.assign(this.form, {
           name: product.name,
           sku: product.sku,
@@ -1555,6 +1555,7 @@ export default {
             formData.append('removed_variant_image_ids[]', id)
           })
         }
+        formData.append('custom_attributes', JSON.stringify(this.form.custom_attributes))
         const url = this.mode === 'update'
           ? `/api/warehouse/product/update/${this.id}`
           : '/api/warehouse/product/create'

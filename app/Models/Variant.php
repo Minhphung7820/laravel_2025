@@ -9,6 +9,7 @@ class Variant extends Model
     protected $fillable = [
         'category_id',
         'title',
+        'product_id'
     ];
 
     protected static function boot()
@@ -42,5 +43,10 @@ class Variant extends Model
     public function attributes()
     {
         return $this->hasMany(Attribute::class);
+    }
+
+    public function values()
+    {
+        return $this->hasMany(Attribute::class, 'variant_id');
     }
 }

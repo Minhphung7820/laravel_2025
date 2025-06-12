@@ -180,12 +180,18 @@
       </label>
     </div>
 
-    <div v-if="form.has_variant" class="mt-4 space-y-2">
-      <label class="font-semibold">Nguồn biến thể</label>
-      <select @change="onChangeVariantInputMode" v-model="form.variant_input_mode" class="w-full px-3 py-2 border rounded">
-        <option value="create">Tạo mới (Mặc định)</option>
-        <option value="from_category">Lấy từ danh mục</option>
-      </select>
+    <div v-if="form.has_variant" class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+      <div>
+        <label class="block font-semibold">{{ $t('product.variant_source') || 'Nguồn biến thể' }}</label>
+        <select
+          @change="onChangeVariantInputMode"
+          v-model="form.variant_input_mode"
+          class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm"
+        >
+          <option value="create">Tạo mới (Mặc định)</option>
+          <option value="from_category">Lấy từ danh mục</option>
+        </select>
+      </div>
     </div>
 
       <div v-if="form.has_variant && form.variant_input_mode === 'create'" class="mt-4 space-y-4">
@@ -200,7 +206,7 @@
           placeholder="Tên thuộc tính (VD: Màu)"
           @blur="validateAttributeTitle(index)"
           :class="[
-            'px-3 py-1 border rounded w-full',
+            'px-3 py-1 border rounded w-64',
             attributeErrors[`attr_${attr.id}`] ? 'border-red-500' : 'border-gray-300'
           ]"
         />
@@ -1293,6 +1299,23 @@ export default {
     },
     async handleSubmit() {
       if (!this.validateForm()) return
+
+      if (this.hasAnyValidationError()) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Thiếu thông tin biến thể',
+          text: 'Vui lòng nhập đầy đủ tên thuộc tính và giá trị trước khi lưu.',
+          confirmButtonText: 'OK'
+        })
+        this.$nextTick(() => {
+          const firstError = document.querySelector('.border-red-500')
+          if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          }
+        })
+        return
+      }
+
       this.loading = true
       try {
         const formData = new FormData()

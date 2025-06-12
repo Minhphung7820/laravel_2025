@@ -188,7 +188,7 @@
           v-model="form.variant_input_mode"
           class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm"
         >
-          <option value="create">Tạo mới (Mặc định)</option>
+          <option value="create">Thêm thủ công (Mặc định)</option>
           <option value="from_category">Lấy từ danh mục</option>
         </select>
       </div>

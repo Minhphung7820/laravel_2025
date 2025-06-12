@@ -474,14 +474,14 @@ export default {
     if (this.mode === 'update' && this.id) {
       promises.push(this.loadProduct())
     }
-      this.$watch(
+    this.$watch(
     () => JSON.stringify(this.form.custom_attributes),
     () => {
-      this.trashVariants = [];
-      this.generateVariantGrid();
+          this.trashVariants = [];
+          this.generateVariantGrid();
     },
     { deep: true }
-  );
+    );
     await Promise.all(promises)
     this.loading = false
   },

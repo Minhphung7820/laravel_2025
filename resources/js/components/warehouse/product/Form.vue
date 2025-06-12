@@ -287,8 +287,10 @@
               <button
                 @click="addAttributeValue(index)"
                 :disabled="hasAnyValidationError()"
-                class="cursor-pointer w-full border border-dashed border-blue-500 text-blue-500 py-2 rounded bg-blue-50"
-              >+ Thêm giá trị</button>
+                class="cursor-pointer w-full border border-dashed border-blue-500 text-blue-500 py-2 rounded bg-blue-50 flex items-center justify-center px-4"
+              >
+                <span>+ Thêm giá trị ({{ attr.values.length }}/10)</span>
+              </button>
             </div>
           </div>
         </div>

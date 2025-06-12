@@ -198,7 +198,7 @@
     <div
       v-for="(attr, index) in form.custom_attributes"
       :key="attr.id"
-      class="bg-gray-50 p-4 border rounded space-y-2"
+      class="bg-gray-50 p-4 rounded space-y-2"
     >
       <div class="relative w-fit">
         <label class="block font-semibold">Tên thuộc tính</label>

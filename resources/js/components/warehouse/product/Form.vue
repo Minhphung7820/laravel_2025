@@ -194,12 +194,12 @@
       </div>
     </div>
 
-    <div v-if="form.has_variant && form.variant_input_mode === 'create'" class="mt-4 space-y-6">
+    <div v-if="form.has_variant && form.variant_input_mode === 'create'" class="space-y-6">
       <!-- Mỗi thuộc tính -->
       <div
         v-for="(attr, index) in form.custom_attributes"
         :key="attr.id"
-        class="bg-gray-100 border border-dashed border-blue-300 rounded-xl shadow-sm p-6 space-y-4"
+        class="bg-gray-100 border border-dashed border-blue-500 rounded-xl shadow-sm p-6 space-y-4"
       >
         <!-- Tên thuộc tính -->
         <div class="relative w-full">

@@ -485,7 +485,7 @@ export default {
     this.loading = false
   },
   methods: {
-   hasAnyValidationError() {
+    hasAnyValidationError() {
       return Object.keys(this.attributeErrors).length > 0
     },
     validateAttributeTitle(index) {
@@ -532,14 +532,56 @@ export default {
         return
       }
 
-      const id = `attr#${Date.now()}-${Math.random().toString(36).substring(2, 5)}`
+      if (this.form.custom_attributes.length >= 2) return
+
+      const fakeAttrId = `attr#temp-${Date.now()}`
+      const fakeValId = `val#temp-${Math.random().toString(36).substring(2, 5)}`
+      const simulatedAttrs = JSON.parse(JSON.stringify(this.form.custom_attributes))
+
+      simulatedAttrs.push({
+        id: fakeAttrId,
+        title: 'Tạm',
+        values: [{ id: fakeValId, title: 'x' }]
+      })
+
+      const selected = simulatedAttrs
+        .filter(attr => attr.title.trim() && attr.values.length > 0)
+        .map(attr => ({
+          attr: {
+            id: attr.id,
+            title: attr.title,
+            attributes: attr.values
+          },
+          values: attr.values.map(v => v.id)
+        }))
+
+      const combinations = this.generateCombinations(
+        selected.map(item => ({
+          attribute: item.attr,
+          values: item.values
+        }))
+      )
+
+      const projected = combinations.length * this.stocks.length
+      const total = projected + this.trashVariants.length
+
+      if (total > 100) {
+        Swal.fire({
+          icon: 'error',
+          title: this.$t('variant_grid.limit_exceeded'),
+          text: this.$t('variant_grid.limit_exceeded_msg'),
+          confirmButtonText: 'OK'
+        })
+        return
+      }
+
+      const newAttrId = `attr#${Date.now()}-${Math.random().toString(36).substring(2, 5)}`
       this.form.custom_attributes.push({
-        id,
+        id: newAttrId,
         title: '',
         values: []
       })
-
-      this.attributeErrors[`attr_${id}`] = 'Tên thuộc tính không được để trống'
+      this.attributeErrors[`attr_${newAttrId}`] = 'Tên thuộc tính không được để trống'
     },
     removeCustomAttribute(index) {
       const attr = this.form.custom_attributes[index]
@@ -568,11 +610,45 @@ export default {
         return
       }
 
-      const attr = this.form.custom_attributes[attrIndex]
-      const id = `val#${Date.now()}-${Math.random().toString(36).substring(2, 5)}`
-      attr.values.push({ id, title: '' })
+      // Tạo bản sao để mô phỏng thêm giá trị
+      const simulatedAttrs = JSON.parse(JSON.stringify(this.form.custom_attributes))
+      const attr = simulatedAttrs[attrIndex]
+      const newId = `val#${Date.now()}-${Math.random().toString(36).substring(2, 5)}`
+      attr.values.push({ id: newId, title: 'Giá trị mới' })
 
-      this.attributeErrors[`val_${id}`] = 'Giá trị không được để trống'
+      const selected = simulatedAttrs
+        .filter(a => a.title.trim() && a.values.length > 0)
+        .map(a => ({
+          attr: {
+            id: a.id,
+            title: a.title,
+            attributes: a.values
+          },
+          values: a.values.map(v => v.id)
+        }))
+
+      const combinations = this.generateCombinations(
+        selected.map(item => ({
+          attribute: item.attr,
+          values: item.values
+        }))
+      )
+
+      const projected = combinations.length * this.stocks.length
+      const total = projected + this.trashVariants.length
+
+      if (total > 100) {
+        Swal.fire({
+          icon: 'error',
+          title: this.$t('variant_grid.limit_exceeded'),
+          text: this.$t('variant_grid.limit_exceeded_msg'),
+          confirmButtonText: 'OK'
+        })
+        return
+      }
+
+      this.form.custom_attributes[attrIndex].values.push({ id: newId, title: '' })
+      this.attributeErrors[`val_${newId}`] = 'Giá trị không được để trống'
     },
     removeAttributeValue(attrIndex, valueIndex) {
       this.form.custom_attributes[attrIndex].values.splice(valueIndex, 1)
@@ -642,6 +718,9 @@ export default {
       this.trashVariants = this.trashVariants.filter(v => v.stock_id !== stockId)
     },
     handleAddStocks(newStocks) {
+      const oldStocks = [...this.stocks]
+      const oldStockData = JSON.parse(JSON.stringify(this.form.stock_data))
+
       const tempStocks = [...this.stocks]
       const tempStockData = { ...this.form.stock_data }
 
@@ -668,6 +747,7 @@ export default {
             name: stock.name,
             is_default: stock.is_default || 0
           }
+
           // Nếu stock_id nằm trong danh sách remove thì xóa ra
           const idx = this.remove_stock_ids.indexOf(stockId)
           if (idx !== -1) {
@@ -676,16 +756,30 @@ export default {
         }
       })
 
-      // Dự đoán số variant sau khi thêm kho
-      const selected = this.selectedAttributes
-        .filter(attr => {
-          const values = this.selectedAttributeValues[attr.id]
-          return attr && attr.id && Array.isArray(values) && values.length > 0
-        })
-        .map(attr => ({
-          attr,
-          values: this.selectedAttributeValues[attr.id]
-        }))
+      let selected = []
+
+      if (this.form.variant_input_mode === 'from_category') {
+        selected = this.selectedAttributes
+          .filter(attr => {
+            const values = this.selectedAttributeValues[attr.id]
+            return attr && attr.id && Array.isArray(values) && values.length > 0
+          })
+          .map(attr => ({
+            attr,
+            values: this.selectedAttributeValues[attr.id]
+          }))
+      } else {
+        selected = this.form.custom_attributes
+          .filter(attr => attr.title.trim() && attr.values.length > 0)
+          .map(attr => ({
+            attr: {
+              id: attr.id,
+              title: attr.title,
+              attributes: attr.values
+            },
+            values: attr.values.map(v => v.id)
+          }))
+      }
 
       let count = 0
       if (selected.length > 0) {
@@ -706,10 +800,20 @@ export default {
           text: this.$t('variant_grid.limit_exceeded_msg'),
           confirmButtonText: 'OK'
         })
+
+        this.stocks.splice(0, this.stocks.length, ...oldStocks)
+
+        Object.keys(this.form.stock_data).forEach(k => {
+          this.$delete(this.form.stock_data, k)
+        })
+        Object.keys(oldStockData).forEach(k => {
+          this.$set(this.form.stock_data, k, oldStockData[k])
+        })
+
         return
       }
 
-      // Nếu không vượt giới hạn thì apply
+      // Không vượt → áp dụng thay đổi
       this.stocks = tempStocks
       this.form.stock_data = tempStockData
 

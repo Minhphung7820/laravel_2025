@@ -183,14 +183,36 @@
     <div v-if="form.has_variant" class="flex gap-4 items-start">
      <div class="w-1/4">
         <label class="block font-semibold">Cách tạo biến thể</label>
-        <select
+        <!-- <select
           @change="onChangeVariantInputMode"
           v-model="form.variant_input_mode"
           class="w-full px-4 py-2 border border-gray-300 rounded shadow-sm"
         >
           <option value="create">Thêm thủ công (Mặc định)</option>
           <option value="from_category">Lấy từ danh mục</option>
-        </select>
+        </select> -->
+        <div class="mt-3 flex gap-x-6">
+          <label class="flex items-center space-x-2">
+            <input
+              type="radio"
+              value="create"
+              v-model="form.variant_input_mode"
+              @change="onChangeVariantInputMode"
+              class="text-blue-600"
+            />
+            <span>Thêm thủ công (Mặc định)</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input
+              type="radio"
+              value="from_category"
+              v-model="form.variant_input_mode"
+              @change="onChangeVariantInputMode"
+              class="text-blue-600"
+            />
+            <span>Lấy từ danh mục</span>
+          </label>
+        </div>
       </div>
       <!-- Vertical line -->
       <div class="w-px bg-gray-300 self-stretch"></div>

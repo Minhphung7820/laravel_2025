@@ -757,7 +757,8 @@ class ProductController extends Controller
             // 3. Stock gốc
             $stocks = json_decode($request->input('stock_data'), true);
             if (empty($stocks)) throw new Exception(__('common.product.missing_stock'));
-
+            $stocksInsert = [];
+            $stocksUpdate = [];
             foreach ($stocks as $stock) {
                 $data = [
                     'id'                   => $stock['id'] ?? null,
@@ -772,10 +773,17 @@ class ProductController extends Controller
                     'product_type'         => 'root_stock',
                 ];
                 if ($data['id']) {
-                    StockProduct::find($data['id'])?->update($data);
+                    $stocksUpdate[] = $data;
                 } else {
-                    StockProduct::create($data);
+                    unset($data['id']);
+                    $stocksInsert[] = $data;
                 }
+            }
+            if (!empty($stocksUpdate)) {
+                batch()->update(new StockProduct(), $stocksUpdate, 'id');
+            }
+            if (!empty($stocksInsert)) {
+                StockProduct::insert($stocksInsert);
             }
             $removeIds = (array) $request->input('remove_stock_ids', []);
             if (count($removeIds) > 0) {
@@ -974,8 +982,7 @@ class ProductController extends Controller
             return $this->responseSuccess(true, __('common.product.update_success'));
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->responseError($e, 500);
-            // return $this->responseError(__('common.product.update_failed'), 500);
+            return $this->responseError(__('common.product.update_failed'), 500);
         }
     }
 

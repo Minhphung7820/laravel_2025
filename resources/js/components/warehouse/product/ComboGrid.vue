@@ -44,7 +44,7 @@
             </td>
             <td class="px-3 py-2">
               <select
-                class="border px-2 py-1 rounded"
+                class="border border-gray-300 rounded-md px-2 py-1 w-full focus:outline-none focus:ring-1 focus:ring-blue-500"
                 v-model="item.stock_id"
                 @change="onSelectStock(item)"
               >
@@ -78,23 +78,23 @@
               <input
                 type="number"
                 min="1"
-                class="border px-2 py-1 rounded w-20 text-center"
+                class="border border-gray-300 rounded-md w-20 text-center px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 v-model.number="item.quantity_combo"
                 :placeholder="$t('combo_grid.quantity')"
               />
             </td>
-            <td class="px-3 py-2">{{ item.quantity }}</td>
+            <td class="px-3 py-2 text-center font-medium">{{ item.quantity }}</td>
             <td class="px-3 py-2">
               <span class="truncate-cell" :title="item.unit_name">{{ item.unit_name }}</span>
             </td>
-            <td class="px-3 py-2">{{ formatCurrency(item.sell_price, $i18n.locale) }}</td>
-            <td class="px-3 py-2">{{ formatCurrency(item.purchase_price, $i18n.locale) }}</td>
+            <td class="px-3 py-2 text-center font-medium">{{ formatCurrency(item.sell_price, $i18n.locale) }}</td>
+            <td class="px-3 py-2 text-center font-medium">{{ formatCurrency(item.purchase_price, $i18n.locale) }}</td>
             <td class="px-3 py-2">
               <input
                 type="text"
                 :value="formatCurrencyInput(item.sell_price_combo)"
                 @input="onCurrencyComboInput($event, index)"
-                class="border px-2 py-1 rounded w-24 text-right"
+                class="border border-gray-300 rounded-md w-24 text-center px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 :placeholder="$t('combo_grid.combo_price')"
               />
             </td>

@@ -978,9 +978,19 @@ export default {
 
       this.form.variant_input_mode = newMode;
 
-      // Nếu đang tạo hoặc đã xác nhận reset
       if (this.mode === 'create' || this.mode === 'update') {
         this.resetVariantData();
+
+        if (newMode === 'create') {
+          this.$watch(
+            () => JSON.stringify(this.form.custom_attributes),
+            () => {
+              this.trashVariants = []
+              this.generateVariantGrid()
+            },
+            { deep: true }
+          )
+        }
       }
 
       this.generateVariantGrid();

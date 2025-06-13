@@ -213,6 +213,14 @@
             <span>Lấy từ danh mục</span>
           </label>
         </div>
+        <p class="mt-2 text-sm italic text-gray-500">
+          <span v-if="form.variant_input_mode === 'create'">
+            (Bạn có thể tạo tối đa <b>2 thuộc tính</b>, mỗi thuộc tính <b>tối đa 10 giá trị</b>)
+          </span>
+          <span v-else-if="form.variant_input_mode === 'from_category'">
+            (Vào <b>Kho &gt; Danh mục</b> → chọn một danh mục → thêm thuộc tính và giá trị. Sau đó chọn danh mục đó ở phía trên.)
+          </span>
+        </p>
       </div>
       <!-- Vertical line -->
       <div class="w-px bg-gray-300 self-stretch"></div>

@@ -1,6 +1,6 @@
 <template>
     <div class="p-4 bg-white rounded-xl shadow-md">
-      <Form :mode="'update'" :type="'single'" :id="$route.params.id" />
+      <Form :mode="'update'" :type="'single'" :id="Number($route.params.id)" />
     </div>
 </template>
 

@@ -1,5 +1,5 @@
 <template>
-  <CategoryForm mode="edit" :id="$route.params.id" />
+  <CategoryForm mode="edit" :id="Number($route.params.id)" />
 </template>
 
 <script>

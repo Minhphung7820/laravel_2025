@@ -472,7 +472,8 @@ export default {
       removed_variant_image_ids: [],
       isLoadingAttributes: false,
       attributeErrors: {},
-      variant_input_mode_original: null
+      variant_input_mode_original: null,
+      isWatchingAttributes: false
     }
   },
   watch: {
@@ -501,14 +502,7 @@ export default {
     }
     await Promise.all(promises)
     if(this.form.variant_input_mode === 'create'){
-      this.$watch(
-      () => JSON.stringify(this.form.custom_attributes),
-      () => {
-            this.trashVariants = [];
-            this.generateVariantGrid();
-      },
-      { deep: true }
-      );
+      this.registerWatchForCreateVariantInputMode()
     }
     this.loading = false
   },
@@ -982,18 +976,23 @@ export default {
         this.resetVariantData();
 
         if (newMode === 'create') {
-          this.$watch(
-            () => JSON.stringify(this.form.custom_attributes),
-            () => {
-              this.trashVariants = []
-              this.generateVariantGrid()
-            },
-            { deep: true }
-          )
+            this.registerWatchForCreateVariantInputMode()
         }
       }
 
       this.generateVariantGrid();
+    },
+    registerWatchForCreateVariantInputMode(){
+      if (this.isWatchingAttributes) return;
+      this.isWatchingAttributes = true;
+      this.$watch(
+          () => JSON.stringify(this.form.custom_attributes),
+          () => {
+            this.trashVariants = []
+            this.generateVariantGrid()
+          },
+          { deep: true }
+      )
     },
     async onVariantCheckboxChange(e) {
       const willUncheck = !e.target.checked;

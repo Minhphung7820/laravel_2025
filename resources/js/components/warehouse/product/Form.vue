@@ -926,6 +926,7 @@ export default {
       this.isMappingVariantData = this.mode === 'create';
 
       if (!this.form.category_id && this.form.has_variant) {
+        this.form.variant_input_mode = 'create';
         this.form.has_variant = false;
         this.form.type = 'single';
         Swal.fire({

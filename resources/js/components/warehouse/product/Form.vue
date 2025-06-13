@@ -192,7 +192,9 @@
           <option value="from_category">Lấy từ danh mục</option>
         </select>
       </div>
-      <div class="col-span-9">
+      <!-- Vertical line -->
+      <div class="hidden lg:block w-px bg-gray-300 my-1" :style="{ minHeight: '120px' }"></div>
+      <div class="col-span-8">
          <div v-if="form.has_variant && form.variant_input_mode === 'create'" class="w-full">
           <!-- Mỗi thuộc tính -->
           <div

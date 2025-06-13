@@ -227,7 +227,7 @@
             <div class="flex flex-col lg:flex-row lg:gap-10 gap-4 items-start">
               <!-- Tên thuộc tính -->
               <div class="relative w-full lg:w-1/2">
-                <label class="block font-semibold">Tên thuộc tính {{ index + 1 }}</label>
+                <label class="block font-semibold">Thuộc tính {{ index + 1 }}</label>
                 <input
                   v-model="attr.title"
                   maxlength="30"

@@ -122,7 +122,7 @@
                 v-if="variant.image"
                 @click="removeImage(index)"
                 class="absolute cursor-pointer top-0 right-0 text-white bg-red-500 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold z-20 hidden group-hover:flex"
-              >X</button>
+              ><XMarkIcon class="w-6 h-6 text-white-500" /></button>
               </div>
             </td>
             <td class="px-4 py-2">{{ getStockName(variant.stock_id) }}</td>
@@ -173,9 +173,11 @@
 
 <script>
 import Swal from 'sweetalert2'
+import { XMarkIcon } from '@heroicons/vue/24/solid'
 
 export default {
   name: 'VariantGrid',
+  components: { XMarkIcon },
   props: {
     variants: Array,
     stocks: Array,

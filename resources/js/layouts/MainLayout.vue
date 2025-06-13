@@ -3,8 +3,8 @@
     <!-- Sidebar -->
     <aside
       :class="[
-          'bg-[#2c2f36] text-white transition-all duration-100 shadow-lg z-20 flex-shrink-0 overflow-y-auto flex flex-col items-center pt-4',
-          showSidebar ? 'w-64 px-4' : 'w-16'
+        'bg-[#1e3a8a] text-white transition-all duration-100 shadow-lg z-20 flex-shrink-0 overflow-y-auto flex flex-col items-center pt-4',
+        showSidebar ? 'w-64 px-4' : 'w-16'
       ]"
     >
       <div v-if="showSidebar && activeModule?.name" class="font-bold text-lg mb-4 text-left w-full">
@@ -20,7 +20,7 @@
             class="group flex items-center rounded hover:bg-blue-600 transition relative w-full"
             :class="[
               showSidebar ? 'px-3 py-2 justify-start' : 'w-10 h-10 mx-auto justify-center',
-              $route.path.startsWith(item.path) ? 'bg-blue-700' : ''
+              $route.path.startsWith(item.path) ? 'bg-[#1d4ed8]' : 'hover:bg-[#3b82f6]'
             ]"
           >
             <template v-if="showSidebar && item?.name">
@@ -46,7 +46,7 @@
     <!-- Main content -->
     <div class="flex-1 flex flex-col overflow-hidden">
       <!-- Top Nav -->
-      <header class="bg-[#1f2937] text-white flex items-center justify-between px-6 py-3 shadow z-10">
+      <header class="bg-[#1e3a8a] text-white flex items-center justify-between px-6 py-3 shadow z-10">
         <div class="flex items-center gap-4">
           <!-- Nút toggle 3 gạch -->
           <button @click="toggleSidebar" class="text-white hover:text-blue-400 focus:outline-none" title="Thu gọn/mở sidebar">
@@ -61,8 +61,8 @@
               v-for="module in modules"
               :key="module.name"
               @click="selectModule(module)"
-              class="px-3 py-1 rounded hover:bg-[#3b82f6]"
-              :class="{ 'bg-[#2563eb]': activeModule.name === module.name }"
+              class="px-3 py-1 rounded font-medium hover:bg-[#3b82f6]"
+              :class="{ 'bg-[#2563eb] text-white': activeModule.name === module.name }"
             >
               {{ module?.name ? $t(module.name) : '' }}
             </button>
@@ -75,7 +75,7 @@
             <select
               v-model="selectedLang"
               @change="changeLanguage"
-              class="appearance-none bg-[#374151] text-white border border-gray-500 rounded px-2 py-1 pr-8"
+               class="appearance-none bg-white text-black border border-gray-300 rounded px-2 py-1 pr-6 shadow-sm"
             >
               <option value="vi">🇻🇳 Tiếng Việt</option>
               <option value="en">🇺🇸 English</option>
@@ -83,7 +83,7 @@
               <option value="ko">🇰🇷 한국어</option>
               <option value="zh">🇨🇳 中文（简体）</option>
             </select>
-            <div class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-white">
+            <div class="absolute inset-y-0 right-2 text-black flex items-center pointer-events-none">
               ▼
             </div>
           </div>

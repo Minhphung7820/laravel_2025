@@ -180,8 +180,8 @@
       </label>
     </div>
 
-    <div v-if="form.has_variant" class="grid grid-cols-12 gap-4 items-start">
-     <div class="col-span-3">
+    <div v-if="form.has_variant" class="flex gap-4 items-start">
+     <div class="w-1/4">
         <label class="block font-semibold">Cách tạo biến thể</label>
         <select
           @change="onChangeVariantInputMode"
@@ -193,8 +193,8 @@
         </select>
       </div>
       <!-- Vertical line -->
-      <div class="hidden lg:block w-px bg-gray-300 my-1" :style="{ minHeight: '120px' }"></div>
-      <div class="col-span-8">
+      <div class="w-px bg-gray-300 self-stretch"></div>
+      <div class="w-3/4 pl-6">
          <div v-if="form.has_variant && form.variant_input_mode === 'create'" class="w-full">
           <!-- Mỗi thuộc tính -->
           <div

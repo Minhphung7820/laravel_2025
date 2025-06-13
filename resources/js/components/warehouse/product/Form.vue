@@ -333,7 +333,7 @@
 
           <!-- Danh sách thuộc tính và value -->
           <div v-else>
-            <div v-for="(attr, index) in variantAttributes" :key="attr.id" class="p-3 rounded w-fit">
+            <div v-for="(attr, index) in variantAttributes" :key="attr.id" class="rounded w-fit mb-4">
               <label class="font-semibold block mb-1">
                 <input
                   type="checkbox"

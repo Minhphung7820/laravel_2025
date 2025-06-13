@@ -285,14 +285,15 @@
               </div>
             </div>
           </div>
-          </div>
           <!-- Nút thêm thuộc tính -->
+          <h2 v-if="form.custom_attributes.length < 1" class="font-semibold text-blue-600">Thêm mới thuộc tính biến thể (tối đa 2)</h2>
           <button
               v-if="form.type === 'variable' && form.custom_attributes.length < 2 && form.variant_input_mode === 'create' && form.has_variant"
               @click="addCustomAttribute"
               :disabled="hasAnyValidationError()"
-              class="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >+ Thêm thuộc tính {{ form.custom_attributes.length + 1 }}</button> <br>
+              class="cursor-pointer w-64 border border-dashed border-blue-500 text-blue-500 py-2 rounded bg-blue-50 flex items-center justify-center px-4"
+          >+ Thêm thuộc tính {{ form.custom_attributes.length + 1 }}</button>
+          </div>
           <!-- Chọn thuộc tính và giá trị con -->
           <div v-if="form.has_variant && form.variant_input_mode === 'from_category'" class="space-y-4">
           <h2 class="font-semibold text-blue-600">{{ $t('product.msg_max_attr') }}</h2>

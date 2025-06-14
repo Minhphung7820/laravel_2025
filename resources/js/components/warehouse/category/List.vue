@@ -49,6 +49,7 @@
 
 <script>
 import TableList from '@/components/common/TableList.vue'
+import { mapActions, mapGetters } from 'vuex'
 
 export default {
   components: { TableList },
@@ -72,6 +73,9 @@ export default {
       dropdownId: null
     }
   },
+  computed: {
+    ...mapGetters('cache', ['getCache'])
+  },
   mounted() {
     document.addEventListener('click', this.closeDropdown)
     this.fetchCategories(1)
@@ -80,6 +84,10 @@ export default {
     document.removeEventListener('click', this.closeDropdown)
   },
   methods: {
+    ...mapActions('cache', ['setCache', 'clearModuleCache']),
+    makeCacheKey(page = this.pagination.current_page) {
+      return `${this.keyword}__page:${page}`
+    },
     closeDropdown() {
       this.dropdownId = null
     },
@@ -89,6 +97,16 @@ export default {
     async fetchCategories(page = 1) {
       this.isLoading = true
       this.categories = []
+
+      const cacheKey = this.makeCacheKey(page)
+      const cached = this.getCache('category', cacheKey)
+      if (cached) {
+        this.categories = cached.categories
+        this.pagination = { ...cached.pagination }
+        this.isLoading = false
+        return
+      }
+
       try {
         const res = await window.axios.get('/api/warehouse/category/list', {
           params: { page, keyword: this.keyword }
@@ -101,6 +119,15 @@ export default {
           to: res.data.data.to,
           total: res.data.data.total
         }
+
+        this.setCache({
+          module: 'category',
+          key: cacheKey,
+          data: {
+            categories: this.categories,
+            pagination: { ...this.pagination }
+          }
+        })
       } catch (e) {
         console.error('Lỗi khi lấy danh sách danh mục:', e)
       } finally {
@@ -121,7 +148,8 @@ export default {
     },
     onDelete(item) {
       if (confirm(this.$t('category.confirm_delete', { title: item.title }))) {
-        console.log('Đã xoá:', item)
+        this.clearModuleCache('category')
+        this.fetchCategories(1)
       }
       this.dropdownId = null
     },

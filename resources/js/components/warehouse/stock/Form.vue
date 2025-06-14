@@ -37,6 +37,8 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
+
 export default {
   props: {
     mode: { type: String, default: 'create' },
@@ -48,11 +50,24 @@ export default {
       loading : true
     }
   },
+  computed: {
+    ...mapGetters('cache', ['getAllCacheKeys'])
+  },
   async mounted() {
     if (this.mode === 'update') await this.fetch()
     this.loading = false
   },
   methods: {
+    ...mapActions('cache', ['clearCacheKey']),
+    resetCacheableListByKey() {
+      const allKeys = this.getAllCacheKeys('stock')
+      const listKeys = allKeys.filter(key =>
+        key.includes('page')
+      )
+      listKeys.forEach(key => {
+        this.clearCacheKey({ module: 'stock', key })
+      })
+    },
     async fetch() {
       const res = await window.axios.get(`/api/warehouse/stock/detail/${this.id}`)
       this.form = res.data.data
@@ -67,6 +82,7 @@ export default {
         : `/api/warehouse/stock/update/${this.id}`
 
       await window.axios.post(url, this.form)
+      this.resetCacheableListByKey()
       this.$router.push('/warehouse/stock')
      } catch (error) {
 

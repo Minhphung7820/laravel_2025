@@ -70,6 +70,7 @@
 
 <script>
 import { PhotoIcon, XMarkIcon } from '@heroicons/vue/24/solid'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   components: { PhotoIcon, XMarkIcon },
@@ -89,11 +90,24 @@ export default {
       loading : true
     }
   },
+  computed: {
+    ...mapGetters('cache', ['getAllCacheKeys'])
+  },
   async mounted() {
     if (this.mode === 'update') await this.fetch()
     this.loading = false
   },
   methods: {
+    ...mapActions('cache', ['clearCacheKey']),
+    resetCacheableListByKey() {
+      const allKeys = this.getAllCacheKeys('brand')
+      const listKeys = allKeys.filter(key =>
+        key.includes('page')
+      )
+      listKeys.forEach(key => {
+        this.clearCacheKey({ module: 'brand', key })
+      })
+    },
     async fetch() {
       try {
         const res = await window.axios.get(`/api/warehouse/brand/detail/${this.id}`)
@@ -138,6 +152,7 @@ export default {
           : `/api/warehouse/brand/update/${this.id}`
 
         await window.axios.post(url, formData)
+        this.resetCacheableListByKey()
         this.$router.push('/warehouse/brand')
       } catch (error) {
 

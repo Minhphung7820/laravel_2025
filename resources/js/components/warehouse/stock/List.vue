@@ -47,6 +47,7 @@
 
 <script>
 import CommonTable from '@/components/common/TableList.vue'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   components: { CommonTable },
@@ -67,6 +68,7 @@ export default {
     }
   },
   computed: {
+     ...mapGetters('cache', ['getCache']),
     columns() {
       return [
         { label: this.$t('id'), key: 'id' },
@@ -87,6 +89,10 @@ export default {
     document.removeEventListener('click', this.closeDropdown)
   },
   methods: {
+      ...mapActions('cache', ['setCache', 'clearModuleCache']),
+    makeCacheKey(page = this.pagination.current_page) {
+      return `${this.search}__page:${page}`
+    },
     toggleDropdown(id) {
       this.dropdownId = this.dropdownId === id ? null : id
     },
@@ -96,10 +102,22 @@ export default {
     async fetchStocks(page = 1) {
       this.isLoading = true
       this.stocks = []
+
+      const cacheKey = this.makeCacheKey(page)
+      const cached = this.getCache('stock', cacheKey)
+
+      if (cached) {
+        this.stocks = cached.stocks
+        this.pagination = { ...cached.pagination }
+        this.isLoading = false
+        return
+      }
+
       try {
         const res = await window.axios.get('/api/warehouse/stock/list', {
           params: { page, keyword: this.search }
         })
+
         this.stocks = res.data.data.data
         this.pagination = {
           current_page: res.data.data.current_page,
@@ -109,8 +127,17 @@ export default {
           total: res.data.data.total,
           per_page: res.data.data.per_page
         }
+
+        this.setCache({
+          module: 'stock',
+          key: cacheKey,
+          data: {
+            stocks: this.stocks,
+            pagination: { ...this.pagination }
+          }
+        })
       } catch (error) {
-        console.log(error);
+        console.error('Lỗi khi fetch stocks:', error)
       } finally {
         this.isLoading = false
       }
@@ -127,7 +154,8 @@ export default {
     },
     onDelete(id) {
       if (confirm(this.$t('stock.confirm_delete'))) {
-        // call API xoá
+        this.clearModuleCache('stock')
+        this.fetchStocks(1)
       }
     }
   }

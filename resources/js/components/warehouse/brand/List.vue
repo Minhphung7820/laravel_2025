@@ -46,6 +46,7 @@
 
 <script>
 import CommonTable from '@/components/common/TableList.vue'
+import { mapActions, mapGetters } from 'vuex'
 
 export default {
   components: { CommonTable },
@@ -70,6 +71,9 @@ export default {
       dropdownId: null
     }
   },
+  computed: {
+    ...mapGetters('cache', ['getCache'])
+  },
   mounted() {
     document.addEventListener('click', this.closeDropdown)
     this.fetchBrands()
@@ -78,6 +82,10 @@ export default {
     document.removeEventListener('click', this.closeDropdown)
   },
   methods: {
+    ...mapActions('cache', ['setCache', 'clearModuleCache']),
+    makeCacheKey(page = this.pagination.current_page) {
+      return `${this.search}__page:${page}`
+    },
     toggleDropdown(id) {
       this.dropdownId = this.dropdownId === id ? null : id
     },
@@ -85,12 +93,24 @@ export default {
       this.dropdownId = null
     },
     async fetchBrands(page = 1) {
-        this.isLoading = true;
-        this.brands = []
-        try {
-          const res = await window.axios.get('/api/warehouse/brand/list', {
+      this.isLoading = true
+      this.brands = []
+
+      const cacheKey = this.makeCacheKey(page)
+      const cached = this.getCache('brand', cacheKey)
+
+      if (cached) {
+        this.brands = cached.brands
+        this.pagination = { ...cached.pagination }
+        this.isLoading = false
+        return
+      }
+
+      try {
+        const res = await window.axios.get('/api/warehouse/brand/list', {
           params: { page, keyword: this.search }
         })
+
         this.brands = res.data.data.data
         this.pagination = {
           current_page: res.data.data.current_page,
@@ -100,8 +120,17 @@ export default {
           total: res.data.data.total,
           per_page: res.data.data.per_page
         }
+
+        this.setCache({
+          module: 'brand',
+          key: cacheKey,
+          data: {
+            brands: this.brands,
+            pagination: { ...this.pagination }
+          }
+        })
       } catch (error) {
-        console.log(error);
+        console.error('Lỗi khi fetch brands:', error)
       } finally {
         this.isLoading = false
       }
@@ -118,7 +147,8 @@ export default {
     },
     onDelete(id) {
       if (confirm(this.$t('brand.confirm_delete'))) {
-        // call API delete
+        this.clearModuleCache('brand')
+        this.fetchBrands(1)
       }
     }
   }

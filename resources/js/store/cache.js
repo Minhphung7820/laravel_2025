@@ -17,7 +17,11 @@ export default {
     cacheLimit: 20,
     customer: createLimitedMap(20),
     supplier: createLimitedMap(20),
-    product: createLimitedMap(30)
+    product: createLimitedMap(30),
+    category: createLimitedMap(20),
+    brand: createLimitedMap(20),
+    unit: createLimitedMap(20),
+    stock: createLimitedMap(20)
   }),
   mutations: {
     setCache(state, { module, key, data }) {

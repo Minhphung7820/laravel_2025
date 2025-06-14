@@ -94,6 +94,7 @@
 
 <script>
 import Swal from 'sweetalert2'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   props: {
@@ -116,13 +117,26 @@ export default {
       formBackup: null
     };
   },
- async created() {
+  computed: {
+    ...mapGetters('cache', ['getAllCacheKeys'])
+  },
+  async created() {
     if (this.mode === 'edit' && this.id) {
         await this.getDetail()
     }
     this.loading = false;
   },
   methods: {
+    ...mapActions('cache', ['clearCacheKey']),
+    resetCacheableListByKey() {
+      const allKeys = this.getAllCacheKeys('category')
+      const listKeys = allKeys.filter(key =>
+        key.includes('page')
+      )
+      listKeys.forEach(key => {
+        this.clearCacheKey({ module: 'category', key })
+      })
+    },
     async getDetail() {
       try {
         const res = await window.axios.get(`/api/warehouse/category/detail/${this.id}`)
@@ -139,6 +153,7 @@ export default {
           ? `/api/warehouse/category/update/${this.id}`
           : `/api/warehouse/category/create`
         await window.axios.post(url, this.form)
+        this.resetCacheableListByKey()
         this.$router.push('/warehouse/category')
       } catch (e) {
         const res = e?.response?.data

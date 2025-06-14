@@ -47,6 +47,7 @@
 
 <script>
 import CommonTable from '@/components/common/TableList.vue'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   components: { CommonTable },
@@ -71,6 +72,9 @@ export default {
       dropdownId: null
     }
   },
+  computed: {
+    ...mapGetters('cache', ['getCache'])
+  },
   mounted() {
     document.addEventListener('click', this.closeDropdown)
     this.fetchUnits()
@@ -79,6 +83,10 @@ export default {
     document.removeEventListener('click', this.closeDropdown)
   },
   methods: {
+    ...mapActions('cache', ['setCache', 'clearModuleCache']),
+    makeCacheKey(page = this.pagination.current_page) {
+      return `${this.search}__page:${page}`
+    },
     toggleDropdown(id) {
       this.dropdownId = this.dropdownId === id ? null : id
     },
@@ -88,10 +96,22 @@ export default {
     async fetchUnits(page = 1) {
       this.isLoading = true
       this.units = []
-        try {
-          const res = await window.axios.get('/api/warehouse/unit/list', {
+
+      const cacheKey = this.makeCacheKey(page)
+      const cached = this.getCache('unit', cacheKey)
+
+      if (cached) {
+        this.units = cached.units
+        this.pagination = { ...cached.pagination }
+        this.isLoading = false
+        return
+      }
+
+      try {
+        const res = await window.axios.get('/api/warehouse/unit/list', {
           params: { page, keyword: this.search }
         })
+
         this.units = res.data.data.data
         this.pagination = {
           current_page: res.data.data.current_page,
@@ -101,8 +121,17 @@ export default {
           total: res.data.data.total,
           per_page: res.data.data.per_page
         }
+
+        this.setCache({
+          module: 'unit',
+          key: cacheKey,
+          data: {
+            units: this.units,
+            pagination: { ...this.pagination }
+          }
+        })
       } catch (error) {
-        console.log(error);
+        console.error('Lỗi khi fetch units:', error)
       } finally {
         this.isLoading = false
       }
@@ -119,7 +148,8 @@ export default {
     },
     onDelete(id) {
       if (confirm(this.$t('unit.confirm_delete'))) {
-        // call API xoá
+        this.clearModuleCache('unit')
+        this.fetchUnits(1)
       }
     }
   }

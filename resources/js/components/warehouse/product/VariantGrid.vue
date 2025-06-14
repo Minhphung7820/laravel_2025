@@ -2,12 +2,6 @@
   <div class="mt-6 space-y-4">
     <h2 class="text-xl font-semibold text-blue-600">{{ $t('variant_grid.title') }}</h2>
 
-    <div v-if="trashVariants.length" class="flex justify-end items-center gap-2 mb-2">
-      <button @click="handleAddRestore" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
-        {{ $t('variant_grid.add_restore') }}
-      </button>
-      <span class="text-sm text-gray-500">({{ trashVariants.length }})</span>
-    </div>
     <!-- Áp dụng toàn bộ (full hàng, không nền xám) -->
     <div class="grid grid-cols-4 gap-4 mb-4">
       <input
@@ -25,12 +19,34 @@
       />
 
       <input v-model.number="applyToAll.quantity" type="number" min="0"
-        class="px-3 py-1 border rounded w-full variant-input" :placeholder="$t('variant_grid.placeholder.quantity')" />
+      class="px-3 py-1 border rounded w-full variant-input" :placeholder="$t('variant_grid.placeholder.quantity')" />
+      <div v-if="trashVariants.length" class="flex items-center gap-4">
+        <button
+          @click="applyAll"
+          class="h-10 w-full bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer flex-grow"
+        >
+          {{ $t('variant_grid.apply_all', { total: variants.length }) }}
+        </button>
 
-      <button @click="applyAll"
-        class="w-full px-4 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer">
-        {{ $t('variant_grid.apply_all', { total: variants.length }) }}
-      </button>
+        <div v-if="trashVariants.length">
+          <button
+            @click="handleAddRestore"
+            class="h-10 min-w-[160px] bg-green-600 text-white rounded hover:bg-green-700 cursor-pointer"
+          >
+            Khôi phục nháp ({{ trashVariants.length }})
+          </button>
+        </div>
+      </div>
+
+      <div v-else>
+        <button
+          @click="applyAll"
+          class="h-10 w-full bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer"
+        >
+          {{ $t('variant_grid.apply_all', { total: variants.length }) }}
+        </button>
+      </div>
+
     </div>
     <div ref="variantScrollContainer" class="rounded border border-gray-300 overflow-y-auto max-h-[600px] min-h-[600px] custom-scroll">
       <table class="min-w-full divide-y divide-gray-200 text-sm">

@@ -16,7 +16,7 @@
                 class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 shadow font-semibold"
                 @click="$router.push('/sale/price-quotation-order/create')"
               >
-                + Tạo báo giá
+                + Tạo đơn báo giá
               </button>
               <button
               @click="showFilter = true"

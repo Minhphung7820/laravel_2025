@@ -11,12 +11,21 @@
       :isLoading="isLoading"
     >
       <template #buttons>
-        <button
-          class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 shadow font-semibold"
-          @click="$router.push('/sale/sale-order/create')"
-        >
-          + Tạo đơn hàng
-        </button>
+        <div class="flex gap-2 justify-end">
+              <button
+                class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 shadow font-semibold"
+                @click="$router.push('/sale/price-quotation-order/create')"
+              >
+                + Tạo đơn bán
+              </button>
+              <button
+              @click="showFilter = true"
+              class="bg-white text-gray-700 px-4 py-2 border rounded-md hover:bg-gray-100 flex items-center gap-2 shadow-sm cursor-pointer"
+              >
+                <FunnelIcon class="w-5 h-5 text-gray-700" />
+                {{ $t('actions.filter') }}
+              </button>
+        </div>
       </template>
       <template #actions="{ item }">
         <div v-if="item && item.id" class="relative" @click.stop>

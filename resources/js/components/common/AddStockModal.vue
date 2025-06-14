@@ -1,13 +1,13 @@
 <template>
   <div v-if="visible" class="fixed inset-0 bg-gray-100 z-50 flex items-center justify-center">
-    <div class="bg-white rounded-xl shadow-lg w-[800px] max-w-full p-6">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-semibold">{{ $t('stock_table.select_stock') }}</h2>
-        <button @click="$emit('close')" class="text-gray-600 hover:text-red-600 text-xl">×</button>
+    <div class="bg-white rounded-xl shadow-lg w-[800px] max-w-full">
+      <div class="flex justify-end items-center mr-8 mt-8">
+        <button @click="$emit('close')" class="text-red-600 hover:text-red-600 text-xl"><XMarkIcon class="w-6 h-6 text-white-500" /></button>
       </div>
 
       <div class="overflow-x-auto">
         <CommonTable
+          :title="'Chọn kho'"
           :columns="columns"
           :data="stocks"
           :pagination="pagination"
@@ -18,7 +18,7 @@
         />
       </div>
 
-      <div class="flex justify-end mt-6">
+      <div class="flex justify-end mb-8 mr-8 mt-8">
         <button @click="$emit('close')" class="mr-3 px-4 py-2 border rounded hover:bg-gray-100">{{ $t('stock_table.cancel') }}</button>
         <button @click="confirmSelection" class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700">{{ $t('stock_table.confirm') }}</button>
       </div>
@@ -28,9 +28,11 @@
 
 <script>
 import CommonTable from '@/components/common/TableList.vue'
+import { XMarkIcon } from '@heroicons/vue/24/solid'
+
 export default {
   name: 'AddStockModal',
-  components: { CommonTable },
+  components: { CommonTable, XMarkIcon },
   props: {
     visible: Boolean,
     exceptIds: Array

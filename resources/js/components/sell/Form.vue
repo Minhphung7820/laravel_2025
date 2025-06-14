@@ -74,9 +74,9 @@
     </div>
 
     <div>
-      <h2 class="block font-semibold">Sản phẩm</h2>
+      <h2 class="text-lg font-semibold mb-2">Sản phẩm</h2>
 
-      <div class="overflow-x-auto">
+      <!-- <div class="overflow-x-auto">
         <table class="w-full border border-gray-200 rounded text-sm">
           <thead class="bg-gray-100">
             <tr>
@@ -100,7 +100,7 @@
             </tr>
           </tbody>
         </table>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>

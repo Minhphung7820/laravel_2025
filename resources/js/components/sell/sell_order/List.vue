@@ -55,9 +55,10 @@
 <script>
 import CommonTable from '@/components/common/TableList.vue'
 import { mapActions, mapGetters } from 'vuex'
+import { FunnelIcon } from '@heroicons/vue/24/solid'
 
 export default {
-  components: { CommonTable },
+  components: { CommonTable, FunnelIcon },
   data() {
     return {
       isLoading : true,

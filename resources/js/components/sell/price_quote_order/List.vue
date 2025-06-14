@@ -1,7 +1,7 @@
 <template>
   <div>
     <CommonTable
-      :title="'Danh sách báo giá'"
+      :title="'Danh sách đơn báo giá'"
       :columns="columns"
       :data="brands"
       :pagination="pagination"

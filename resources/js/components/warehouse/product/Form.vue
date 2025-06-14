@@ -7,7 +7,7 @@
   </svg>
 </div>
 <!-- Loader -->
-  <div class="space-y-6 p-4 bg-white rounded-xl shadow-md">
+  <div class="space-y-6 p-4 bg-white rounded-xl">
     <h1 class="text-2xl font-bold">
       {{ mode === 'update' ? $t('product.update_title') : $t('product.create_title') }}
     </h1>

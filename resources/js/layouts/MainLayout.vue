@@ -125,9 +125,9 @@ export default {
           name: 'menu.sale',
           epics: [
             { name: 'menu.customer', path: '/sale/customer' },
-            { name: 'menu.quote', path: '/quotes' },
-            { name: 'menu.order', path: '/orders' },
-            { name: 'menu.return', path: '/returns' }
+            { name: 'menu.quote', path: '/sale/price-quotation-order' },
+            { name: 'menu.order', path: '/sale/sale-order' },
+            { name: 'menu.return', path: '/sale/sale-return-order' }
           ]
         },
         {

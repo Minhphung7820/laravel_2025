@@ -229,7 +229,7 @@ export default {
       return this.variants.length + this.trashVariants.length
     },
     isVariantLimitExceeded() {
-      return this.totalVariants >= 100
+      return this.totalVariants > 100
     },
     isRestoreReady() {
       return (

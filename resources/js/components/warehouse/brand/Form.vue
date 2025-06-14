@@ -5,7 +5,7 @@
       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
     </svg>
   </div>
-  <div class="w-full p-6 bg-white rounded-xl shadow-md">
+  <div class="w-full p-8 bg-white rounded-xl shadow-md">
     <h1 class="text-2xl font-bold">
       {{ mode === 'update' ? $t('brand.edit_title') : $t('brand.add_title') }}
     </h1>

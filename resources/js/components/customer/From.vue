@@ -5,7 +5,7 @@
       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
     </svg>
   </div>
-  <div class="p-6 bg-white rounded-xl shadow-md w-full">
+  <div class="p-8 bg-white rounded-xl shadow-md w-full">
     <h2 class="text-2xl font-bold mb-6">{{ mode === 'create' ? 'Thêm khách hàng' : 'Chỉnh sửa khách hàng' }}</h2>
 
     <form @submit.prevent="submitForm" class="space-y-8" enctype="multipart/form-data">

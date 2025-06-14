@@ -6,7 +6,7 @@
     </svg>
   </div>
 
-  <div class="p-6 bg-white rounded-xl shadow-md w-full">
+  <div class="p-8 bg-white rounded-xl shadow-md w-full">
     <h2 class="text-2xl font-bold mb-6">{{ mode === 'create' ? 'Thêm nhà cung cấp' : 'Chỉnh sửa nhà cung cấp' }}</h2>
 
     <form @submit.prevent="submitForm" class="space-y-8" enctype="multipart/form-data">

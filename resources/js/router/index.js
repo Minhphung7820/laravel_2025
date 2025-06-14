@@ -42,6 +42,8 @@ import CreateCategory from '../components/warehouse/category/Create.vue'
 import EditCategory from '../components/warehouse/category/Edit.vue'
 //
 import CreateQuote from '../components/sell/price_quote_order/Create.vue'
+import ListQuote from '../components/sell/price_quote_order/List.vue'
+//
 import CreateSell from '../components/sell/sell_order/Create.vue'
 
 const routes = [{
@@ -63,6 +65,10 @@ const routes = [{
   {
     path: 'sale/price-quotation-order/create',
     component: CreateQuote
+  },
+  {
+    path: 'sale/price-quotation-order/',
+    component: ListQuote
   },
   {
     path: 'sale/sale-order/create',

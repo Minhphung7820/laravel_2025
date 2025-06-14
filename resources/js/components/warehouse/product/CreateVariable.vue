@@ -1,7 +1,5 @@
 <template>
-    <div class="p-4 bg-white rounded-xl shadow-md">
-      <Form mode="create" :type="'single'" />
-    </div>
+  <Form mode="create" :type="'single'" />
 </template>
 
 <script>

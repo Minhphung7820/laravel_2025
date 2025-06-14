@@ -1,8 +1,7 @@
 <template>
   <div>
-    <h1 class="text-2xl font-bold mb-4">Danh sách nhà cung cấp</h1>
-
     <CommonTable
+      :title="'Danh sách nhà cung cấp'"
       :columns="columns"
       :data="suppliers"
       :pagination="pagination"

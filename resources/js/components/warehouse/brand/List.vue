@@ -1,8 +1,7 @@
 <template>
   <div>
-    <h2 class="text-2xl font-bold mb-4">{{ $t('brand.list_title') }}</h2>
-
     <CommonTable
+      :title="$t('brand.list_title')"
       :columns="columns"
       :data="brands"
       :pagination="pagination"

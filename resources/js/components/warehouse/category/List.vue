@@ -1,8 +1,7 @@
 <template>
   <div>
-    <h2 class="text-2xl font-bold mb-4">{{ $t('category.list_title') }}</h2>
-
     <TableList
+      :title="$t('category.list_title')"
       :columns="columns"
       :data="categories"
       :pagination="pagination"

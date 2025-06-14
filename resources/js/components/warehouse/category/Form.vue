@@ -8,7 +8,7 @@
       </svg>
     </div>
 
-    <div class="space-y-6 p-4 bg-white rounded-xl shadow-md">
+    <div class="space-y-6 p-8 bg-white rounded-xl shadow-md">
       <h1 class="text-2xl font-bold">
         {{ mode === 'create' ? $t('category.add_title') : $t('category.edit_title') }}
       </h1>

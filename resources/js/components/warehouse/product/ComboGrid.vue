@@ -110,8 +110,8 @@
     <div v-if="showModal" class="fixed inset-0 flex items-center justify-center z-50">
       <div class="absolute inset-0 bg-gray-200 bg-opacity-90"></div>
       <div class="bg-white w-[90%] max-w-[1200px] rounded-xl shadow-lg z-10 p-6 relative">
-        <h3 class="text-lg font-semibold mb-4">{{ $t('combo_grid.add_quick') }}</h3>
           <CommonTable
+            :title="$t('combo_grid.add_quick')"
             :columns="productColumns"
             :data="productList"
             :pagination="pagination"

@@ -1,5 +1,6 @@
 <template>
-  <div class="p-4 bg-white rounded-xl shadow-md">
+  <div class="p-8 bg-white rounded-xl shadow-md">
+    <h1 class="text-2xl font-bold mb-4">{{ title }}</h1>
     <div class="mb-4 flex flex-col md:flex-row md:justify-between md:items-center gap-2">
       <input
         v-model="search"
@@ -199,6 +200,7 @@ import { formatCurrency } from '@/utils/currency'
 export default {
   name: 'CommonTable',
   props: {
+    title :  { type: String, default: 'Danh sách' },
     isLoading: { type: Boolean, default: false },
     columns: { type: Array, required: true },
     data: { type: Array, required: true },

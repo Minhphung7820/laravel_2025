@@ -1,8 +1,7 @@
 <template>
   <div>
-    <h2 class="text-2xl font-bold mb-4">{{ $t('brand.list_title') }}</h2>
-
     <CommonTable
+      :title="'Danh sách đơn bán hàng'"
       :columns="columns"
       :data="brands"
       :pagination="pagination"
@@ -14,9 +13,9 @@
       <template #buttons>
         <button
           class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 shadow font-semibold"
-          @click="$router.push('/warehouse/brand/create')"
+          @click="$router.push('/sale/sale-order/create')"
         >
-          {{ $t('brand.add_button') }}
+          + Tạo đơn hàng
         </button>
       </template>
       <template #actions="{ item }">

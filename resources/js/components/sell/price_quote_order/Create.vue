@@ -1,16 +1,16 @@
 <template>
   <div>
-    <SellForm :form="form" :customers="customers" />
+    <PriceQuoteForm :form="form" :customers="customers" />
 
     <!-- Các phần khác như bảng sản phẩm... -->
   </div>
 </template>
 
 <script>
-import SellForm from '@/components/sell/Form.vue'
+import PriceQuoteForm from '@/components/sell/Form.vue'
 
 export default {
-  components: { SellForm },
+  components: { PriceQuoteForm },
   data() {
     return {
       form: {

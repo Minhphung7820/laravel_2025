@@ -45,6 +45,7 @@ import CreateQuote from '../components/sell/price_quote_order/Create.vue'
 import ListQuote from '../components/sell/price_quote_order/List.vue'
 //
 import CreateSell from '../components/sell/sell_order/Create.vue'
+import ListSell from '../components/sell/sell_order/List.vue'
 
 const routes = [{
   path: '/',
@@ -73,6 +74,10 @@ const routes = [{
   {
     path: 'sale/sale-order/create',
     component: CreateSell
+  },
+  {
+    path: 'sale/sale-order',
+    component: ListSell
   },
   {
     path: 'sale/customer/create',

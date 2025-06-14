@@ -88,7 +88,11 @@
             </div>
           </div>
 
-          <button v-if="isLoggedIn" @click="handleLogout" class="text-white hover:text-red-400 font-bold">
+          <button
+            v-if="isLoggedIn"
+            @click="handleLogout"
+            class="logout-hover-effect text-white font-bold"
+          >
             {{ $t('app.logout') }}
           </button>
         </div>
@@ -218,4 +222,25 @@ export default {
 </script>
 
 <style scoped>
+.logout-hover-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.logout-hover-effect::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: white;
+  transition: width 0.3s ease, left 0.3s ease;
+}
+
+.logout-hover-effect:hover::after {
+  width: 100%;
+  left: 0;
+}
+
 </style>

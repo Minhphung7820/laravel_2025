@@ -14,6 +14,8 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 
 class ProductController extends Controller
 {
@@ -510,6 +512,9 @@ class ProductController extends Controller
         $query->orderBy('stock_products.id', 'desc');
 
         return $query->paginate($request['limit'] ?? 10);
+
+        // $rawSql = $this->getRawSql($query);
+        // dd($rawSql);
     }
 
     public function getProductsByTypeOrderPriceQuote($request)
@@ -721,6 +726,20 @@ class ProductController extends Controller
         }
         $query->orderBy('stock_products.id', 'desc');
         return $query->paginate($request['limit'] ?? 10);
+    }
+
+    function getRawSql($query)
+    {
+        if ($query instanceof EloquentBuilder) {
+            $query = $query->getQuery();
+        }
+
+        $sql = $query->toSql();
+        foreach ($query->getBindings() as $binding) {
+            $binding = is_numeric($binding) ? $binding : "'" . addslashes($binding) . "'";
+            $sql = preg_replace('/\?/', $binding, $sql, 1);
+        }
+        return $sql;
     }
 
     public function getInitOrder(Request $request)

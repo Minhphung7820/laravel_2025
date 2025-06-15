@@ -107,23 +107,32 @@
     </div>
 
     <!-- Modal -->
-    <div v-if="showModal" class="fixed inset-0 flex items-center justify-center z-50">
-      <div class="absolute inset-0 bg-gray-200 bg-opacity-90"></div>
-      <div class="bg-white w-[90%] max-w-[1200px] rounded-xl shadow-lg z-10 p-6 relative">
-          <CommonTable
-            :title="$t('combo_grid.add_quick')"
-            :columns="productColumns"
-            :data="productList"
-            :pagination="pagination"
-            :withCheckbox="true"
-            :placeholder="$t('product_list.search_placeholder')"
-            @search="onSearch"
-            @page-change="onPageChange"
-            @selection-change="onSelected"
-            :isLoading="isLoading"
-          />
+    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center">
+      <!-- Overlay nền mờ -->
+      <div class="absolute inset-0 bg-black/20 backdrop-blur-sm" @click="closeModal"></div>
+
+      <!-- Nội dung modal -->
+      <div
+        class="relative z-10 bg-white w-[90%] max-w-[1200px] rounded-xl shadow-lg p-6"
+        @click.stop
+      >
+        <CommonTable
+          :title="$t('combo_grid.add_quick')"
+          :columns="productColumns"
+          :data="productList"
+          :pagination="pagination"
+          :withCheckbox="true"
+          :placeholder="$t('product_list.search_placeholder')"
+          @search="onSearch"
+          @page-change="onPageChange"
+          @selection-change="onSelected"
+          :isLoading="isLoading"
+        />
+
         <div class="flex justify-end gap-2 pt-6 mt-auto">
-          <button class="px-4 py-1 rounded bg-red-300 text-white hover:bg-red-400" @click="closeModal">{{ $t('combo_grid.cancel') }}</button>
+          <button class="px-4 py-1 rounded bg-red-300 text-white hover:bg-red-400" @click="closeModal">
+            {{ $t('combo_grid.cancel') }}
+          </button>
           <button class="px-4 py-1 rounded bg-blue-600 text-white hover:bg-blue-700" @click="onSaveComboItems">
             {{ $t('combo_grid.save') }}
           </button>

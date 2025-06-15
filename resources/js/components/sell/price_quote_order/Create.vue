@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import PriceQuoteForm from '@/components/sell/Form.vue'
+import PriceQuoteForm from '@/components/common/order/FormOrder.vue'
 
 export default {
   components: { PriceQuoteForm },

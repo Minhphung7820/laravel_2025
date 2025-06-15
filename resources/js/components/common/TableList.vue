@@ -289,8 +289,6 @@ export default {
         })
       }
       this.$emit('selection-change', this.selectedItems)
-      console.log(this.selectedIds);
-
     },
     getCellText(item, col) {
       if (!col.withLang || !col.keyLang) return item[col.key]

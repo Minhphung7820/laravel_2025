@@ -8,7 +8,7 @@
     </div>
     <div class="rounded border border-gray-300 overflow-y-auto max-h-[600px] min-h-[600px] custom-scroll">
       <table class="min-w-full divide-y divide-gray-200 text-sm">
-        <thead class="bg-gray-100 sticky top-0 z-20">
+        <thead class="bg-blue-50">
           <tr>
             <th class="px-3 py-2">{{ $t('combo_grid.image') }}</th>
             <th class="px-3 py-2">{{ $t('combo_grid.product_name') }}</th>

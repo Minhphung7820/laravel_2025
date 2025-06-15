@@ -74,54 +74,55 @@
     </div>
 
     <div>
-      <h2 class="text-lg font-semibold mb-2">Sản phẩm</h2>
-
-      <!-- <div class="overflow-x-auto">
-        <table class="w-full border border-gray-200 rounded text-sm">
-          <thead class="bg-gray-100">
-            <tr>
-              <th class="text-left px-4 py-2 border-b">SKU</th>
-              <th class="text-left px-4 py-2 border-b">Tên sản phẩm</th>
-              <th class="text-left px-4 py-2 border-b">Số lượng</th>
-              <th class="text-left px-4 py-2 border-b">Đơn giá</th>
-              <th class="text-left px-4 py-2 border-b">Thành tiền</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(item, index) in form.products" :key="index" class="border-t">
-              <td class="px-4 py-2">{{ item.sku }}</td>
-              <td class="px-4 py-2">{{ item.name }}</td>
-              <td class="px-4 py-2">{{ item.quantity }}</td>
-              <td class="px-4 py-2">{{ formatCurrency(item.unit_price) }}</td>
-              <td class="px-4 py-2">{{ formatCurrency(item.total) }}</td>
-            </tr>
-            <tr v-if="!form.products.length">
-              <td colspan="5" class="text-center px-4 py-6 text-gray-500">Không có sản phẩm</td>
-            </tr>
-          </tbody>
-        </table>
-      </div> -->
+      <TableAddItems
+        :form="form"
+        :transaction_type="transaction_type"
+        @add-items="handleAddItems"
+      />
     </div>
   </div>
 </template>
 
 <script>
+import TableAddItems from '@/components/common/order/TableAddItems.vue'
+
 export default {
-  name: 'SellForm',
+  components: {TableAddItems},
   props: {
-    form: {
-      type: Object,
+    mode: {
+      type: String,
       required: true
     },
-    customers: {
-      type: Array,
-      default: () => []
+    transaction_type: {
+      type: String,
+      required: true
+    }
+  },
+  data() {
+    return {
+      form: {
+        seller_email: 'richchoi@gmail.com',
+        created_at: this.today(),
+        order_date: this.today(),
+        email: '',
+        customer_id: 1,
+        phone: '',
+        note: '',
+        items: []
+      },
+      customers : [
+        { id: 1, name: 'Khách A' },
+        { id: 2, name: 'Khách B' }
+      ]
     }
   },
   methods: {
-    formatCurrency(value) {
-      if (!value && value !== 0) return ''
-      return Number(value).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
+    handleAddItems(items) {
+      this.form.items.push(...items)
+    },
+    today() {
+      const d = new Date()
+      return d.toISOString().slice(0, 10)
     }
   }
 }

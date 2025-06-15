@@ -1,43 +1,11 @@
 <template>
-  <div>
-    <PriceQuoteForm :form="form" :customers="customers" />
-
-    <!-- Các phần khác như bảng sản phẩm... -->
-  </div>
+    <PriceQuoteForm :mode="'create'" :transaction_type="'price_quote'" />
 </template>
 
 <script>
 import PriceQuoteForm from '@/components/common/order/FormOrder.vue'
 
 export default {
-  components: { PriceQuoteForm },
-  data() {
-    return {
-      form: {
-        seller_email: 'richchoi@gmail.com',
-        created_at: this.today(),
-        order_date: this.today(),
-        email: '',
-        customer_id: '',
-        phone: '',
-        note: '',
-        products: []
-      },
-      customers: []
-    }
-  },
-  mounted() {
-    // fake API
-    this.customers = [
-      { id: 1, name: 'Khách A' },
-      { id: 2, name: 'Khách B' }
-    ]
-  },
-  methods: {
-    today() {
-      const d = new Date()
-      return d.toISOString().slice(0, 10)
-    }
-  }
+  components: { PriceQuoteForm }
 }
 </script>

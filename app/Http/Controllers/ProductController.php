@@ -64,7 +64,10 @@ class ProductController extends Controller
             's.name as stock_name',
             'products.type as product_type',
             'st.purchase_price',
-            'st.sell_price',
+            DB::raw("CASE
+                WHEN products.type = 'combo' THEN st.sell_price_combo
+                ELSE st.sell_price
+            END AS sell_price"),
             'st.quantity',
             'u.name as unit_name',
             DB::raw("CASE
@@ -337,14 +340,17 @@ class ProductController extends Controller
         $search = $request->input('keyword');
         $urlPrefix = url('/');
         $imageDefault = env('IMAGE_DEFAULT');
-
+        $exceptIds = explode(",", $request['except_ids'] ?? '');
         $query = \App\Models\StockProduct::with([
-            'comboList.parent.attributeFirst:id,title',
-            'comboList.parent.attributeSecond:id,title',
-            'comboList.parent.product:id,name,image_cover,type,sku',
-            'comboList.parent.variantImages:id,image,stock_product_id',
-            'comboList:id,sell_price_combo,parent_id,quantity_combo,product_id',
-            'comboList.parent:id,sku,product_id,attribute_first_id,attribute_second_id'
+            'product:id,type',
+            'product.combo.parent.attributeFirst:id,title,variant_id',
+            'product.combo.parent.attributeSecond:id,title,variant_id',
+            'product.combo.parent.attributeFirst.variant:id,title',
+            'product.combo.parent.attributeSecond.variant:id,title',
+            'product.combo.parent.product:id,name,image_cover,type,sku',
+            'product.combo.parent.variantImages:id,image,stock_product_id',
+            'product.combo:id,sell_price_combo,parent_id,quantity_combo,product_id',
+            'product.combo.parent:id,sku,product_id,attribute_first_id,attribute_second_id'
         ])
             ->leftJoin('attributes as attr1_org', 'stock_products.attribute_first_id', '=', 'attr1_org.id')
             ->leftJoin('attributes as attr2_org', 'stock_products.attribute_second_id', '=', 'attr2_org.id')
@@ -378,7 +384,15 @@ class ProductController extends Controller
                 'stocks.id as stock_id',
                 'products.type as product_type',
                 'stock_products.purchase_price',
-                'stock_products.sell_price',
+                'stock_products.purchase_price as purchase_price_main',
+                DB::raw("CASE
+                    WHEN products.type = 'combo' THEN stock_products.sell_price_combo
+                    ELSE stock_products.sell_price
+                END AS sell_price"),
+                DB::raw("CASE
+                    WHEN products.type = 'combo' THEN stock_products.sell_price_combo
+                    ELSE stock_products.sell_price
+                END AS sell_price_main"),
                 'stock_products.quantity',
                 'stock_products.attribute_first_id',
                 'stock_products.attribute_second_id',
@@ -394,20 +408,22 @@ class ProductController extends Controller
                     CASE
                         WHEN products.type = "variable" THEN (
                             SELECT JSON_ARRAYAGG(JSON_OBJECT(
-                                "id", sp2.id,
-                                "product_id", sp2.product_id,
-                                "attribute_first_id", sp2.attribute_first_id,
-                                "attribute_second_id", sp2.attribute_second_id,
-                                "sell_price", sp2.sell_price,
-                                "purchase_price", sp2.purchase_price,
-                                "stock_name", s.name,
-                                "attr1_title", attr1.title,
-                                "attr2_title", attr2.title,
-                                "quantity", sp2.quantity,
-                                "stock_id", s.id,
-                                "is_stock_default", s.is_default,
-                                "sku", sp2.sku,
-                                "image", COALESCE(CONCAT("' . $urlPrefix . '", pvi.image), "' . $imageDefault . '")
+                                \'id\', sp2.id,
+                                \'product_id\', sp2.product_id,
+                                \'attribute_first_id\', sp2.attribute_first_id,
+                                \'attribute_second_id\', sp2.attribute_second_id,
+                                \'sell_price\', (CASE WHEN sp2.product_type = \'combo\' THEN sp2.sell_price_combo ELSE sp2.sell_price END),
+                                \'purchase_price\', sp2.purchase_price,
+                                \'sell_price_main\', (CASE WHEN sp2.product_type = \'combo\' THEN sp2.sell_price_combo ELSE sp2.sell_price END),
+                                \'purchase_price_main\', sp2.purchase_price,
+                                \'stock_name\', s.name,
+                                \'attr1_title\', attr1.title,
+                                \'attr2_title\', attr2.title,
+                                \'quantity\', sp2.quantity,
+                                \'stock_id\', s.id,
+                                \'is_stock_default\', s.is_default,
+                                \'sku\', sp2.sku,
+                                \'image\', COALESCE(CONCAT(\'' . $urlPrefix . '\', pvi.image), \'' . $imageDefault . '\')
                             ))
                             FROM stock_products sp2
                             JOIN stocks s ON sp2.stock_id = s.id
@@ -435,32 +451,26 @@ class ProductController extends Controller
                         )
                         ELSE (
                             SELECT JSON_ARRAYAGG(JSON_OBJECT(
-                                "id", sp2.id,
-                                "product_id", sp2.product_id,
-                                "attribute_first_id", sp2.attribute_first_id,
-                                "attribute_second_id", sp2.attribute_second_id,
-                                "sell_price", sp2.sell_price,
-                                "purchase_price", sp2.purchase_price,
-                                "stock_name", s.name,
-                                "attr1_title", null,
-                                "attr2_title", null,
-                                "quantity", sp2.quantity,
-                                "stock_id", s.id,
-                                "is_stock_default", s.is_default,
-                                "sku", sp2.sku,
-                                "image", COALESCE(CONCAT("' . $urlPrefix . '", pvi.image), "' . $imageDefault . '")
+                                \'id\', sp2.id,
+                                \'product_id\', sp2.product_id,
+                                \'attribute_first_id\', sp2.attribute_first_id,
+                                \'attribute_second_id\', sp2.attribute_second_id,
+                                \'sell_price\', (CASE WHEN sp2.product_type = \'combo\' THEN sp2.sell_price_combo ELSE sp2.sell_price END),
+                                \'purchase_price\', sp2.purchase_price,
+                                \'sell_price_main\', (CASE WHEN sp2.product_type = \'combo\' THEN sp2.sell_price_combo ELSE sp2.sell_price END),
+                                \'purchase_price_main\', sp2.purchase_price,
+                                \'stock_name\', s.name,
+                                \'attr1_title\', NULL,
+                                \'attr2_title\', NULL,
+                                \'quantity\', sp2.quantity,
+                                \'stock_id\', s.id,
+                                \'is_stock_default\', s.is_default,
+                                \'sku\', sp2.sku,
+                                \'image\', COALESCE(CONCAT(\'' . $urlPrefix . '\', p.image_cover), \'' . $imageDefault . '\')
                             ))
                             FROM stock_products sp2
                             JOIN stocks s ON sp2.stock_id = s.id
-                            LEFT JOIN (
-                                SELECT t1.*
-                                FROM product_variant_images t1
-                                INNER JOIN (
-                                    SELECT stock_product_id, MIN(id) AS min_id
-                                    FROM product_variant_images
-                                    GROUP BY stock_product_id
-                                ) t2 ON t1.stock_product_id = t2.stock_product_id AND t1.id = t2.min_id
-                            ) AS pvi ON pvi.stock_product_id = sp2.id
+                            JOIN products p ON sp2.product_id = p.id
                             WHERE sp2.product_id = stock_products.product_id
                             AND sp2.product_type != "variable"
                         )
@@ -491,26 +501,238 @@ class ProductController extends Controller
                     ->orWhere('stock_products.sku', 'like', "%$search%");
             });
         }
+
+        if (!empty($exceptIds)) {
+            $query->whereNotIn('stock_products.id', $exceptIds);
+        }
+
         $query->orderBy('stock_products.id', 'desc');
 
         return $query->paginate($request['limit'] ?? 10);
     }
 
-    public function getProductsByTypeOrder(Request $request) {}
+    public function getProductsByTypeOrderPriceQuote($request)
+    {
+        $search = $request['keyword'] ?? '';
+        $customerId = $request['customer_id'] ?? '';
+        $transactionType = $request['transaction_type'];
+        $urlPrefix = url('/');
+        $imageDefault = env('IMAGE_DEFAULT');
+        $exceptIds = explode(",", $request['except_ids'] ?? '');
+
+        $query = \App\Models\StockProduct::with([
+            'product:id,type',
+            'product.combo.parent.attributeFirst:id,title,variant_id',
+            'product.combo.parent.attributeSecond:id,title,variant_id',
+            'product.combo.parent.attributeFirst.variant:id,title',
+            'product.combo.parent.attributeSecond.variant:id,title',
+            'product.combo.parent.product:id,name,image_cover,type,sku',
+            'product.combo.parent.variantImages:id,image,stock_product_id',
+            'product.combo:id,sell_price_combo,parent_id,quantity_combo,product_id',
+            'product.combo.parent:id,sku,product_id,attribute_first_id,attribute_second_id'
+        ])
+            ->join('products', 'stock_products.product_id', '=', 'products.id')
+            ->leftJoin('units as u', 'products.unit_id', '=', 'u.id')
+            ->leftJoin('product_variant_images', 'product_variant_images.stock_product_id', '=', 'stock_products.id')
+            ->leftJoin(
+                DB::raw(
+                    "(
+                SELECT oi1.*
+                FROM order_items oi1
+                INNER JOIN (
+                    SELECT oi.stock_product_id, MAX(o.transaction_date) AS max_date
+                    FROM order_items oi
+                    JOIN orders o ON o.id = oi.order_id
+                    WHERE o.status = 'approved'
+                    AND o.customer_id = $customerId
+                    AND o.transaction_type = '$transactionType'
+                    GROUP BY oi.stock_product_id
+                ) latest ON latest.stock_product_id = oi1.stock_product_id
+                    JOIN orders o2 ON o2.id = oi1.order_id AND o2.transaction_date = latest.max_date
+                    WHERE o2.status = 'approved'
+                    AND o2.customer_id = $customerId
+                    AND o2.transaction_type = '$transactionType'
+                ) AS last_order_items"
+                ),
+                'last_order_items.stock_product_id',
+                '=',
+                'stock_products.id'
+            )
+            ->leftJoin('stocks', 'stocks.id', '=', DB::raw('last_order_items.stock_id'))
+            ->leftJoin('attributes as attr1_org', 'stock_products.attribute_first_id', '=', 'attr1_org.id')
+            ->leftJoin('attributes as attr2_org', 'stock_products.attribute_second_id', '=', 'attr2_org.id')
+            ->leftJoin('variants as var1', 'attr1_org.variant_id', '=', 'var1.id')
+            ->leftJoin('variants as var2', 'attr2_org.variant_id', '=', 'var2.id')
+            ->whereNotNull('last_order_items.id')
+            ->select([
+                'stock_products.id',
+                'stock_products.product_id',
+                DB::raw("CASE
+                    WHEN products.type = 'variable' THEN stock_products.sku
+                    ELSE products.sku
+                END AS sku"),
+                DB::raw(
+                    "CASE
+                        WHEN products.type = 'variable' THEN
+                            CONCAT(products.name, ' ',
+                                COALESCE(var1.title, ''), ' ',
+                                COALESCE(attr1_org.title, ''), ' ',
+                                COALESCE(var2.title, ''), ' ',
+                                COALESCE(attr2_org.title, '')
+                            )
+                        ELSE products.name
+                     END AS product_name"
+                ),
+                'last_order_items.stock_id',
+                'stocks.name as stock_name',
+                'last_order_items.sell_price as sell_price_main',
+                'last_order_items.purchase_price as purchase_price_main',
+                DB::raw("CASE
+                    WHEN products.type = 'combo' THEN stock_products.sell_price_combo
+                    ELSE stock_products.sell_price
+                END AS sell_price"),
+                'stock_products.purchase_price',
+                'last_order_items.quantity',
+                'products.type as product_type',
+                'stock_products.attribute_first_id',
+                'stock_products.attribute_second_id',
+                'u.name as unit_name',
+                DB::raw("CASE
+                    WHEN products.type = 'variable' THEN
+                        COALESCE(CONCAT('$urlPrefix', product_variant_images.image), '$imageDefault')
+                    ELSE
+                        COALESCE(CONCAT('$urlPrefix', products.image_cover), '$imageDefault')
+                END AS image"),
+                'products.status',
+                DB::raw('(
+                    CASE
+                        WHEN products.type = "variable" THEN (
+                            SELECT JSON_ARRAYAGG(JSON_OBJECT(
+                                "id", sp2.id,
+                                "product_id", sp2.product_id,
+                                "attribute_first_id", sp2.attribute_first_id,
+                                "attribute_second_id", sp2.attribute_second_id,
+
+                                "sell_price_main",
+                                    CASE
+                                        WHEN sp2.attribute_first_id = stock_products.attribute_first_id
+                                        AND sp2.attribute_second_id = stock_products.attribute_second_id
+                                        AND sp2.stock_id = last_order_items.stock_id
+                                        THEN last_order_items.sell_price
+                                        ELSE NULL
+                                    END,
+                                "purchase_price_main",
+                                    CASE
+                                        WHEN sp2.attribute_first_id = stock_products.attribute_first_id
+                                        AND sp2.attribute_second_id = stock_products.attribute_second_id
+                                        AND sp2.stock_id = last_order_items.stock_id
+                                        THEN last_order_items.purchase_price
+                                        ELSE NULL
+                                    END,
+                                "quantity",
+                                    CASE
+                                        WHEN sp2.attribute_first_id = stock_products.attribute_first_id
+                                        AND sp2.attribute_second_id = stock_products.attribute_second_id
+                                        AND sp2.stock_id = last_order_items.stock_id
+                                        THEN last_order_items.quantity
+                                        ELSE NULL
+                                    END,
+
+                                "stock_name", s.name,
+                                "attr1_title", attr1.title,
+                                "attr2_title", attr2.title,
+                                "stock_id", s.id,
+                                "is_stock_default", s.is_default,
+                                "sku", sp2.sku,
+                                "image", COALESCE(CONCAT("' . $urlPrefix . '", pv.image), "' . $imageDefault . '"),
+
+                                "sell_price", (CASE WHEN sp2.product_type = \'combo\' THEN sp2.sell_price_combo ELSE sp2.sell_price END),
+                                "purchase_price", sp2.purchase_price
+                            ))
+                            FROM stock_products sp2
+                            JOIN stocks s ON sp2.stock_id = s.id
+                            LEFT JOIN attributes attr1 ON sp2.attribute_first_id = attr1.id
+                            LEFT JOIN attributes attr2 ON sp2.attribute_second_id = attr2.id
+                            LEFT JOIN (
+                                SELECT t1.*
+                                FROM product_variant_images t1
+                                INNER JOIN (
+                                    SELECT stock_product_id, MIN(id) AS min_id
+                                    FROM product_variant_images
+                                    GROUP BY stock_product_id
+                                ) t2 ON t1.stock_product_id = t2.stock_product_id AND t1.id = t2.min_id
+                            ) AS pv ON pv.stock_product_id = sp2.id
+                            WHERE sp2.product_id = stock_products.product_id
+                            AND sp2.product_type = "variable"
+                        )
+                        ELSE (
+                            SELECT JSON_ARRAYAGG(JSON_OBJECT(
+                                "id", sp2.id,
+                                "product_id", sp2.product_id,
+                                "attribute_first_id", sp2.attribute_first_id,
+                                "attribute_second_id", sp2.attribute_second_id,
+
+                                "sell_price_main",
+                                    CASE
+                                        WHEN sp2.stock_id = last_order_items.stock_id THEN last_order_items.sell_price
+                                        ELSE NULL
+                                    END,
+                                "purchase_price_main",
+                                    CASE
+                                        WHEN sp2.stock_id = last_order_items.stock_id THEN last_order_items.purchase_price
+                                        ELSE NULL
+                                    END,
+                                "quantity",
+                                    CASE
+                                        WHEN sp2.stock_id = last_order_items.stock_id THEN last_order_items.quantity
+                                        ELSE NULL
+                                    END,
+
+                                "stock_name", s.name,
+                                "attr1_title", NULL,
+                                "attr2_title", NULL,
+                                "stock_id", s.id,
+                                "is_stock_default", s.is_default,
+                                "sku", sp2.sku,
+                                "image", COALESCE(CONCAT("' . $urlPrefix . '", p.image_cover), "' . $imageDefault . '"),
+
+                                "sell_price", (CASE WHEN sp2.product_type = \'combo\' THEN sp2.sell_price_combo ELSE sp2.sell_price END),
+                                "purchase_price", sp2.purchase_price
+                            ))
+                            FROM stock_products sp2
+                            JOIN stocks s ON sp2.stock_id = s.id
+                            JOIN products p ON sp2.product_id = p.id
+                            WHERE sp2.product_id = stock_products.product_id
+                            AND sp2.product_type != "variable"
+                        )
+                    END
+                ) as stocks')
+            ]);
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('products.name', 'like', "%$search%")
+                    ->orWhere('stock_products.sku', 'like', "%$search%");
+            });
+        }
+        if (!empty($exceptIds)) {
+            $query->whereNotIn('stock_products.id', $exceptIds);
+        }
+        $query->orderBy('stock_products.id', 'desc');
+        return $query->paginate($request['limit'] ?? 10);
+    }
 
     public function getInitOrder(Request $request)
     {
-        if (isset($request['get_all']) && $request['get_all']) {
+        if (isset($request['get_all']) && $request['get_all'] == 1) {
             return $this->getAllProducts($request);
         } else {
-            if (isset($request['order_type']) && $request['order_type']) {
-                $typeOrder = $request['order_type'];
+            if (isset($request['transaction_type']) && $request['transaction_type']) {
+                $typeOrder = $request['transaction_type'];
                 switch ($typeOrder) {
                     case 'sell':
-                        # code...
                         break;
                     case 'price_quote':
-                        # code...
+                        return $this->getProductsByTypeOrderPriceQuote($request);
                         break;
                     case 'sell_return':
                         # code...
@@ -576,6 +798,7 @@ class ProductController extends Controller
 
             // 4. Lưu stock_data (gốc)
             $stockData = json_decode($request->input('stock_data'), true);
+            $totalSellPriceCombo = $this->getTotalSellPriceCombo($request['combo'] ?? []) ?? 0;
             foreach ($stockData as $item) {
                 StockProduct::create([
                     'stock_id'             => $item['stock_id'],
@@ -588,6 +811,7 @@ class ProductController extends Controller
                     'auto_calc'            => $item['auto_calc'] ?? false,
                     'is_product_variant'   => 0,
                     'product_type'         => 'root_stock',
+                    'sell_price_combo'     => $request['type'] === 'combo' ? $totalSellPriceCombo + ($item['sell_price'] ?? 0) : 0
                 ]);
             }
 
@@ -701,6 +925,17 @@ class ProductController extends Controller
             report($e);
             return $this->responseError(__('common.product.create_failed'), 500);
         }
+    }
+
+    public function getTotalSellPriceCombo($arrays = [])
+    {
+        if (is_string($arrays)) {
+            $arrays = json_decode($arrays, true);
+        }
+
+        return array_reduce($arrays, function ($carry, $item) {
+            return $carry + ($item['sell_price_combo'] ?? 0);
+        }, 0);
     }
 
     private function getPrepareCombo($productId, $arrays = [])
@@ -893,6 +1128,7 @@ class ProductController extends Controller
             }
 
             // 3. Stock gốc
+            $totalSellPriceCombo = $this->getTotalSellPriceCombo($request['combo'] ?? []) ?? 0;
             $stocks = json_decode($request->input('stock_data'), true);
             if (empty($stocks)) throw new Exception(__('common.product.missing_stock'));
             $stocksInsert = [];
@@ -909,6 +1145,7 @@ class ProductController extends Controller
                     'max_increase_percent' => $stock['max_increase_percent'] ?? 0,
                     'auto_calc'            => $stock['auto_calc'] ?? 0,
                     'product_type'         => 'root_stock',
+                    'sell_price_combo'     => $request['type'] === 'combo' ? $totalSellPriceCombo + ($stock['sell_price'] ?? 0) : 0
                 ];
                 if ($data['id']) {
                     $stocksUpdate[] = $data;

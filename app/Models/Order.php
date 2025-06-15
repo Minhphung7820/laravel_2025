@@ -32,5 +32,6 @@ class Order extends Model
         'shipping_address',
         'payment_status',
         'shipping_status',
+        'parent_id'
     ];
 }

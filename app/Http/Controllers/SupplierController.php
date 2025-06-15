@@ -41,12 +41,12 @@ class SupplierController extends Controller
                             ->orWhere('customers.code', 'like', "%{$keyword}%");
                     });
                 })
-                ->when($request->filled('code'), fn($q) => $q->where('customers.code', 'like', '%' . $request->input('code') . '%'))
-                ->when($request->filled('name'), fn($q) => $q->where('customers.name', 'like', '%' . $request->input('name') . '%'))
-                ->when($request->filled('email'), fn($q) => $q->where('customers.email', 'like', '%' . $request->input('email') . '%'))
-                ->when($request->filled('phone'), fn($q) => $q->where('customers.phone', 'like', '%' . $request->input('phone') . '%'))
-                ->when($request->filled('from_date'), fn($q) => $q->whereDate('customers.created_at', '>=', $request->input('from_date')))
-                ->when($request->filled('to_date'), fn($q) => $q->whereDate('customers.created_at', '<=', $request->input('to_date')))
+                ->when($request->filled('code'), fn ($q) => $q->where('customers.code', 'like', '%' . $request->input('code') . '%'))
+                ->when($request->filled('name'), fn ($q) => $q->where('customers.name', 'like', '%' . $request->input('name') . '%'))
+                ->when($request->filled('email'), fn ($q) => $q->where('customers.email', 'like', '%' . $request->input('email') . '%'))
+                ->when($request->filled('phone'), fn ($q) => $q->where('customers.phone', 'like', '%' . $request->input('phone') . '%'))
+                ->when($request->filled('from_date'), fn ($q) => $q->whereDate('customers.created_at', '>=', $request->input('from_date')))
+                ->when($request->filled('to_date'), fn ($q) => $q->whereDate('customers.created_at', '<=', $request->input('to_date')))
                 ->select([
                     'customers.id',
                     'customers.name',
@@ -74,39 +74,39 @@ class SupplierController extends Controller
         }
 
         $rules = [
-            'name'    => 'required|string|max:255',
-            'code'    => [
+            'name' => 'required|string|max:255',
+            'code' => [
                 'required',
                 'string',
                 'max:100',
                 \Illuminate\Validation\Rule::unique('customers', 'code')
-                    ->where(fn($q) => $q->where('is_customer', 0)),
+                    ->where(fn ($q) => $q->where('is_customer', 0)),
             ],
-            'phone'   => [
+            'phone' => [
                 'required',
                 'string',
                 'max:20',
                 \Illuminate\Validation\Rule::unique('customers', 'phone')
-                    ->where(fn($q) => $q->where('is_customer', 0)),
+                    ->where(fn ($q) => $q->where('is_customer', 0)),
             ],
-            'email'            => 'nullable|email|max:255',
-            'address'          => 'required|string|max:255',
-            'status'           => 'in:active,inactive,blacklist',
-            'tax_code'         => 'nullable|string|max:100',
-            'debt_amount'      => 'nullable|numeric',
-            'credit_limit'     => 'nullable|numeric',
-            'note'             => 'nullable|string',
-            'avatar'           => 'nullable|image|max:2048',
-            'country_code'     => 'required|string|max:5',
-            'company_province_id'      => 'nullable|string|max:50',
-            'company_district_id'      => 'nullable|string|max:50',
-            'company_ward_id'          => 'nullable|string|max:50',
+            'email'               => 'nullable|email|max:255',
+            'address'             => 'required|string|max:255',
+            'status'              => 'in:active,inactive,blacklist',
+            'tax_code'            => 'nullable|string|max:100',
+            'debt_amount'         => 'nullable|numeric',
+            'credit_limit'        => 'nullable|numeric',
+            'note'                => 'nullable|string',
+            'avatar'              => 'nullable|image|max:2048',
+            'country_code'        => 'required|string|max:5',
+            'company_province_id' => 'nullable|string|max:50',
+            'company_district_id' => 'nullable|string|max:50',
+            'company_ward_id'     => 'nullable|string|max:50',
         ];
 
         if ($request->input('country_code') === 'VN') {
             $rules['company_province_id'] = 'required|string|max:50';
             $rules['company_district_id'] = 'required|string|max:50';
-            $rules['company_ward_id']     = 'required|string|max:50';
+            $rules['company_ward_id'] = 'required|string|max:50';
         }
 
         $validated = $request->validate($rules);
@@ -139,35 +139,35 @@ class SupplierController extends Controller
         $supplier = Customer::findOrFail($id);
 
         $rules = [
-            'name'       => 'required|string|max:255',
-            'code'       => [
+            'name' => 'required|string|max:255',
+            'code' => [
                 'required',
                 'string',
                 'max:100',
                 \Illuminate\Validation\Rule::unique('customers', 'code')
-                    ->where(fn($q) => $q->where('is_customer', 0))
+                    ->where(fn ($q) => $q->where('is_customer', 0))
                     ->ignore($supplier->id),
             ],
-            'phone'      => [
+            'phone' => [
                 'required',
                 'string',
                 'max:20',
                 \Illuminate\Validation\Rule::unique('customers', 'phone')
-                    ->where(fn($q) => $q->where('is_customer', 0))
+                    ->where(fn ($q) => $q->where('is_customer', 0))
                     ->ignore($supplier->id),
             ],
-            'email'         => 'nullable|email|max:255',
-            'address'       => 'nullable|string|max:255',
-            'company_province_id'   => 'nullable|string|max:20',
-            'company_district_id'   => 'nullable|string|max:20',
-            'company_ward_id'       => 'nullable|string|max:20',
-            'country_code'  => 'nullable|string|max:10',
-            'status'        => 'required|in:active,inactive,blacklist',
-            'tax_code'      => 'nullable|string|max:50',
-            'debt_amount'   => 'nullable|numeric|min:0',
-            'credit_limit'  => 'nullable|numeric|min:0',
-            'note'          => 'nullable|string|max:1000',
-            'avatar'        => 'nullable|image|max:2048',
+            'email'               => 'nullable|email|max:255',
+            'address'             => 'nullable|string|max:255',
+            'company_province_id' => 'nullable|string|max:20',
+            'company_district_id' => 'nullable|string|max:20',
+            'company_ward_id'     => 'nullable|string|max:20',
+            'country_code'        => 'nullable|string|max:10',
+            'status'              => 'required|in:active,inactive,blacklist',
+            'tax_code'            => 'nullable|string|max:50',
+            'debt_amount'         => 'nullable|numeric|min:0',
+            'credit_limit'        => 'nullable|numeric|min:0',
+            'note'                => 'nullable|string|max:1000',
+            'avatar'              => 'nullable|image|max:2048',
         ];
 
         $validator = Validator::make($request->all(), $rules);

@@ -838,10 +838,12 @@ class ProductController extends Controller
                         $customAttributes,
                         $variantCreate
                     ) {
-                        if (!$attr) return null;
+                        if (!$attr) {
+                            return null;
+                        }
 
                         $attrId = $attr['attribute_id'];
-                        $valId  = $attr['value_id'];
+                        $valId = $attr['value_id'];
 
                         if ($variantCreate) {
                             // Tạo attribute nếu là chuỗi tạm
@@ -849,7 +851,7 @@ class ProductController extends Controller
                                 $attrTitle = collect($customAttributes)
                                     ->firstWhere('id', $attrId)['title'] ?? 'Thuộc tính';
                                 $createdAttr = Variant::create([
-                                    'title' => $attrTitle,
+                                    'title'      => $attrTitle,
                                     'product_id' => $product->id,
                                 ]);
                                 $attributeMap[$attrId] = $createdAttr->id;
@@ -880,7 +882,7 @@ class ProductController extends Controller
                         return $valId;
                     };
 
-                    $firstId  = $variantCreate ? $resolveValueId($attr1) : ($variant['attributes'][0]['value_id'] ?? null);
+                    $firstId = $variantCreate ? $resolveValueId($attr1) : ($variant['attributes'][0]['value_id'] ?? null);
                     $secondId = $variantCreate ? $resolveValueId($attr2) : ($variant['attributes'][1]['value_id'] ?? null);
 
                     $variantStock = StockProduct::create([
@@ -1076,19 +1078,19 @@ class ProductController extends Controller
                 : null;
             $variantInputMode = $request->input('variant_input_mode', 'create');
             $data = [
-                'name'        => $request->input('name'),
-                'sku'         => $request->input('sku', ''),
-                'barcode'     => $request->input('barcode', ''),
-                'has_serial'  => $request->input('has_serial', 0),
-                'warranty'    => $request->input('warranty'),
-                'unit_id'     => $request->input('unit_id'),
-                'brand_id'    => $request->input('brand_id'),
-                'category_id' => $request->input('category_id'),
-                'supplier_id' => $request->input('supplier_id'),
-                'description' => $request->input('description', ''),
-                'has_variant' => $request->input('has_variant', 0),
-                'type'        => $request->input('type', 'single'),
-                'status'      => 'pending',
+                'name'               => $request->input('name'),
+                'sku'                => $request->input('sku', ''),
+                'barcode'            => $request->input('barcode', ''),
+                'has_serial'         => $request->input('has_serial', 0),
+                'warranty'           => $request->input('warranty'),
+                'unit_id'            => $request->input('unit_id'),
+                'brand_id'           => $request->input('brand_id'),
+                'category_id'        => $request->input('category_id'),
+                'supplier_id'        => $request->input('supplier_id'),
+                'description'        => $request->input('description', ''),
+                'has_variant'        => $request->input('has_variant', 0),
+                'type'               => $request->input('type', 'single'),
+                'status'             => 'pending',
                 'variant_input_mode' => ($product->type === 'variable' && $request['type'] === 'single') ? null : $variantInputMode
             ];
 
@@ -1132,7 +1134,9 @@ class ProductController extends Controller
             // 3. Stock gốc
             $totalSellPriceCombo = $this->getTotalSellPriceCombo($request['combo'] ?? []) ?? 0;
             $stocks = json_decode($request->input('stock_data'), true);
-            if (empty($stocks)) throw new Exception(__('common.product.missing_stock'));
+            if (empty($stocks)) {
+                throw new Exception(__('common.product.missing_stock'));
+            }
             $stocksInsert = [];
             $stocksUpdate = [];
             foreach ($stocks as $stock) {
@@ -1173,7 +1177,9 @@ class ProductController extends Controller
             // 4. Biến thể
             if ($request->input('type') === 'variable') {
                 $variants = $request->input('variants', []);
-                if (empty($variants)) throw new Exception(__('common.product.missing_variant'));
+                if (empty($variants)) {
+                    throw new Exception(__('common.product.missing_variant'));
+                }
 
                 $customAttributes = json_decode($request->input('custom_attributes'), true) ?? [];
 
@@ -1205,10 +1211,12 @@ class ProductController extends Controller
                         &$attributeKeptIds,
                         $variantCreate
                     ) {
-                        if (!$attr) return null;
+                        if (!$attr) {
+                            return null;
+                        }
 
                         $attrId = $attr['attribute_id'];
-                        $valId  = $attr['value_id'];
+                        $valId = $attr['value_id'];
                         // Nếu đang dùng create mode (tạo thuộc tính/giá trị mới)
                         if ($variantCreate) {
                             // === TẠO HOẶC CẬP NHẬT ATTRIBUTE ===
@@ -1216,7 +1224,7 @@ class ProductController extends Controller
                                 if (!isset($attributeMap[$attrId])) {
                                     $title = collect($customAttributes)->firstWhere('id', $attrId)['title'] ?? 'Thuộc tính';
                                     $attributeMap[$attrId] = Variant::create([
-                                        'title' => $title,
+                                        'title'      => $title,
                                         'product_id' => $product->id,
                                     ])->id;
                                     if (!in_array($attributeMap[$attrId], $variantKeptIds)) {
@@ -1242,8 +1250,8 @@ class ProductController extends Controller
                                     $valList = collect($customAttributes)->firstWhere('id', $attrId)['values'] ?? [];
                                     $title = collect($valList)->firstWhere('id', $valId)['title'] ?? 'Giá trị';
                                     $valueMap[$valId] = Attribute::create([
-                                        'title'        => $title,
-                                        'variant_id'   => $realAttrId,
+                                        'title'      => $title,
+                                        'variant_id' => $realAttrId,
                                     ])->id;
                                     if (!in_array($valueMap[$valId], $attributeKeptIds)) {
                                         $attributeKeptIds[] = $valueMap[$valId];
@@ -1254,7 +1262,7 @@ class ProductController extends Controller
                                 $item = collect($values)->firstWhere('id', (int) $valId);
                                 if ($item && isset($item['title'])) {
                                     Attribute::where('id', $valId)->update([
-                                        'title'        => $item['title']
+                                        'title' => $item['title']
                                     ]);
                                     if (!in_array($valId, $attributeKeptIds)) {
                                         $attributeKeptIds[] = $valId;
@@ -1268,7 +1276,7 @@ class ProductController extends Controller
                         return $valId;
                     };
 
-                    $firstId  = $variantCreate ? $resolve($attr1) : ($variant['attributes'][0]['value_id'] ?? null);
+                    $firstId = $variantCreate ? $resolve($attr1) : ($variant['attributes'][0]['value_id'] ?? null);
                     $secondId = $variantCreate ? $resolve($attr2) : ($variant['attributes'][1]['value_id'] ?? null);
 
                     $sku = $variant['sku'] ?: $this->generateUniqueSku($request->input('sku') ?? 'SP', $variant['id'] ?? null);
@@ -1306,7 +1314,9 @@ class ProductController extends Controller
                             'stock_product_id' => $variantModel->id,
                             'image'            => $imgPath,
                         ]);
-                        if ($img) $imageTracked[] = $img->id;
+                        if ($img) {
+                            $imageTracked[] = $img->id;
+                        }
                     }
                 }
 

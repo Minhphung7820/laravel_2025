@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class CustomerController extends Controller
 {
@@ -39,13 +39,13 @@ class CustomerController extends Controller
                             ->orWhere('customers.email', 'like', '%' . $request->keyword . '%');
                     });
                 })
-                ->when($request->filled('code'), fn($q) => $q->where('customers.code', 'like', '%' . $request->code . '%'))
-                ->when($request->filled('name'), fn($q) => $q->where('customers.name', 'like', '%' . $request->name . '%'))
-                ->when($request->filled('email'), fn($q) => $q->where('customers.email', 'like', '%' . $request->email . '%'))
-                ->when($request->filled('phone'), fn($q) => $q->where('customers.phone', 'like', '%' . $request->phone . '%'))
-                ->when($request->filled('type'), fn($q) => $q->where('customers.type', $request->type))
-                ->when($request->filled('from_date'), fn($q) => $q->whereDate('customers.created_at', '>=', $request->from_date))
-                ->when($request->filled('to_date'), fn($q) => $q->whereDate('customers.created_at', '<=', $request->to_date))
+                ->when($request->filled('code'), fn ($q) => $q->where('customers.code', 'like', '%' . $request->code . '%'))
+                ->when($request->filled('name'), fn ($q) => $q->where('customers.name', 'like', '%' . $request->name . '%'))
+                ->when($request->filled('email'), fn ($q) => $q->where('customers.email', 'like', '%' . $request->email . '%'))
+                ->when($request->filled('phone'), fn ($q) => $q->where('customers.phone', 'like', '%' . $request->phone . '%'))
+                ->when($request->filled('type'), fn ($q) => $q->where('customers.type', $request->type))
+                ->when($request->filled('from_date'), fn ($q) => $q->whereDate('customers.created_at', '>=', $request->from_date))
+                ->when($request->filled('to_date'), fn ($q) => $q->whereDate('customers.created_at', '<=', $request->to_date))
                 ->select([
                     'customers.id',
                     'customers.name',
@@ -80,14 +80,14 @@ class CustomerController extends Controller
                 'string',
                 'max:20',
                 \Illuminate\Validation\Rule::unique('customers', 'phone')
-                    ->where(fn($q) => $q->where('is_customer', 1)),
+                    ->where(fn ($q) => $q->where('is_customer', 1)),
             ],
             'code' => [
                 'required',
                 'string',
                 'max:100',
                 \Illuminate\Validation\Rule::unique('customers', 'code')
-                    ->where(fn($q) => $q->where('is_customer', 1)),
+                    ->where(fn ($q) => $q->where('is_customer', 1)),
             ],
             'email'       => 'nullable|email|max:255',
             'birthday'    => 'nullable|date',
@@ -189,7 +189,7 @@ class CustomerController extends Controller
                 'string',
                 'max:20',
                 \Illuminate\Validation\Rule::unique('customers', 'phone')
-                    ->where(fn($q) => $q->where('is_customer', 1))
+                    ->where(fn ($q) => $q->where('is_customer', 1))
                     ->ignore($customer->id),
             ],
             'code' => [
@@ -197,7 +197,7 @@ class CustomerController extends Controller
                 'string',
                 'max:100',
                 \Illuminate\Validation\Rule::unique('customers', 'code')
-                    ->where(fn($q) => $q->where('is_customer', 1))
+                    ->where(fn ($q) => $q->where('is_customer', 1))
                     ->ignore($customer->id),
             ],
             'email'       => 'nullable|email|max:255',

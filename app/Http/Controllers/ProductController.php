@@ -268,7 +268,7 @@ class ProductController extends Controller
                     "attribute_first_id", sp2.attribute_first_id,
                     "attribute_second_id", sp2.attribute_second_id,
                     "sell_price", sp2.sell_price,
-                    "purchase", sp2.sell_price,
+                    "purchase_price", sp2.purchase_price,
                     "stock_name", s.name,
                     "attr1_title", attr1.title,
                     "attr2_title", attr2.title,
@@ -332,6 +332,196 @@ class ProductController extends Controller
         return $this->responseSuccess($query->paginate($limit));
     }
 
+    public function getAllProducts(Request $request)
+    {
+        $search = $request->input('keyword');
+        $urlPrefix = url('/');
+        $imageDefault = env('IMAGE_DEFAULT');
+
+        $query = \App\Models\StockProduct::with([
+            'comboList.parent.attributeFirst:id,title',
+            'comboList.parent.attributeSecond:id,title',
+            'comboList.parent.product:id,name,image_cover,type,sku',
+            'comboList.parent.variantImages:id,image,stock_product_id',
+            'comboList:id,sell_price_combo,parent_id,quantity_combo,product_id',
+            'comboList.parent:id,sku,product_id,attribute_first_id,attribute_second_id'
+        ])
+            ->leftJoin('attributes as attr1_org', 'stock_products.attribute_first_id', '=', 'attr1_org.id')
+            ->leftJoin('attributes as attr2_org', 'stock_products.attribute_second_id', '=', 'attr2_org.id')
+            ->leftJoin('variants as var1', 'attr1_org.variant_id', '=', 'var1.id')
+            ->leftJoin('variants as var2', 'attr2_org.variant_id', '=', 'var2.id')
+            ->join('products', 'stock_products.product_id', '=', 'products.id')
+            ->join('stocks', 'stock_products.stock_id', '=', 'stocks.id')
+            ->leftJoin('units as u', 'products.unit_id', '=', 'u.id')
+            ->leftJoin('product_variant_images', 'product_variant_images.stock_product_id', '=', 'stock_products.id')
+            ->where('stocks.is_default', 1)
+            ->select([
+                'stock_products.id',
+                'stock_products.product_id',
+                DB::raw("CASE
+                    WHEN products.type = 'variable' THEN stock_products.sku
+                    ELSE products.sku
+                    END AS sku"),
+                DB::raw("CASE
+                    WHEN products.type = 'variable' THEN
+                        CONCAT(
+                            products.name,
+                            ' ',
+                            COALESCE(var1.title, ''), ' ',
+                            COALESCE(attr1_org.title, ''), ' ',
+                            COALESCE(var2.title, ''), ' ',
+                            COALESCE(attr2_org.title, '')
+                        )
+                    ELSE products.name
+                END AS product_name"),
+                'stocks.name as stock_name',
+                'stocks.id as stock_id',
+                'products.type as product_type',
+                'stock_products.purchase_price',
+                'stock_products.sell_price',
+                'stock_products.quantity',
+                'stock_products.attribute_first_id',
+                'stock_products.attribute_second_id',
+                'u.name as unit_name',
+                DB::raw("CASE
+                    WHEN products.type = 'variable' THEN
+                        COALESCE(CONCAT('$urlPrefix', product_variant_images.image), '$imageDefault')
+                    ELSE
+                        COALESCE(CONCAT('$urlPrefix', products.image_cover), '$imageDefault')
+                END AS image"),
+                'products.status',
+                DB::raw('(
+                    CASE
+                        WHEN products.type = "variable" THEN (
+                            SELECT JSON_ARRAYAGG(JSON_OBJECT(
+                                "id", sp2.id,
+                                "product_id", sp2.product_id,
+                                "attribute_first_id", sp2.attribute_first_id,
+                                "attribute_second_id", sp2.attribute_second_id,
+                                "sell_price", sp2.sell_price,
+                                "purchase_price", sp2.purchase_price,
+                                "stock_name", s.name,
+                                "attr1_title", attr1.title,
+                                "attr2_title", attr2.title,
+                                "quantity", sp2.quantity,
+                                "stock_id", s.id,
+                                "is_stock_default", s.is_default,
+                                "sku", sp2.sku,
+                                "image", COALESCE(CONCAT("' . $urlPrefix . '", pvi.image), "' . $imageDefault . '")
+                            ))
+                            FROM stock_products sp2
+                            JOIN stocks s ON sp2.stock_id = s.id
+                            LEFT JOIN attributes attr1 ON sp2.attribute_first_id = attr1.id
+                            LEFT JOIN attributes attr2 ON sp2.attribute_second_id = attr2.id
+                            LEFT JOIN (
+                                SELECT t1.*
+                                FROM product_variant_images t1
+                                INNER JOIN (
+                                    SELECT stock_product_id, MIN(id) AS min_id
+                                    FROM product_variant_images
+                                    GROUP BY stock_product_id
+                                ) t2 ON t1.stock_product_id = t2.stock_product_id AND t1.id = t2.min_id
+                            ) AS pvi ON pvi.stock_product_id = sp2.id
+                            WHERE sp2.product_id = stock_products.product_id
+                            AND (
+                                (sp2.attribute_first_id IS NULL AND stock_products.attribute_first_id IS NULL)
+                                OR sp2.attribute_first_id = stock_products.attribute_first_id
+                            )
+                            AND (
+                                (sp2.attribute_second_id IS NULL AND stock_products.attribute_second_id IS NULL)
+                                OR sp2.attribute_second_id = stock_products.attribute_second_id
+                            )
+                            AND sp2.product_type = "variable"
+                        )
+                        ELSE (
+                            SELECT JSON_ARRAYAGG(JSON_OBJECT(
+                                "id", sp2.id,
+                                "product_id", sp2.product_id,
+                                "attribute_first_id", sp2.attribute_first_id,
+                                "attribute_second_id", sp2.attribute_second_id,
+                                "sell_price", sp2.sell_price,
+                                "purchase_price", sp2.purchase_price,
+                                "stock_name", s.name,
+                                "attr1_title", null,
+                                "attr2_title", null,
+                                "quantity", sp2.quantity,
+                                "stock_id", s.id,
+                                "is_stock_default", s.is_default,
+                                "sku", sp2.sku,
+                                "image", COALESCE(CONCAT("' . $urlPrefix . '", pvi.image), "' . $imageDefault . '")
+                            ))
+                            FROM stock_products sp2
+                            JOIN stocks s ON sp2.stock_id = s.id
+                            LEFT JOIN (
+                                SELECT t1.*
+                                FROM product_variant_images t1
+                                INNER JOIN (
+                                    SELECT stock_product_id, MIN(id) AS min_id
+                                    FROM product_variant_images
+                                    GROUP BY stock_product_id
+                                ) t2 ON t1.stock_product_id = t2.stock_product_id AND t1.id = t2.min_id
+                            ) AS pvi ON pvi.stock_product_id = sp2.id
+                            WHERE sp2.product_id = stock_products.product_id
+                            AND sp2.product_type != "variable"
+                        )
+                    END
+                ) AS stocks')
+
+            ])
+            ->where(function ($q) use ($request) {
+                $q->where(function ($q2) use ($request) {
+                    $q2->where('products.type', 'variable')
+                        ->where('stock_products.product_type', 'variable')
+                        ->where('stock_products.is_using', 1)
+                        ->where('stock_products.is_sale', 1)
+                        ->when(!empty($request['excepts_variable']), function ($q) use ($request) {
+                            return $q->whereNotIn('stock_products.id', explode(",", $request['excepts_variable']));
+                        });
+                })->orWhere(function ($q2) use ($request) {
+                    $q2->whereIn('products.type', ['single', 'combo'])
+                        ->where('stock_products.product_type', 'root_stock')
+                        ->when(!empty($request['excepts_single']), function ($q) use ($request) {
+                            return $q->whereNotIn('stock_products.id', explode(",", $request['excepts_single']));
+                        });
+                });
+            });
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('products.name', 'like', "%$search%")
+                    ->orWhere('stock_products.sku', 'like', "%$search%");
+            });
+        }
+        $query->orderBy('stock_products.id', 'desc');
+
+        return $query->paginate($request['limit'] ?? 10);
+    }
+
+    public function getProductsByTypeOrder(Request $request) {}
+
+    public function getInitOrder(Request $request)
+    {
+        if (isset($request['get_all']) && $request['get_all']) {
+            return $this->getAllProducts($request);
+        } else {
+            if (isset($request['order_type']) && $request['order_type']) {
+                $typeOrder = $request['order_type'];
+                switch ($typeOrder) {
+                    case 'sell':
+                        # code...
+                        break;
+                    case 'price_quote':
+                        # code...
+                        break;
+                    case 'sell_return':
+                        # code...
+                        break;
+                    default:
+                        # code...
+                        break;
+                }
+            }
+        }
+    }
     /**
      * Display truongssg of t    esource
      */

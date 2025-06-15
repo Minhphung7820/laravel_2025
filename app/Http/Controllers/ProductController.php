@@ -472,7 +472,7 @@ class ProductController extends Controller
                             JOIN stocks s ON sp2.stock_id = s.id
                             JOIN products p ON sp2.product_id = p.id
                             WHERE sp2.product_id = stock_products.product_id
-                            WHERE sp2.parent_id IS NULL
+                            AND sp2.parent_id IS NULL
                             AND sp2.product_type != "variable"
                         )
                     END
@@ -704,7 +704,7 @@ class ProductController extends Controller
                             JOIN stocks s ON sp2.stock_id = s.id
                             JOIN products p ON sp2.product_id = p.id
                             WHERE sp2.product_id = stock_products.product_id
-                            WHERE sp2.parent_id IS NULL
+                            AND sp2.parent_id IS NULL
                             AND sp2.product_type != "variable"
                         )
                     END

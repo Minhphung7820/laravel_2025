@@ -6,6 +6,7 @@ use App\Http\Controllers\CommonController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SellOrderController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UnitController;
@@ -87,5 +88,10 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::group(['prefix' => 'report'], function () {
         Route::get('/top-customers', [ReportController::class, 'topCustomers']);
         Route::get('/top-products', [ReportController::class, 'topProducts']);
+    });
+    Route::group(['prefix' => 'sale'], function () {
+        Route::group(['prefix' => 'price-quotation-order'], function () {
+            Route::post('/create', [SellOrderController::class, 'store']);
+        });
     });
 });

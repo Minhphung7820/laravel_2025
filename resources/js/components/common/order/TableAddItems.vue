@@ -11,15 +11,17 @@
       <table class="min-w-full divide-y divide-gray-200 text-sm">
         <thead class="bg-blue-50">
           <tr>
-            <th class="px-4 py-2 text-left">SKU</th>
-            <th class="px-4 py-2 text-left">Tên sản phẩm</th>
-            <th class="px-4 py-2 text-left">Loại SP</th>
-            <th class="px-4 py-2 text-left">Kho</th>
-            <th class="px-4 py-2 text-left">Đơn vị</th>
-            <th class="px-4 py-2 text-right">Giá bán lẻ</th>
-            <th class="px-4 py-2 text-right">Giá bán</th>
+            <th class="px-4 py-2 text-center">Ảnh</th>
+            <th class="px-4 py-2 text-center">SKU</th>
+            <th class="px-4 py-2 text-center">Tên sản phẩm</th>
+            <th class="px-4 py-2 text-center">Loại SP</th>
+            <th class="px-4 py-2 text-center">Kho</th>
+            <th class="px-4 py-2 text-center">Đơn vị</th>
+            <th class="px-4 py-2 text-center">Giá bán lẻ</th>
+            <th class="px-4 py-2 text-center">Giá bán</th>
             <th class="px-4 py-2 text-center">Số lượng</th>
-            <th class="px-4 py-2 text-right">Thành tiền</th>
+            <th class="px-4 py-2 text-center">Thành tiền</th>
+            <th class="px-4 py-2 text-center">Xóa</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 bg-white">
@@ -48,15 +50,15 @@
                 </option>
               </select>
             </td>
-
-            <td class="px-4 py-2 text-right">{{ formatCurrency(item.sell_price) }}</td>
+            <td class="px-4 py-2 text-center">{{ item.unit_name }}</td>
+            <td class="px-4 py-2 text-center">{{ formatCurrency(item.sell_price) }}</td>
 
             <!-- Giá bán chỉnh được -->
-            <td class="px-4 py-2 text-right">
+            <td class="px-4 py-2 text-center">
               <input
                 type="number"
                 v-model.number="item.sell_price_main"
-                class="w-24 px-2 py-1 border rounded text-right"
+                class="w-24 px-2 py-1 border rounded text-center"
               />
             </td>
 
@@ -69,19 +71,13 @@
               />
             </td>
 
-            <td class="px-4 py-2 text-right">
+            <td class="px-4 py-2 text-center">
               {{ formatCurrency(item.sell_price_main * item.quantity) }}
             </td>
-          </tr>
-          <tr v-if="!form.items.length">
-            <td colspan="9" class="text-center py-6 text-gray-500">
-              <div class="flex justify-center items-center gap-2">
-                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 17v-6h6v6m2 4H7a2 2 0 01-2-2V5a2 2 0 012-2h6l5 5v11a2 2 0 01-2 2z" />
-                </svg>
-                Không có sản phẩm
-              </div>
+            <td class="px-4 py-2 text-center">
+              <button @click="removeItem(index)" class="text-red-500 hover:text-red-700">
+                🗑
+              </button>
             </td>
           </tr>
         </tbody>
@@ -133,6 +129,7 @@ export default {
   },
   data() {
     return {
+      controller: null,
       searchKeyword : '',
       showModal: false,
       items: [],
@@ -148,11 +145,15 @@ export default {
         { key: 'quantity', label: 'TỒN KHO' },
         { key: 'sell_price', label: 'GIÁ BÁN', isMoney: true },
         { key: 'purchase_price', label: 'GIÁ MUA', isMoney: true }
-      ]
+      ],
+      except_ids: ''
     }
   },
   methods: {
     formatCurrency,
+    removeItem(index) {
+      this.form.items.splice(index, 1)
+    },
     addSelected() {
       const selected = this.$refs.table?.selectedItems || []
       if (!selected.length) return
@@ -165,6 +166,7 @@ export default {
         }
 
         return {
+          stock_product_id: item.id,
           image: item.image,
           sku: item.sku,
           product_name: item.product_name,
@@ -179,7 +181,9 @@ export default {
           total: item.sell_price_main * 1,
           stock: stock,
           stock_id: item.stock_id,
-          selected_stock_id: item.stock_id
+          selected_stock_id: item.stock_id,
+          attribute_first_id: item.attribute_first_id,
+          attribute_second_id: item.attribute_second_id
         }
       })
 
@@ -191,12 +195,17 @@ export default {
     updateStockData(item) {
       const selected = item.stock.find(s => s.stock_id === item.selected_stock_id)
       if (!selected) return
-
+      item.stock_product_id = selected.id
+      item.stock_id = selected.stock_id
       item.sell_price_main = selected.sell_price_main
       item.sell_price = selected.sell_price
+      item.purchase_price = selected.purchase_price
       item.purchase_price_main = selected.purchase_price_main
       item.image = selected.image
-      item.stock_name = selected.stock_name
+      item.stock_name = selected.stock_name,
+      item.attribute_first_id = selected.attribute_first_id,
+      item.attribute_second_id = selected.attribute_second_id,
+      item.sku = selected.sku
     },
     async onSearch(keyword) {
       this.searchKeyword = keyword
@@ -209,24 +218,42 @@ export default {
       await this.fetchItems()
     },
     async openModal() {
+      this.getAll = false
+      const ids = this.form.items.map(i => i.stock_product_id).filter(Boolean)
+      this.except_ids = ids.join(',')
       this.showModal = true
       await this.fetchItems()
     },
     async fetchItems(page = 1) {
+      if (this.controller) {
+        this.controller.abort()
+      }
+
+      this.controller = new AbortController()
       this.isLoading = true
       this.items = []
+
       const params = {
         page,
         get_all: this.getAll ? 1 : 0,
-        keyword : this.searchKeyword
+        keyword: this.searchKeyword
       }
 
       if (!this.getAll) {
         params.transaction_type = this.transaction_type
         params.customer_id = this.form.customer_id
       }
+
+      if (this.except_ids) {
+        params.except_ids = this.except_ids
+      }
+
       try {
-        const res = await window.axios.get('/api/warehouse/product/get-init-order', { params })
+        const res = await window.axios.get('/api/warehouse/product/get-init-order', {
+          params,
+          signal: this.controller.signal
+        })
+
         this.items = res.data.data
         this.pagination = {
           current_page: res.data.current_page,
@@ -237,7 +264,11 @@ export default {
           total: res.data.total
         }
       } catch (e) {
-        console.error(e)
+        if (e.name === 'CanceledError' || e.name === 'AbortError') {
+          console.warn('Request bị hủy')
+        } else {
+          console.error(e)
+        }
       } finally {
         this.isLoading = false
       }

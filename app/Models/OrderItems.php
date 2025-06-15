@@ -21,8 +21,11 @@ class OrderItems extends Model
         'purchase_price',
         'created_at',
         'updated_at',
-        'name',
+        'product_name',
         'image',
         'parent_id',
+        'unit_name',
+        'sell_price_main',
+        'purchase_price_main'
     ];
 }

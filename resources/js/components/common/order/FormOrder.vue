@@ -80,6 +80,20 @@
         @add-items="handleAddItems"
       />
     </div>
+    <div class="flex gap-2 mt-6">
+      <button
+        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        @click="submitForm('save')"
+      >
+        Lưu
+      </button>
+      <button
+        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+        @click="submitForm('save_approve')"
+      >
+        Lưu & Duyệt
+      </button>
+    </div>
   </div>
 </template>
 
@@ -105,7 +119,7 @@ export default {
         created_at: this.today(),
         order_date: this.today(),
         email: '',
-        customer_id: 1,
+        customer_id: 1027,
         phone: '',
         note: '',
         items: []
@@ -117,8 +131,30 @@ export default {
     }
   },
   methods: {
+    async submitForm(action) {
+      const payload = {
+        ...this.form,
+        status: action === 'save' ? 'create' : 'approved'
+      }
+
+      if (this.transaction_type === 'price_quote' && this.mode === 'create') {
+        try {
+          const res = await window.axios.post('/api/sale/price-quotation-order/create', payload)
+
+          console.log(payload);
+return
+          alert('Tạo đơn thành công!')
+          console.log(res.data)
+        } catch (e) {
+          console.error('Lỗi tạo đơn:', e)
+          alert('Tạo đơn thất bại')
+        }
+      } else {
+        alert('Không đúng điều kiện để gửi')
+      }
+    },
     handleAddItems(items) {
-      this.form.items.push(...items)
+      this.form.items.unshift(...items)
     },
     today() {
       const d = new Date()

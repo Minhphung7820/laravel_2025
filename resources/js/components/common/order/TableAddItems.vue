@@ -185,6 +185,8 @@ export default {
 
       this.$emit('add-items', newItems)
       this.showModal = false
+      console.log(this.form.items);
+
     },
     updateStockData(item) {
       const selected = item.stock.find(s => s.stock_id === item.selected_stock_id)

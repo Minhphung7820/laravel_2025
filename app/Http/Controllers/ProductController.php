@@ -412,9 +412,9 @@ class ProductController extends Controller
                                 \'product_id\', sp2.product_id,
                                 \'attribute_first_id\', sp2.attribute_first_id,
                                 \'attribute_second_id\', sp2.attribute_second_id,
-                                \'sell_price\', (CASE WHEN sp2.product_type = \'combo\' THEN sp2.sell_price_combo ELSE sp2.sell_price END),
+                                \'sell_price\', (CASE WHEN products.type = \'combo\' THEN sp2.sell_price_combo ELSE sp2.sell_price END),
                                 \'purchase_price\', sp2.purchase_price,
-                                \'sell_price_main\', (CASE WHEN sp2.product_type = \'combo\' THEN sp2.sell_price_combo ELSE sp2.sell_price END),
+                                \'sell_price_main\', (CASE WHEN products.type = \'combo\' THEN sp2.sell_price_combo ELSE sp2.sell_price END),
                                 \'purchase_price_main\', sp2.purchase_price,
                                 \'stock_name\', s.name,
                                 \'attr1_title\', attr1.title,
@@ -455,9 +455,9 @@ class ProductController extends Controller
                                 \'product_id\', sp2.product_id,
                                 \'attribute_first_id\', sp2.attribute_first_id,
                                 \'attribute_second_id\', sp2.attribute_second_id,
-                                \'sell_price\', (CASE WHEN sp2.product_type = \'combo\' THEN sp2.sell_price_combo ELSE sp2.sell_price END),
+                                \'sell_price\', (CASE WHEN products.type = \'combo\' THEN sp2.sell_price_combo ELSE sp2.sell_price END),
                                 \'purchase_price\', sp2.purchase_price,
-                                \'sell_price_main\', (CASE WHEN sp2.product_type = \'combo\' THEN sp2.sell_price_combo ELSE sp2.sell_price END),
+                                \'sell_price_main\', (CASE WHEN products.type = \'combo\' THEN sp2.sell_price_combo ELSE sp2.sell_price END),
                                 \'purchase_price_main\', sp2.purchase_price,
                                 \'stock_name\', s.name,
                                 \'attr1_title\', NULL,
@@ -647,7 +647,7 @@ class ProductController extends Controller
                                 "sku", sp2.sku,
                                 "image", COALESCE(CONCAT("' . $urlPrefix . '", pv.image), "' . $imageDefault . '"),
 
-                                "sell_price", (CASE WHEN sp2.product_type = \'combo\' THEN sp2.sell_price_combo ELSE sp2.sell_price END),
+                                "sell_price", (CASE WHEN products.type = \'combo\' THEN sp2.sell_price_combo ELSE sp2.sell_price END),
                                 "purchase_price", sp2.purchase_price
                             ))
                             FROM stock_products sp2
@@ -697,7 +697,7 @@ class ProductController extends Controller
                                 "sku", sp2.sku,
                                 "image", COALESCE(CONCAT("' . $urlPrefix . '", p.image_cover), "' . $imageDefault . '"),
 
-                                "sell_price", (CASE WHEN sp2.product_type = \'combo\' THEN sp2.sell_price_combo ELSE sp2.sell_price END),
+                                "sell_price", (CASE WHEN products.type = \'combo\' THEN sp2.sell_price_combo ELSE sp2.sell_price END),
                                 "purchase_price", sp2.purchase_price
                             ))
                             FROM stock_products sp2
